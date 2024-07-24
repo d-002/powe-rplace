@@ -6,9 +6,9 @@ let colors = ['white', 'red', 'green', 'blue', 'black'];
 let currentColor = 1;
 
 let cachedGrid = [];
-for (let y = 0; y < W; y++) {
+for (let y = 0; y < H; y++) {
 	cachedGrid.push([]);
-	for (let x = 0; x < H; x++) cachedGrid[y].push(0);
+	for (let x = 0; x < W; x++) cachedGrid[y].push(0);
 }
 
 function updateSettings() {
@@ -40,6 +40,16 @@ function click(evt) {
 
 	cachedGrid[y][x] = currentColor;
 	drawPixel(x, y, currentColor);
+
+	$.ajax({url: "/src/placePixel.php",
+		method: "POST", 
+		data: {},
+		success: (err) => {
+			if (err == 0) ; // success
+			else if (err == 1) ; // in cooldown
+			else console.log('Error while placing pixel: '+err);
+		}
+	});
 }
 
 function init() {
