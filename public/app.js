@@ -1,20 +1,16 @@
 let socket = io();
 
 let canvas, ctx;
-let W = 30, H = 30, size = 50;
 let scrW, scrH;
 
-const colors = ['white', 'red', 'blue', 'orange', 'green', 'yellow', 'purple', 'gray', 'black'];
-let currentColor = 1;
+// options loaded from user save
+let zoom = 1, pos = [0, 0], currentColor = 1;
+let size = 50;
 
 // pixels pre-placed locally, waiting for server to accept or overrule
 let placedLocally = {}; // hash: [x, y, prev col]
 
 let localGrid = [];
-for (let y = 0; y < H; y++) {
-	localGrid.push([]);
-	for (let x = 0; x < W; x++) localGrid[y].push(0);
-}
 
 function updateSettings() {
 	scrW = window.innerWidth;
@@ -43,6 +39,7 @@ function click(evt) {
 	const x = parseInt(evt.x/size);
 	const y = parseInt(evt.y/size);
 	const hash = hashPixel(x, y, currentColor);
+	if (x < 0 || x >= W || y < 0 || y >= H) return;
 
 	placedLocally[hash] = [x, y, localGrid[y][x]];
 	drawPixel(x, y, currentColor);
@@ -54,7 +51,12 @@ function hashPixel(x, y, col) {
 	return ((x << col) + (y*123 << col+10)) & 0xffff;
 }
 
-socket.on("pixelFeedback", (data) => {
+socket.on("initial", data => {
+	localGrid = decodePixelData(data);
+	updateAllCanvas();
+});
+
+socket.on("pixelFeedback", data => {
 	// the last byte is for the error, the rest is the pixel hash
 	const err = data & 0xff;
 	const hash = data >> 8;
@@ -70,8 +72,6 @@ window.onload = () => {
 	canvas = document.getElementById("grid");
 	ctx = canvas.getContext("2d");
 	updateSettings();
-
-	updateAllCanvas();
 
 	canvas.addEventListener("click", click);
 
