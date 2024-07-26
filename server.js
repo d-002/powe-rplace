@@ -14,16 +14,17 @@ let clients = {}; // ip: socket
 
 app.use(express.static(__dirname + "/public"));
 
+let ready = false; // display loading page while not ready
+
 // landing page
 app.get("/", (req, res) => {
-	res.sendFile(__dirname + "/index.html");
+    res.sendFile(ready ? __dirname + "/index.html" : __dirname + "/loading.html");
 });
 
 // files
 const files = {
     'options': '/files/options.txt',
-    'cooldown': '/files/inCooldown.csv',
-    'logsVersion': '/files/logs/version.txt'
+    'cooldown': '/files/inCooldown.csv'
 }
 const dirs = {
     'logsFolder': '/files/logs/',
@@ -55,6 +56,13 @@ Array.from(Object.keys(files)).forEach(name => {
 	console.log('Created file '+file);
     }
 });
+
+// read options
+let logsVersion = 0; // increases by 1 every map edit, to apply changes to clients
+let W = 30;
+let H = 30;
+let pixelData = new Array(H).fill(0);
+for (let y = 0; y < H; y++) pixelData[y] = new Array(W).fill(0);
 
 io.on("connection", socket => {
     const ip = socket.handshake.address.address;
@@ -91,3 +99,4 @@ io.on("connection", socket => {
 });
 
 server.listen(port, () => console.log("Listening on port "+port));
+ready = true;

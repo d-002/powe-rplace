@@ -66,7 +66,7 @@ socket.on("pixelFeedback", (data) => {
 	if (err != 0) drawPixel(x, y, col); // revert placement
 });
 
-function init() {
+window.onload = () => {
 	canvas = document.getElementById("grid");
 	ctx = canvas.getContext("2d");
 	updateSettings();
