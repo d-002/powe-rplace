@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const http = require("http");
 const path = require("path");
+const fs = require("fs");
 const server = http.createServer(app);
 
 const { Server } = require("socket.io");
@@ -9,14 +10,56 @@ const io = new Server(server);
 
 const port = 8080;
 
+let clients = {}; // ip: socket
+
 app.use(express.static(__dirname + "/public"));
 
+// landing page
 app.get("/", (req, res) => {
 	res.sendFile(__dirname + "/index.html");
 });
 
+// files
+const files = {
+    'options': '/files/options.txt',
+    'cooldown': '/files/inCooldown.csv',
+    'logsVersion': '/files/logs/version.txt'
+}
+const dirs = {
+    'logsFolder': '/files/logs/',
+    'accountsFolder': '/files/accounts/'
+}
+
+// create directories and files if non-existant
+const mainDir = __dirname+'/files';
+if (!fs.existsSync(mainDir)) {
+    fs.mkdirSync(mainDir);
+    console.log('Created main dir');
+}
+Array.from(Object.keys(dirs)).forEach(name => {
+    let dir = __dirname+dirs[name];
+    dirs[name] = dir;
+
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir);
+	console.log('Created dir '+dir);
+    }
+});
+
+Array.from(Object.keys(files)).forEach(name => {
+    let file = __dirname+files[name];
+    files[name] = file;
+
+    if (!fs.existsSync(file)) {
+        fs.writeFileSync(file, '');
+	console.log('Created file '+file);
+    }
+});
+
 io.on("connection", socket => {
-    console.log("user connected");
+    const ip = socket.handshake.address.address;
+    clients[ip] = socket;
+    console.log("new connection from "+ip);
 
     socket.on("placePixel", message => {
 	// parse request, check if correct
@@ -42,7 +85,8 @@ io.on("connection", socket => {
     });
 
     socket.on("disconnect", () => {
-        console.log("user disconnected");
+        console.log("disconnection from "+ip);
+	delete clients[ip];
     });
 });
 

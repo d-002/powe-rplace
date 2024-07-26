@@ -4,7 +4,7 @@ let canvas, ctx;
 let W = 30, H = 30, size = 50;
 let scrW, scrH;
 
-const colors = ['white', 'red', 'green', 'blue', 'black'];
+const colors = ['white', 'red', 'blue', 'orange', 'green', 'yellow', 'purple', 'gray', 'black'];
 let currentColor = 1;
 
 // pixels pre-placed locally, waiting for server to accept or overrule
@@ -74,4 +74,6 @@ function init() {
 	updateAllCanvas();
 
 	canvas.addEventListener("click", click);
+
+	document.addEventListener("keydown", () => { currentColor = (currentColor+1) % colors.length });
 }
