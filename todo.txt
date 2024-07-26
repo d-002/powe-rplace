@@ -9,3 +9,14 @@ every log file (1000 changes), a snapshot is created to avoid querying too much 
 each client has another server-side cooldown to limit this query
 
 display currently active users (server map update request in the last interval*2)
+
+unlock powerups:
+after placing a certain number of pixels, after a certain amount of play time, when placing a pixel on the first possible frame, in a certain interval...
+multiple powerups tiers
+
+point system, get points and use them in a tree to buy upgrades
+
+powerups:
+- access more colors
+- place pixels faster
+- pre-place (must have window open)
