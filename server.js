@@ -1,14 +1,16 @@
 const { decodePixelData, encodePixelData, colors, W, H } = require(__dirname+"/pixelUtils.js");
+const { initAccounts, canPlacePixel, placePixel } = require(__dirname+"/accounts.js");
+const { initUser, User, decodeUserFile, encodeUserFile } = require(__dirname+"/user.js");
 
 // files
 const files = {
-    'options': '/files/options.txt',
-    'cooldown': '/files/inCooldown.csv',
-    'grid': '/files/grid.csv'
+    "options": "/files/options.txt",
+    "inCooldown": "/files/inCooldown.csv",
+    "grid": "/files/grid.csv"
 }
 const dirs = {
-    'logsFolder': '/files/logs/',
-    'accountsFolder': '/files/accounts/'
+    "logsFolder": "/files/logs/",
+    "accountsFolder": "/files/accounts/"
 }
 
 
@@ -25,7 +27,11 @@ const io = new Server(server);
 
 const port = 8080;
 
-let clients = {}; // ip: socket
+let clients = {}; // ip: User object
+
+// init modules
+initAccounts(fs, files, dirs);
+initUser(fs, files, dirs);
 
 app.use(express.static(__dirname+"/public"));
 
@@ -93,8 +99,14 @@ function getUserPath(ip) {
 
 
 io.on("connection", socket => {
-    const ip = socket.handshake.address.address;
-    clients[ip] = socket;
+    let ip = socket.handshake.address.address;
+    if (ip == null) {
+	ip = "127.0.0.1";
+	console.warn("Undefined IP, setting to "+ip);
+    }
+
+    clients[ip] = decodeUserFile(files.accountsFolder+ip);
+    clients[ip].socket = socket;
     console.log("new connection from "+ip);
 
     socket.emit("initial", encodePixelData(pixelData));
@@ -116,12 +128,16 @@ io.on("connection", socket => {
 	else if (isNaN(y) || y < 0 || y >= H) ok = false;
 
 	if (x == y) ok = false;
-	socket.emit("pixelFeedback", (hash << 8) + (ok ? 0 : 1));
 
+	ok &= canPlacePixel(clients[ip]);
+
+	socket.emit("pixelFeedback", (hash << 8) + (ok ? 0 : 1));
 	if (ok)	{
 	    pixelData[y][x] = col;
+	    placePixel(clients[ip]);
+	    encodeUserFile(clients[ip]);
+
 	    fs.writeFileSync(files.grid, encodePixelData(pixelData));
-	    console.log(encodePixelData(pixelData));
 	    console.log("placed pixel at ("+x+", "+y+"), col "+col);
 	}
 	else console.log("no");
