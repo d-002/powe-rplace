@@ -30,6 +30,8 @@ function canPlacePixel(user) {
 
 function placePixel(user) {
     user.lastPixel = Date.now()/1000;
+
+    fs.appendFileSync(files.inCooldown, "\n"+user.ip+" "+user.lastPixel);
 }
 
 module.exports = { initAccounts, canPlacePixel, placePixel };

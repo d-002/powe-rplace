@@ -127,8 +127,6 @@ io.on("connection", socket => {
 	if (isNaN(x) || x < 0 || x >= W) ok = false;
 	else if (isNaN(y) || y < 0 || y >= H) ok = false;
 
-	if (x == y) ok = false;
-
 	ok &= canPlacePixel(clients[ip]);
 
 	socket.emit("pixelFeedback", (hash << 8) + (ok ? 0 : 1));

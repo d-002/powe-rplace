@@ -34,7 +34,7 @@ function decodeUserFile(ip, baseNColors, baseCooldown) {
 	    pixelCooldown = parseInt(lines[3]);
         }
 	catch {
-	    console.log("Error loading user file "+path);
+	    console.log("Error loading user file "+ip);
         }
     }
 
