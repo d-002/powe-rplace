@@ -43,4 +43,4 @@ function encodePixelData(pixels) {
 }
 
 // module is manually set to null on the client to avoid errors
-if (module != null) module.exports = { decodePixelData, encodePixelData, colors, W, H };
+if (module != null) module.exports = { decodePixelData, encodePixelData, colors, colorsLengths, W, H };

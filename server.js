@@ -1,4 +1,4 @@
-const { decodePixelData, encodePixelData, colors, W, H } = require(__dirname+"/pixelUtils.js");
+const { decodePixelData, encodePixelData, colors, colorsLengths, W, H } = require(__dirname+"/pixelUtils.js");
 const { initAccounts, canPlacePixel, placePixel } = require(__dirname+"/accounts.js");
 const { initUser, User, decodeUserFile, encodeUserFile } = require(__dirname+"/user.js");
 
@@ -105,7 +105,7 @@ io.on("connection", socket => {
 	console.warn("Undefined IP, setting to "+ip);
     }
 
-    clients[ip] = decodeUserFile(files.accountsFolder+ip);
+    clients[ip] = decodeUserFile(ip, colorsLengths[0], 10);
     clients[ip].socket = socket;
     console.log("new connection from "+ip);
 

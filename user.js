@@ -10,6 +10,7 @@ class User {
 	// this.socket can be undefined if the object is only used as a container for its settings
 	this.socket = undefined;
 
+	this.ip = ip;
 	this.nColors = nColors;
 	this.version = version;
 	this.lastPixel = lastPixel;
@@ -37,7 +38,7 @@ function decodeUserFile(ip, baseNColors, baseCooldown) {
         }
     }
 
-    return new User(undefined, ip, nColors, version, lastPixel, pixelCooldown);
+    return new User(ip, nColors, version, lastPixel, pixelCooldown);
 }
 
 function encodeUserFile(user) {
