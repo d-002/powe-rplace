@@ -1,7 +1,8 @@
-const colors = ['white', 'red', 'blue', 'orange', 'green', 'yellow', 'purple', 'gray', 'black'];
+const colors = ['#fff', '#000', '#f00', '#00f', '#f80', '#080', '#ff0', '#a0c', '#800', '#008', '#840', '#068', '#fd0', '#880', '#af0', '#707', '#bbb', '#444', '#f88', '#88f', '#fc8', '#8f8', '#ffc', '#f7e'];
+const colorsLengths = [8, 16, 24];
 
-const W = 10;
-const H = 10;
+const W = 16;
+const H = 16;
 
 function decodePixelData(data) {
     let pixels = [];

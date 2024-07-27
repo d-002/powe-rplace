@@ -20,3 +20,10 @@ powerups:
 - access more colors
 - place pixels faster
 - pre-place (must have window open)
+
+TODO:
+- handle server stops (different script redirect)
+- implement cache for user data
+- add message popup for when things change
+- login support to sync data from ip, implement passkey system in local storage
+- landing page
