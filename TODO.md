@@ -5,7 +5,21 @@ when an user places a pixel, the server gets their ip and sets their cooldown (f
 the server then updates the grid chunk
 
 every 10s? the server sends map updates to every user (list of changes stored in log files, client has a "version" to know which changes to apply)
-every log file (1000 changes), a snapshot is created to avoid querying too much information: new clients and very much outdated clients get changes starting from this state
+every log file (1024 changes), a snapshot is created to avoid querying too much information: new clients and very much outdated clients get changes starting from this state
+
+downtime handling:
+down page, using get parameters to make for different pages: maintenance, server loading (redirected to when the server is starting)
+display a link to refresh the page, auto-refresh after 10s, show countdown
+show downtime list, graph, reasons for downtime [TODO]
+
+admin page:
+special page, not linked in the website, verification system needed [TODO]
+can set up maintenance: edit a file with the shutdown time, server reads this file every minute and notices the current clients
+in the normal page, if the shutdown time is different than 0 and reached, the client refreshes the page (/!\ add some more time, like 10s, to make sure the backend is restarted in maintenance mode).
+On the backend, the server restarts when the time is reached, so most clients requests are ignored, also need to handle timeout when placing a pixel.
+No editing the package.json file, the server should execute a different script now knowing the server state to successfully redirect clients.
+
+This way, editing regular files can be done in maintenance mode, and editing maintenance files can be done in normal mode.
 
 unlock powerups:
 after placing a certain number of pixels, after a certain amount of play time, when placing a pixel on the first possible frame, in a certain interval...
@@ -25,3 +39,4 @@ TODO:
 - login support to sync data from ip, implement passkey system in local storage
 - landing page
 - display currently active users
+- changelog popup

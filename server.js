@@ -1,6 +1,5 @@
-const { decodePixelData, encodePixelData, colors, colorsLengths, W, H } = require(__dirname+"/pixelUtils.js");
-const { initAccounts, canPlacePixel, placePixel } = require(__dirname+"/accounts.js");
-const { initUser, User, decodeUserFile, encodeUserFile } = require(__dirname+"/user.js");
+const { decodePixelData, encodePixelData, colors, colorsLengths, W, H } = require(__dirname+"/public/map.js");
+const { initAccounts, User, isInCooldown, userPlacePixel } = require(__dirname+"/accounts.js");
 
 // files
 const files = {
@@ -30,18 +29,12 @@ let clients = {}; // ip: User object
 
 // init modules
 initAccounts(fs, files, dirs);
-initUser(fs, files, dirs);
 
 app.use(express.static(__dirname+"/public"));
 
 // landing page
 app.get("/", (req, res) => {
     res.sendFile(ready ? __dirname+"/index.html" : __dirname+"/loading.html");
-});
-
-// to import modules on the client
-app.get("/modules/pixelUtils.js", (req, res) => {
-    res.sendFile(__dirname+"/pixelUtils.js");
 });
 
 
@@ -104,7 +97,7 @@ io.on("connection", socket => {
 	console.warn("Undefined IP, setting to "+ip);
     }
 
-    clients[ip] = decodeUserFile(ip, colorsLengths[0], 10);
+    clients[ip] = User.decodeFile(ip, colorsLengths[0], 10);
     clients[ip].socket = socket;
     console.log("new connection from "+ip);
 
@@ -126,13 +119,13 @@ io.on("connection", socket => {
 	if (isNaN(x) || x < 0 || x >= W) ok = false;
 	else if (isNaN(y) || y < 0 || y >= H) ok = false;
 
-	ok &= canPlacePixel(clients[ip]);
+	ok &= !isInCooldown(clients[ip]);
 
 	socket.emit("pixelFeedback", (hash << 8) + (ok ? 0 : 1));
 	if (ok)	{
 	    pixelData[y][x] = col;
-	    placePixel(clients[ip]);
-	    encodeUserFile(clients[ip]);
+	    userPlacePixel(clients[ip]);
+	    clients[ip].encodeToFile();
 
 	    fs.writeFileSync(files.grid, encodePixelData(pixelData));
 	    console.log("placed pixel at ("+x+", "+y+"), col "+col);

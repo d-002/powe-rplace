@@ -2,18 +2,15 @@ server.js (server)
 client.js (client)
 
 accounts.js:
-- accounts handling (files)
+- files accounts handling
 - check if in cooldown (server)
 - user class (server)
 - user class encoding, decoding (server)
 
 map.js:
-- map encoding / decoding (server+client)
+- map packet encoding / decoding (server+client)
+- map changes encoding / decoding (server+client)
+- version files handling, what to send to the client (server)
+- verion system handling (client)
 
-versions.js:
-- versions handling (server)
-
-down.js:
-- server loading (client)
-- down (client)
-- maintenance (client)
+down.js (client)

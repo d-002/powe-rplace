@@ -1,13 +1,23 @@
-const express = require("express");
-const app = express();
-const http = require("http");
-const server = http.createServer(app);
+let startTime;
+let interval;
+let link;
 
-const port = 8080;
+function update() {
+	const t = Date.now() - startTime;
 
-// landing page
-app.get("/", (req, res) => {
-    res.sendFile(__dirname+"/down.html");
-});
+	if (t > 5000) {
+		link.href = "/";
+		link.innerHTML = "Refresh";
+		window.clearInterval(interval);
+		document.location.href = "/";
+	}
+	else {
+		link.innerHTML = "Or wait "+Math.ceil((5000-t) / 1000)+" seconds...";
+	}
+}
 
-server.listen(port, () => console.log("Listening on port "+port));
+window.onload = () => {
+	link = document.getElementById("link");
+	startTime = Date.now();
+	interval = window.setInterval(update, 1000/30);
+}
