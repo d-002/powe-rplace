@@ -23,7 +23,7 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
 
-const port = 8080;
+const port = process.env.PORT || 3000;
 
 let clients = {}; // ip: User object
 
@@ -34,9 +34,8 @@ app.use(express.static(__dirname+"/public"));
 
 // landing page
 app.get("/", (req, res) => {
-    res.sendFile(ready ? __dirname+"/index.html" : __dirname+"/loading.html");
+    res.sendFile(ready ? __dirname+"/index.html" : __dirname+"/down.html");
 });
-
 
 let ready = false; // display loading page while not ready
 
@@ -137,6 +136,12 @@ io.on("connection", socket => {
         console.log("disconnection from "+ip);
 	delete clients[ip];
     });
+});
+
+// error handling
+process.on("uncaughtException", function (err) {
+	console.log("PREVENTED SERVER CRASH, logging...");
+	console.error(err);
 });
 
 server.listen(port, () => console.log("Listening on port "+port));
