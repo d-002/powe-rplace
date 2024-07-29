@@ -27,7 +27,7 @@ function decodeUserFile(ip, baseNColors, baseCooldown) {
 
     if (fs.existsSync(dirs.accountsFolder+ip)) {
 	try {
-	    const lines = String(fs.readFileSync(path)).split("\n");
+	    const lines = String(fs.readFileSync(dirs.accountsFolder+ip)).split("\n");
 	    nColors = parseInt(lines[0]);
 	    version = Number(lines[1]);
 	    lastPixel = Number(lines[2]);
