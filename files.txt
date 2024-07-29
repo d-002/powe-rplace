@@ -1,0 +1,19 @@
+server.js (server)
+client.js (client)
+
+accounts.js:
+- accounts handling (files)
+- check if in cooldown (server)
+- user class (server)
+- user class encoding, decoding (server)
+
+map.js:
+- map encoding / decoding (server+client)
+
+versions.js:
+- versions handling (server)
+
+down.js:
+- server loading (client)
+- down (client)
+- maintenance (client)
