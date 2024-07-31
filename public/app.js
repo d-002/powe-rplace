@@ -19,9 +19,9 @@ function updateSettings() {
 	canvas.height = scrH;
 }
 
-function drawPixel(x, y, colI) {
-	localGrid[y][x] = colI;
-	ctx.fillStyle = colors[colI];
+function drawPixel(x, y, col) {
+	localGrid[y][x] = col;
+	ctx.fillStyle = colors[col];
 	const _x = x*size, _y = y*size;
 	ctx.fillRect(_x, _y, size-1, size-1);
 }
@@ -43,6 +43,7 @@ function click(evt) {
 
 	placedLocally[hash] = [x, y, localGrid[y][x]];
 	drawPixel(x, y, currentColor);
+	updateLocalStorage();
 
 	socket.emit("placePixel", x+" "+y+" "+currentColor+" "+hash);
 }
@@ -51,8 +52,9 @@ function hashPixel(x, y, col) {
 	return ((x << col) + (y*123 << col+10)) & 0xffff;
 }
 
-socket.on("initial", data => {
-	localGrid = decodePixelData(data);
+socket.on("mapUpdate", data => {
+	applyUpdate(data, drawPixel, grid => { localGrid = grid });
+	updateLocalStorage();
 	updateAllCanvas();
 });
 
@@ -65,13 +67,39 @@ socket.on("pixelFeedback", data => {
 	if (local == null) return;
 	const [x, y, col] = local;
 
-	if (err != 0) drawPixel(x, y, col); // revert placement
+	if (err != 0) {
+		// revert placement
+		drawPixel(x, y, col);
+		updateLocalStorage();
+	}
 });
+
+function updateLocalStorage() {
+	localStorage.setItem("map", encodeMap(localGrid));
+}
+
+function loadLocalStorage() {
+	let item = localStorage.getItem("map");
+	if (item == null) console.warn("No map found in local storage");
+	else {
+		try {
+			localGrid = decodeMap(item);
+			return;
+		}
+		catch {
+			console.warn("Error loading map from local storage");
+		}
+	}
+
+	// loading map failed
+	socket.emit("help");
+}
 
 window.onload = () => {
 	canvas = document.getElementById("grid");
 	ctx = canvas.getContext("2d");
 	updateSettings();
+	loadLocalStorage();
 
 	canvas.addEventListener("click", click);
 

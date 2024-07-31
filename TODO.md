@@ -5,7 +5,8 @@ when an user places a pixel, the server gets their ip and sets their cooldown (f
 the server then updates the grid chunk
 
 every 10s? the server sends map updates to every user (list of changes stored in log files, client has a "version" to know which changes to apply)
-every log file (1024 changes), a snapshot is created to avoid querying too much information: new clients and very much outdated clients get changes starting from this state
+each log file contains 1024 changes to avoid reading too much information
+new clients and outdated clients (with an update process requiring to read multiple files) read from the current map file instead
 
 downtime handling:
 down page, using get parameters to make for different pages: maintenance, server loading (redirected to when the server is starting)
@@ -34,7 +35,7 @@ powerups:
 
 TODO:
 - handle server stops (different script redirect)
-- implement cache for user data
+- less file writes: options, user data, map file
 - add message popup for when things change
 - login support to sync data from ip, implement passkey system in local storage
 - landing page

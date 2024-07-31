@@ -1,10 +1,21 @@
+let fs, files, dirs;
+function initMap(_fs, _files, _dirs) {
+    fs = _fs;
+    files = _files;
+    dirs = _dirs;
+}
+
 const colors = ['#fff', '#000', '#f00', '#00f', '#f80', '#080', '#ff0', '#a0c', '#800', '#008', '#840', '#068', '#fd0', '#880', '#af0', '#707', '#bbb', '#444', '#f88', '#88f', '#fc8', '#8f8', '#ffc', '#f7e'];
 const colorsLengths = [8, 16, 24];
 
 const W = 16;
 const H = 16;
 
-function decodePixelData(data) {
+const versionFileSize = 1024;
+
+// map packet decoding/encoding
+
+function decodeMap(data) {
     let pixels = [];
 
     if (data.length == W*H) {
@@ -31,7 +42,7 @@ function decodePixelData(data) {
     return pixels;
 }
 
-function encodePixelData(pixels) {
+function encodeMap(pixels) {
     let data = "";
     for (let y = 0; y < pixels.length; y++) {
 	let line = "";
@@ -42,5 +53,82 @@ function encodePixelData(pixels) {
     return data;
 }
 
+// version files handling
+
+function logPixelChange(x, y, col, version) {
+    let newline;
+    if (++version == versionFileSize) {
+	version = 0;
+	newline = "";
+    }
+    else newline = "\n";
+
+    // store x and y in two bytes, and col in one byte
+    x = String.fromCharCode(x>>8)+String.fromCharCode(x&255);
+    y = String.fromCharCode(y>>8)+String.fromCharCode(y&255);
+    col = String.fromCharCode(col);
+    fs.appendFileSync(dirs.logsFolder+parseInt(version/versionFileSize)+".log", newline+x+"."+y+"."+col);
+
+    return version;
+}
+
+function makeClientUpdate(clientVersion, serverVersion, serverGrid) {
+    // make the client update its local map version
+    
+    if (clientVersion == serverVersion) return "";
+
+    // first byte of message: either 0 or 1
+    // if 0: message contains only a list of changes
+    // if 1: message contains the full, updated map file
+    let message;
+
+    const serverFile = parseInt(serverVersion/versionFileSize);
+    if (clientVersion == null || clientVersion > serverVersion || serverFile != parseInt(clientVersion/versionFileSize)) {
+	// need to read multiple log files to update the client: send the server map instead
+	// in case an error occured with the client version, reset their map safely here
+	message = String.fromCharCode(1)+encodeMap(serverGrid);
+    }
+    else {
+        // only send the relevant changes to the client to then apply
+	message = String.fromCharCode(0);
+
+	let changes = fs.readFileSync(dirs.logsFolder+serverFile+".log").split("\n");
+
+	const stop = serverVersion%versionFileSize;
+	for (let i = clientVersion%versionFileSize; i < stop; i++) {
+	    message += changes[i];
+	}
+    }
+
+    return message;
+}
+
+function applyUpdate(message, updateFunction, setGrid) {
+    if (message.length == 0) {
+	console.log("Already up-to-date");
+	return;
+    }
+
+    if (message[0].charCodeAt(0) == 0) {
+	// individual changes to apply
+	let n = 0;
+	for (let i = 1; i < message.length; i++) {
+	    const x = (message.charCodeAt(i++)<<8) + message.charCodeAt(i++);
+	    const y = (message.charCodeAt(i++)<<8) + message.charCodeAt(i++);
+	    const col = message.charCodeAt(i);
+
+	    updateFunction(x, y, col);
+	    n++;
+	}
+
+	console.log("Caught up, applied "+n+"change"+(n == 1 ? "" : "s"));
+    }
+    else {
+	// full map update
+	setGrid(decodeMap(message.substring(1)));
+	console.log("Caught up, refreshed entire map");
+    }
+}
+
 // module is manually set to null on the client to avoid errors
-if (module != null) module.exports = { decodePixelData, encodePixelData, colors, colorsLengths, W, H };
+if (module != null) module.exports = { colors, colorsLengths, W, H, initMap, decodeMap, encodeMap, makeClientUpdate, applyUpdate };

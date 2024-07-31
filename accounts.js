@@ -68,10 +68,13 @@ function isInCooldown(user) {
     return result;
 }
 
-function userPlacePixel(user) {
+function userPlacePixel(user, version) {
     user.lastPixel = Date.now()/1000;
+    user.version = ++version;
 
     fs.appendFileSync(files.inCooldown, "\n"+user.ip+" "+user.lastPixel);
+
+    return version;
 }
 
 module.exports = { initAccounts, User, isInCooldown, userPlacePixel };

@@ -1,5 +1,5 @@
-const { decodePixelData, encodePixelData, colors, colorsLengths, W, H } = require(__dirname+"/public/map.js");
 const { initAccounts, User, isInCooldown, userPlacePixel } = require(__dirname+"/accounts.js");
+const { colors, colorsLengths, W, H, initMap, decodeMap, encodeMap, makeClientUpdate, applyUpdate } = require(__dirname+"/public/map.js");
 
 // files
 const files = {
@@ -29,6 +29,7 @@ let clients = {}; // ip: User object
 
 // init modules
 initAccounts(fs, files, dirs);
+initMap(fs, files, dirs);
 
 app.use(express.static(__dirname+"/public"));
 
@@ -73,16 +74,20 @@ let logsVersion = 0; // increases by 1 every map edit, to apply changes to clien
 const lines = String(fs.readFileSync(files.options)).split("\n");
 try {
     let value = parseInt(lines[0]);
-    if (!isNaN(value)) W = value;
-    value = parseInt(lines[1]);
-    if (!isNaN(value)) H = value;
+    if (!isNaN(value)) logsVersion = value;
 }
 catch(e) {
     console.log("Error while loading options: "+e);
 }
+console.log("Server version: "+logsVersion);
+
+function updateOptions() {
+    fs.writeFileSync(files.options, ""+logsVersion);
+}
+updateOptions();
 
 console.log("Reading canvas array...");
-let pixelData = decodePixelData(String(fs.readFileSync(files.grid)));
+let pixelData = decodeMap(String(fs.readFileSync(files.grid)));
 
 function getUserPath(ip) {
     return dirs[accountsFolder]+ip;
@@ -100,7 +105,9 @@ io.on("connection", socket => {
     clients[ip].socket = socket;
     console.log("new connection from "+ip);
 
-    socket.emit("initial", encodePixelData(pixelData));
+    socket.emit("mapUpdate", makeClientUpdate(clients[ip].version, logsVersion, pixelData));
+    clients[ip].version = logsVersion;
+    clients[ip].encodeToFile();
 
     socket.on("placePixel", message => {
 	// parse request, check if correct
@@ -123,13 +130,23 @@ io.on("connection", socket => {
 	socket.emit("pixelFeedback", (hash << 8) + (ok ? 0 : 1));
 	if (ok)	{
 	    pixelData[y][x] = col;
-	    userPlacePixel(clients[ip]);
-	    clients[ip].encodeToFile();
+	    logsVersion = userPlacePixel(clients[ip], logsVersion);
 
-	    fs.writeFileSync(files.grid, encodePixelData(pixelData));
-	    console.log("placed pixel at ("+x+", "+y+"), col "+col);
+	    console.log("Placed pixel at ("+x+", "+y+"), col "+col);
+	    clients[ip].encodeToFile();
+	    updateOptions();
+
+	    fs.writeFileSync(files.grid, encodeMap(pixelData));
+	    console.log("... done saving");
 	}
 	else console.log("no");
+    });
+
+    socket.on("help", _ => {
+	// triggered when the map in the user's local storage doesn't exist
+	socket.emit("mapUpdate", makeClientUpdate(null, logsVersion, pixelData));
+	clients[ip].version = logsVersion;
+	clients[ip].encodeToFile();
     });
 
     socket.on("disconnect", () => {
