@@ -8,10 +8,13 @@ let zoom = 1, pos = [0, 0], currentColor = 1;
 let size = 50;
 
 // pixels pre-placed locally, waiting for server to accept or overrule
-let placedLocally = {}; // hash: [x, y, prev col]
+let placedLocally = {}; // hash: [x, y, prev col, timestamp]
 
 let localGrid = [];
 let needHelp = false;
+
+timeoutDelay = 10000;
+let interval;
 
 function updateSettings() {
 	scrW = window.innerWidth;
@@ -43,7 +46,7 @@ function click(evt) {
 	const hash = hashPixel(x, y, currentColor);
 	if (x < 0 || x >= W || y < 0 || y >= H) return;
 
-	placedLocally[hash] = [x, y, localGrid[y][x]];
+	placedLocally[hash] = [x, y, localGrid[y][x], Date.now()];
 	drawPixel(x, y, currentColor);
 	updateLocalStorage();
 
@@ -74,7 +77,8 @@ socket.on("pixelFeedback", data => {
 
 	const local = placedLocally[hash];
 	if (local == null) return;
-	const [x, y, col] = local;
+	const [x, y, col, _] = local;
+	delete placedLocally[hash];
 
 	if (err != 0) {
 		// revert placement
@@ -113,6 +117,14 @@ socket.on("maintenance", () => {
 	window.location.href = "/down?reason=maintenance";
 });
 
+function update() {
+	const now = Date.now();
+	let timeout = false;
+	Object.values(placedLocally).forEach(options => { if (now-options[3] > timeoutDelay) timeout = true; });
+
+	if (timeout) window.location.href="/down?reason=timeout";
+}
+
 window.onload = () => {
 	canvas = document.getElementById("grid");
 	ctx = canvas.getContext("2d");
@@ -122,4 +134,6 @@ window.onload = () => {
 	canvas.addEventListener("click", click);
 
 	document.addEventListener("keydown", () => { currentColor = (currentColor+1) % colors.length });
+
+	interval = window.setInterval(update, 100);
 }
