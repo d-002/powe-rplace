@@ -109,6 +109,10 @@ socket.on("duplicateIp", () => {
 	window.location.href = "/down?reason=dupe-ip";
 });
 
+socket.on("maintenance", () => {
+	window.location.href = "/down?reason=maintenance";
+});
+
 window.onload = () => {
 	canvas = document.getElementById("grid");
 	ctx = canvas.getContext("2d");

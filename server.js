@@ -5,7 +5,8 @@ const { colors, colorsLengths, W, H, initMap, decodeMap, encodeMap, logPixelChan
 const files = {
     "options": "/files/options.txt",
     "inCooldown": "/files/inCooldown.csv",
-    "grid": "/files/grid.csv"
+    "grid": "/files/grid.csv",
+    "maintenance": "/files/maintenance.txt"
 }
 const dirs = {
     "logsFolder": "/files/logs/",
@@ -37,17 +38,24 @@ initMap(fs, files, dirs);
 
 app.use(express.static(__dirname+"/public"));
 
+let ready = false; // display loading page while not ready
+let maintenance;
+
 // landing page
 app.get("/", (req, res) => {
-    if (ready) res.sendFile(__dirname+"/index.html");
+    if (maintenance) {
+	res.redirect("/down?reason=maintenance");
+	checkMaintenance();
+    }
+    else if (ready) res.sendFile(__dirname+"/index.html");
     else res.redirect("/down?reason=starting");
 });
 
 app.get("/down", (req, res) => {
-    res.sendFile(__dirname+"/down.html");
+    // if maintenance just stopped, maybe that was the cause of the issue, try to fix
+    if (checkMaintenance() && !maintenance) res.redirect("/");
+    else res.sendFile(__dirname+"/down.html");
 });
-
-let ready = false; // display loading page while not ready
 
 // create directories and files if non-existant
 console.log("Checking files...");
@@ -76,6 +84,8 @@ Array.from(Object.keys(files)).forEach(name => {
 	console.log('Created file '+file);
     }
 });
+
+checkMaintenance();
 
 // read options
 let logsVersion = 0; // increases by 1 every map edit, to apply changes to clients
@@ -185,6 +195,23 @@ function interval() {
     Object.values(clients).forEach(user => {
 	updateClientIp(user.ip, user.version);
     });
+
+    checkMaintenance();
+}
+
+function checkMaintenance() {
+    const value = Number(fs.readFileSync(files.maintenance)) != 0;
+    if (value != maintenance) {
+	maintenance = value;
+	console.log("Maintenance set to "+maintenance);
+
+	// notify all clients
+	if (maintenance) Object.values(clients).forEach(user => user.socket.emit("maintenance"));
+
+	return true;
+    }
+
+    return false;
 }
 
 // error handling
