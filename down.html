@@ -1,13 +1,25 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 	<head>
-		<title>powe-R/PLACE</title>
+		<meta charset="UTF-8">
+		<title>powe-r/place</title>
+
 		<link rel="stylesheet" href="css/common.css">
 		<link rel="stylesheet" href="css/down.css">
-		<script src="down.js"></script>
+
+		<script>let module = null;</script>
+		<script src="map.js"></script>
+		<script src="down.js" type="module"></script>
 	</head>
 
 	<body>
-		<p id="info"></p>
-		<a id="link">Refresh</a>
+		<canvas id="canvas-bg"></canvas>
+
+		<div id="main">
+			<h1>powe-r/place</h1>
+			<h2>Oops.</h2>
+			<p id="info"></p>
+			<a id="link">Refresh</a>
+		</div>
 	</body>
 </html>	

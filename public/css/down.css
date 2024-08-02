@@ -1,0 +1,28 @@
+#main {
+	padding: 200px 0 0 200px;
+}
+
+h1 {
+	font-size: 48px;
+	margin: 0;
+}
+
+h2 {
+	font-family: "stifly";
+	font-size: 128px;
+	margin: 20px 0 40px 0;
+}
+
+p {
+	margin: 0;
+}
+
+#canvas-bg {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+
+	z-index: -1;
+}

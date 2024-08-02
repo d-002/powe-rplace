@@ -55,7 +55,7 @@ function encodeMap(pixels) {
 
 // version files handling
 
-getFile = version => dirs.logsFolder+parseInt((version-1)/versionFileSize)+".log";
+let getFile = version => dirs.logsFolder+parseInt((version-1)/versionFileSize)+".log";
 
 function logPixelChange(x, y, col, version) {
     version = version%versionFileSize+1;
