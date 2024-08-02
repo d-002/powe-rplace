@@ -1,5 +1,5 @@
 const { initAccounts, User, isInCooldown, userPlacePixel } = require(__dirname+"/accounts.js");
-const { colors, colorsLengths, W, H, initMap, decodeMap, encodeMap, makeClientUpdate, applyUpdate } = require(__dirname+"/public/map.js");
+const { colors, colorsLengths, W, H, initMap, decodeMap, encodeMap, logPixelChange, makeClientUpdate, applyUpdate } = require(__dirname+"/public/map.js");
 
 // files
 const files = {
@@ -26,6 +26,10 @@ const io = new Server(server);
 const port = process.env.PORT || 3000;
 
 let clients = {}; // ip: User object
+
+// execute certain actions once in a while, triggered when someone places a pixel
+let prevBroadcast = Date.now();
+const broadcastDelay = 10000;
 
 // init modules
 initAccounts(fs, files, dirs);
@@ -87,7 +91,7 @@ function updateOptions() {
 updateOptions();
 
 console.log("Reading canvas array...");
-let pixelData = decodeMap(String(fs.readFileSync(files.grid)));
+let serverGrid = decodeMap(String(fs.readFileSync(files.grid)));
 
 function getUserPath(ip) {
     return dirs[accountsFolder]+ip;
@@ -97,7 +101,7 @@ function getUserPath(ip) {
 io.on("connection", socket => {
     let ip = socket.handshake.address.address;
     if (ip == null) {
-	ip = "127.0.0.1";
+	ip = "127.0.0.1"+Object.keys(clients).length;
 	console.warn("Undefined IP, setting to "+ip);
     }
 
@@ -105,9 +109,7 @@ io.on("connection", socket => {
     clients[ip].socket = socket;
     console.log("new connection from "+ip);
 
-    socket.emit("mapUpdate", makeClientUpdate(clients[ip].version, logsVersion, pixelData));
-    clients[ip].version = logsVersion;
-    clients[ip].encodeToFile();
+    updateClientIp(ip, clients[ip].version);
 
     socket.on("placePixel", message => {
 	// parse request, check if correct
@@ -129,24 +131,30 @@ io.on("connection", socket => {
 
 	socket.emit("pixelFeedback", (hash << 8) + (ok ? 0 : 1));
 	if (ok)	{
-	    pixelData[y][x] = col;
+	    serverGrid[y][x] = col;
 	    logsVersion = userPlacePixel(clients[ip], logsVersion);
 
 	    console.log("Placed pixel at ("+x+", "+y+"), col "+col);
 	    clients[ip].encodeToFile();
 	    updateOptions();
 
-	    fs.writeFileSync(files.grid, encodeMap(pixelData));
+	    fs.writeFileSync(files.grid, encodeMap(serverGrid));
 	    console.log("... done saving");
 	}
 	else console.log("no");
+
+
+	// execute code at certain time intervals, triggered here
+	const now = Date.now();
+	if (now - prevBroadcast > broadcastDelay) {
+	    prevBroadcast = now;
+	    interval();
+	}
     });
 
     socket.on("help", _ => {
 	// triggered when the map in the user's local storage doesn't exist
-	socket.emit("mapUpdate", makeClientUpdate(null, logsVersion, pixelData));
-	clients[ip].version = logsVersion;
-	clients[ip].encodeToFile();
+	updateClientIp(ip, null);
     });
 
     socket.on("disconnect", () => {
@@ -154,6 +162,19 @@ io.on("connection", socket => {
 	delete clients[ip];
     });
 });
+
+function updateClientIp(ip, version) {
+    const client = clients[ip];
+    client.socket.emit("mapUpdate", makeClientUpdate(version, logsVersion, serverGrid));
+    client.version = logsVersion;
+    client.encodeToFile();
+}
+
+function interval() {
+    Object.values(clients).forEach(user => {
+	updateClientIp(user.ip, user.version);
+    });
+}
 
 // error handling
 process.on("uncaughtException", function (err) {

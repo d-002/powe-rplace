@@ -11,7 +11,7 @@ const colorsLengths = [8, 16, 24];
 const W = 16;
 const H = 16;
 
-const versionFileSize = 1024;
+const versionFileSize = 10;//24;
 
 // map packet decoding/encoding
 
@@ -131,4 +131,4 @@ function applyUpdate(message, updateFunction, setGrid) {
 }
 
 // module is manually set to null on the client to avoid errors
-if (module != null) module.exports = { colors, colorsLengths, W, H, initMap, decodeMap, encodeMap, makeClientUpdate, applyUpdate };
+if (module != null) module.exports = { colors, colorsLengths, W, H, initMap, decodeMap, encodeMap, logPixelChange, makeClientUpdate, applyUpdate };
