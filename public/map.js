@@ -55,6 +55,8 @@ function encodeMap(pixels) {
 
 // version files handling
 
+getFile = version => dirs.logsFolder+parseInt((version-1)/versionFileSize)+".log";
+
 function logPixelChange(x, y, col, version) {
     version = version%versionFileSize+1;
     const newline = version == 1 ? "" : "\n";
@@ -63,12 +65,10 @@ function logPixelChange(x, y, col, version) {
     x = String.fromCharCode(x>>8)+String.fromCharCode(x&255);
     y = String.fromCharCode(y>>8)+String.fromCharCode(y&255);
     col = String.fromCharCode(col);*/
-    fs.appendFileSync(dirs.logsFolder+parseInt(version/versionFileSize)+".log", newline+x+"."+y+"."+col);
+    fs.appendFileSync(getFile(version), newline+x+"."+y+"."+col);
 
     return version;
 }
-
-getFile = version => parseInt((version-1)/versionFileSize);
 
 function makeClientUpdate(clientVersion, serverVersion, serverGrid) {
     // make the client update its local map version
@@ -91,7 +91,7 @@ function makeClientUpdate(clientVersion, serverVersion, serverGrid) {
         // only send the relevant changes to the client to then apply
 	message = String.fromCharCode(0);
 
-	let changes = String(fs.readFileSync(dirs.logsFolder+serverFile+".log")).split("\n");
+	let changes = String(fs.readFileSync(serverFile)).split("\n");
 
 	const start = (clientVersion-1)%versionFileSize+1;
 	const stop = (serverVersion-1)%versionFileSize+1;

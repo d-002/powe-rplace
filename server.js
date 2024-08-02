@@ -29,7 +29,7 @@ let clients = {}; // ip: User object
 
 // execute certain actions once in a while, triggered when someone places a pixel
 let prevBroadcast = Date.now();
-const broadcastDelay = 10000;
+const broadcastDelay = 30000;
 
 // init modules
 initAccounts(fs, files, dirs);
@@ -100,9 +100,9 @@ if (logsVersion == 0) {
 
 
 io.on("connection", socket => {
-    let ip = socket.handshake.address.address;
+    let ip = socket.handshake.address.split(":").slice(-1).pop();
     if (ip == null) {
-	ip = "127.0.0.1"+Object.keys(clients).length;
+	ip = "127.0.0.1";
 	console.warn("Undefined IP, setting to "+ip);
     }
 
