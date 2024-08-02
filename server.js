@@ -200,13 +200,13 @@ function interval() {
 }
 
 function checkMaintenance() {
-    const value = Number(fs.readFileSync(files.maintenance)) != 0;
+    const value = Number(fs.readFileSync(files.maintenance));
     if (value != maintenance) {
 	maintenance = value;
 	console.log("Maintenance set to "+maintenance);
 
 	// notify all clients
-	if (maintenance) Object.values(clients).forEach(user => user.socket.emit("maintenance"));
+	if (maintenance) Object.values(clients).forEach(user => user.socket.emit("maintenance", maintenance));
 
 	return true;
     }

@@ -14,6 +14,7 @@ let localGrid = [];
 let needHelp = false;
 
 timeoutDelay = 10000;
+let maintenanceTime = 0;
 let interval;
 
 function updateSettings() {
@@ -113,8 +114,10 @@ socket.on("duplicateIp", () => {
 	window.location.href = "/down?reason=dupe-ip";
 });
 
-socket.on("maintenance", () => {
-	window.location.href = "/down?reason=maintenance";
+socket.on("maintenance", data => {
+	maintenanceTime = Number(data);
+	if (isNaN(maintenanceTime)) maintenanceTime = Date.now()+60000;
+	console.log("Maintenance planned, starting in "+Math.ceil((maintenanceTime-Date.now())/1000)+"s");
 });
 
 function update() {
@@ -123,6 +126,8 @@ function update() {
 	Object.values(placedLocally).forEach(options => { if (now-options[3] > timeoutDelay) timeout = true; });
 
 	if (timeout) window.location.href="/down?reason=timeout";
+
+	if (maintenanceTime != 0 && Date.now() > maintenanceTime+2000) window.location.href = "/down?reason=maintenance";
 }
 
 window.onload = () => {

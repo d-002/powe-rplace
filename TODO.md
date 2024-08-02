@@ -17,7 +17,7 @@ show downtime list, graph, reasons for downtime [TODO]
 
 admin page:
 special page, not linked in the website, verification system needed [TODO]
-can set up maintenance: edit a file with the shutdown time, server reads this file every minute and notices the current clients
+can set up maintenance: edit a file with the shutdown time, server reads this file every minute and notifies the current clients
 in the normal page, if the shutdown time is different than 0 and reached, the client refreshes the page (/!\ add some more time, like 10s, to make sure the backend is restarted in maintenance mode).
 On the backend, the server restarts when the time is reached, so most clients requests are ignored, also need to handle timeout when placing a pixel.
 No editing the package.json file, the server should execute a different script now knowing the server state to successfully redirect clients.
