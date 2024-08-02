@@ -11,6 +11,7 @@ let size = 50;
 let placedLocally = {}; // hash: [x, y, prev col]
 
 let localGrid = [];
+let needHelp = false;
 
 function updateSettings() {
 	scrW = window.innerWidth;
@@ -54,7 +55,14 @@ function hashPixel(x, y, col) {
 }
 
 socket.on("mapUpdate", data => {
-	applyUpdate(data, drawPixel, grid => { localGrid = grid });
+	try {
+		applyUpdate(data, drawPixel, grid => { localGrid = grid });
+	}
+	catch (err) {
+		if (!needHelp) console.error("Error loading the map, while not needing help: "+err);
+	}
+
+	needHelp = false;
 	updateLocalStorage();
 	updateAllCanvas();
 });
@@ -93,6 +101,7 @@ function loadLocalStorage() {
 	}
 
 	// loading map failed
+	needHelp = true;
 	socket.emit("help");
 }
 
