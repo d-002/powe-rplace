@@ -14,7 +14,7 @@ class User {
 	this.nColors = nColors;
 	this.version = version;
 	this.lastPixel = lastPixel;
-	this.pixelCooldown = pixelCooldown; // s
+	this.pixelCooldown = pixelCooldown;
     }
 
     static decodeFile(ip, baseNColors, baseCooldown) {
@@ -54,7 +54,7 @@ function isInCooldown(user) {
     String(fs.readFileSync(files.inCooldown)).split('\n').forEach(line => {
 	const i = line.indexOf(" ");
 	const prev = Number(line.substring(i+1));
-	const inCooldown = Date.now()/1000 - prev < user.pixelCooldown || prev <= 0;
+	const inCooldown = Date.now() - prev < user.pixelCooldown || prev <= 0;
 
 	if (inCooldown) {
 	    if (user.ip == line.substring(0, i) && inCooldown) result = true;
@@ -69,7 +69,7 @@ function isInCooldown(user) {
 }
 
 function userPlacePixel(user, version) {
-    user.lastPixel = Date.now()/1000;
+    user.lastPixel = Date.now();
     user.version = version;
 
     fs.appendFileSync(files.inCooldown, "\n"+user.ip+" "+user.lastPixel);

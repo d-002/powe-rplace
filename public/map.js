@@ -11,7 +11,7 @@ const colorsLengths = [8, 16, 24];
 const W = 16;
 const H = 16;
 
-const versionFileSize = 10;//24;
+const versionFileSize = 10;
 
 // map packet decoding/encoding
 
@@ -73,7 +73,6 @@ function logPixelChange(x, y, col, version) {
 function makeClientUpdate(clientVersion, serverVersion, serverGrid) {
     // make the client update its local map version
 
-    console.log(clientVersion+" "+serverVersion);
     if (clientVersion == serverVersion) return "";
 
     // first byte of message: either 0 or 1
@@ -114,7 +113,6 @@ function applyUpdate(message, updateFunction, setGrid) {
 	    const x = (message.charCodeAt(i++)<<8) + message.charCodeAt(i++);
 	    const y = (message.charCodeAt(i++)<<8) + message.charCodeAt(i++);
 	    const col = message.charCodeAt(i);*/
-	console.log(message.substring(1));
 	message.split("\n").slice(1).forEach(line => {
 	    let [x, y, col] = line.split(".");
 	    x = Number(x);

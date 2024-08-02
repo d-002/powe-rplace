@@ -29,7 +29,7 @@ let clients = {}; // ip: User object
 
 // execute certain actions once in a while, triggered when someone places a pixel
 let prevBroadcast = Date.now();
-const broadcastDelay = 30000;
+const broadcastDelay = 10000;
 
 // init modules
 initAccounts(fs, files, dirs);
@@ -39,7 +39,12 @@ app.use(express.static(__dirname+"/public"));
 
 // landing page
 app.get("/", (req, res) => {
-    res.sendFile(ready ? __dirname+"/index.html" : __dirname+"/down.html");
+    if (ready) res.sendFile(__dirname+"/index.html");
+    else res.redirect("/down?reason=starting");
+});
+
+app.get("/down", (req, res) => {
+    res.sendFile(__dirname+"/down.html");
 });
 
 let ready = false; // display loading page while not ready
@@ -106,14 +111,14 @@ io.on("connection", socket => {
     let ok = true;
     Object.keys(clients).forEach(ip2 => { if (ip == ip2) ok = false; });
     if (!ok) {
-	console.error("A client with this IP is already connected");
+	console.error("Duplicate connection from "+ip);
 	socket.emit("duplicateIp");
 	return;
     }
 
-    clients[ip] = User.decodeFile(ip, colorsLengths[0], 10);
+    clients[ip] = User.decodeFile(ip, colorsLengths[0], 2000);
     clients[ip].socket = socket;
-    console.log("new connection from "+ip);
+    console.log("New connection from "+ip);
 
     updateClientIp(ip, clients[ip].version);
 
@@ -146,15 +151,13 @@ io.on("connection", socket => {
 	    updateOptions();
 
 	    fs.writeFileSync(files.grid, encodeMap(serverGrid));
-	    console.log("... done saving");
 	}
-	else console.log("no");
 
 
 	// execute code at certain time intervals, triggered here
 	const now = Date.now();
 	if (now - prevBroadcast > broadcastDelay) {
-	    console.log("broadcast")
+	    console.log("Broadcast")
 	    prevBroadcast = now;
 	    interval();
 	}
@@ -166,7 +169,7 @@ io.on("connection", socket => {
     });
 
     socket.on("disconnect", () => {
-        console.log("disconnection from "+ip);
+        console.log("Disconnection from "+ip);
 	delete clients[ip];
     });
 });

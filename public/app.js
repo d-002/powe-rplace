@@ -106,7 +106,7 @@ function loadLocalStorage() {
 }
 
 socket.on("duplicateIp", () => {
-	window.location.href = "/duplicate-ip";
+	window.location.href = "/down?reason=dupe-ip";
 });
 
 window.onload = () => {
