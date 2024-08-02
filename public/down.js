@@ -3,7 +3,6 @@ import { animate } from "./animated-bg.js";
 let startTime;
 let interval;
 let link;
-let fps = 60; // not affecting the countdown update
 
 // error name: [info, link content, link address, initiate countdown (will override link content)]
 const options = {
@@ -47,5 +46,5 @@ window.onload = () => {
 		link.href = linkAddr;
 	}
 
-	animate(window, document.getElementById("canvas-bg"), fps);
+	animate(window, document.getElementById("canvas-bg"));
 }

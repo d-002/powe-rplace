@@ -1,100 +1,115 @@
 let W, H, ctx;
-let fps;
+let fps = 5;
 let size = 20;
 let window, canvas;
 let interval;
 
+let canvMult;
 let points;
 
 class Point {
-	constructor() {
+	constructor(x) {
 		this.x = Math.random()*W;
-		this.y = Math.random()*H;
+		this.y = parseInt(Math.random()*H/size)*size;
 
 		// random spawn delay in the first few seconds
 		this.spawn = Date.now()+Math.random()*2000;
 
-		this.pulseSpeed = Math.random()*0.5 + 0.2;
+		this.length = parseInt(Math.random()*5) + 10;
 
-		const a = Math.random()*2*Math.PI;
-		const speed = Math.random()*100 + 50;
-		this.dx = Math.cos(a)*speed/fps;
-		this.dy = Math.sin(a)*speed/fps;
+		this.dx = (parseInt(Math.random()*2)*2 - 1) * 100 / fps;
 
-		this.col = colors[parseInt(Math.random()*colors.length)];
-		this.colObj = Vec3.fromColor(this.col);
+		this.trail = []; // previous points
+
+		this.col = Math.random();
+		this.dcol = (Math.random()*0.05 + 0.1) / fps;
+
+		this.height = parseInt(Math.random()*2 + 2);
+		this.offset = [];
+		for (let i = 0; i < this.height*2 + 1; i++) {
+			this.offset.push(Math.round(Math.random()*2));
+		}
 	}
 
-	update() {
+	update(f) {
 		this.x = mod(this.x + this.dx, W);
-		this.y = mod(this.y + this.dy, H);
-	}
-}
+		this.y = this.y%H; // in case the screen gets resized
+		this.col = (this.col+this.dcol)%1;
 
-class Vec3 {
-	constructor(r, g, b) {
-		this.r = r;
-		this.g = g;
-		this.b = b;
-	}
+		this.ix = parseInt(this.x/size);
 
-	lerp(col, t) {
-		this.r += (col.r-this.r)*t;
-		this.g += (col.g-this.g)*t;
-		this.b += (col.b-this.b)*t;
-	}
-
-	static fromColor(col) {
-		let r, g, b;
-		if (col.length == 7) {
-			r = parseInt(col.substring(1), 16)/256;
-			g = parseInt(col.substring(3, 5), 16)/256;
-			b = parseInt(col.substring(5), 16)/256;
+		// reached a new tile: edit the trail
+		if (this.trail.length == 0 || this.trail.slice(-1)[0][0] != this.ix) {
+			this.trail.push([this.ix, parseInt(this.y/size)]);
 		}
-		else if (col.length == 4) {
-			r = parseInt(col[1], 16)/16;
-			g = parseInt(col[2], 16)/16;
-			b = parseInt(col[3], 16)/16;
+
+		if (this.trail.length > this.length) {
+			const [x, y, _] = this.trail.shift();
+			f(x, y);
 		}
-		else console.log("Unparsable color: "+col);
-
-		return new Vec3(r, g, b);
-	}
-
-	toColor() {
-		return "rgb("+this.r*256+", "+this.g*256+", "+this.b*256+")";
 	}
 }
 
 let mod = (x, m) => (x%m + m) % m;
 
+let alpha = x => Math.pow(2.25 * Math.sqrt(x) * (Math.cos(Math.PI*x)/2 + 0.5), 2);
+
+function getCol(t) {
+	// convert HSL (t, 1, 0.5) into RGB
+
+	t *= 360;
+	const X = (1 - Math.abs(t/60%2 - 1)) * 255;
+	let r, g, b;
+
+	if (t < 60) [r, g, b] = [255, X, 0];
+	else if (t < 120) [r, g, b] = [X, 255, 0];
+	else if (t < 180) [r, g, b] = [0, 255, X];
+	else if (t < 240) [r, g, b] = [0, X, 255];
+	else if (t < 300) [r, g, b] = [X, 0, 255];
+	else [r, g, b] = [255, 0, X];
+
+	return "rgb("+r+", "+g+", "+b+")";
+}
+
 function _start() {
 	points = [];
-	for (let i = 0; i < 5; i++) points.push(new Point());
+	for (let i = 0; i < 20; i++) points.push(new Point(i));
 }
 
 function _animate() {
-	points.forEach(point => point.update());
+	// move points and fill end of trails with background color
+	points.forEach(point => {
+		ctx.fillStyle = "white";
+		ctx.globalAlpha = 1;
+		point.update((x, y) => ctx.fillRect(x*size, y*size, size-1, size-1));
 
-	ctx.clearRect(0, 0, W, H);
+		for (let i = 0; i < point.trail.length; i++) {
+			const [x, _y, col] = point.trail[i];
+			let j = 0;
+			for (let y = _y-point.height; y <= _y+point.height; y++) {
+				ctx.fillStyle = "white";
+				ctx.globalAlpha = 1;
+				ctx.fillRect((x+point.offset[j++])*size, y*size, size-1, size-1);
+			}
+		}
+	});
 
-	const value = 255/256;
-	const thres = 25000;
+	points.forEach(point => {
+		for (let i = 0; i < point.trail.length; i++) {
+			const [x, _y] = point.trail[i];
+			let j = 0;
+			for (let y = _y-point.height; y <= _y+point.height; y++) {
+				const offset = point.offset[j];
 
-	for (let x = 0; x <= W/size; x++)
-	for (let y = 0; y <= H/size; y++) {
-		const col = new Vec3(value, value, value);
-		points.forEach(point => {
-			const dx = point.x - x*size;
-			const dy = point.y - y*size;
-			const d2 = dx*dx + dy*dy;
+				ctx.fillStyle = getCol(point.col+point.dcol*j+offset);
+				ctx.globalAlpha = alpha(1 - i/point.length) * canvMult[x][y];
+				ctx.fillRect((x+offset)*size, y*size, size-1, size-1);
+				j++;
+			}
+		}
+	});
 
-			if (d2 < thres) col.lerp(point.colObj, 1 - d2/thres);
-		});
-
-		ctx.fillStyle = col.toColor();
-		ctx.fillRect(x*size, y*size, size-1, size-1);
-	}
+	ctx.globalAlpha = 1;
 }
 
 function animResize() {
@@ -102,16 +117,26 @@ function animResize() {
 	H = window.innerHeight;
 	canvas.width = W;
 	canvas.height = H;
+
+	canvMult = [];
+	ctx.fillStyle = "white";
+
+	for (let x = 0; x <= W/size; x++) {
+		canvMult.push([]);
+		for (let y = 0; y <= H/size; y++) {
+			canvMult[x].push(Math.random()*0.3 + 0.7);
+			ctx.fillRect(x*size, y*size, size-1, size-1);
+		}
+	}
 }
 
-export function animate(_window, _canvas, _fps) {
+export function animate(_window, _canvas) {
 	window = _window;
 	canvas = _canvas;
-	fps = _fps;
 
 	window.addEventListener("resize", animResize);
-	animResize();
 	ctx = canvas.getContext("2d");
+	animResize();
 
 	_start();
 	interval = window.setInterval(_animate, 1000/fps);

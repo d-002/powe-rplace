@@ -115,7 +115,7 @@ if (logsVersion == 0) {
 
 
 io.on("connection", socket => {
-    let ip = (socket.handshake.headers['x-forwarded-for'] || socket.conn.remoteAddress).split(',')[0].split(":").slice(-1).pop();
+    let ip = (socket.handshake.headers['x-forwarded-for'] || socket.conn.remoteAddress).split(',')[0].split(":").slice(-1)[0];
 
     // check if a client with this ip already connected
     let ok = true;
