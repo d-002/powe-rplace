@@ -138,6 +138,7 @@ io.on("connection", socket => {
 	    clients[ip].encodeToFile();
 	    updateOptions();
 
+	    logsVersion = logPixelChange(x, y, col, logsVersion);
 	    fs.writeFileSync(files.grid, encodeMap(serverGrid));
 	    console.log("... done saving");
 	}
