@@ -33,6 +33,6 @@ a {
 	color: var(--link1);
 }
 
-a:hover {
+a:not(.nohref):hover {
 	text-decoration: underline;
 }

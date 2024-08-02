@@ -4,6 +4,8 @@ let startTime;
 let interval;
 let link;
 
+let timer = 10000;
+
 // error name: [info, link content, link address, initiate countdown (will override link content)]
 const options = {
 	"unknown": ["Unknown error.", "Back to homepage", "/", false],
@@ -19,14 +21,15 @@ if (!Object.keys(options).includes(type)) type = "unknown";
 function update() {
 	const t = Date.now() - startTime;
 
-	if (t > 5000) {
+	if (t > timer) {
 		link.href = "/";
 		link.innerHTML = "Refresh";
+		link.className = "";
 		window.clearInterval(interval);
 		document.location.href = options[type][2];
 	}
 	else {
-		const value = Math.ceil((5000-t) / 1000);
+		const value = Math.ceil((timer-t) / 1000);
 		const s = value == 1 ? "" : "s";
 		link.innerHTML = "Or wait "+value+" second"+s+"...";
 	}
@@ -39,6 +42,7 @@ window.onload = () => {
 
 	if (countdown) {
 		startTime = Date.now();
+		link.className = "nohref";
 		interval = window.setInterval(update, 100);
 	}
 	else {

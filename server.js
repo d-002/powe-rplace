@@ -221,4 +221,4 @@ process.on("uncaughtException", function (err) {
 });
 
 server.listen(port, () => console.log("Listening on port "+port));
-//ready = true;
+ready = true;
