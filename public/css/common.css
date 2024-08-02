@@ -1,11 +1,11 @@
 @font-face {
 	font-family: "pixelify";
-	src: url("pixelify.ttf");
+	src: url("https://d-002.github.io/other-fonts/pixelify.ttf");
 }
 
 @font-face {
 	font-family: "stifly";
-	src: url("stifly.ttf");
+	src: url("https://d-002.github.io/other-fonts/stifly.ttf");
 }
 
 body, html {
