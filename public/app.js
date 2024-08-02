@@ -96,6 +96,10 @@ function loadLocalStorage() {
 	socket.emit("help");
 }
 
+socket.on("duplicateIp", () => {
+	window.location.href = "/duplicate-ip";
+});
+
 window.onload = () => {
 	canvas = document.getElementById("grid");
 	ctx = canvas.getContext("2d");

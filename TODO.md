@@ -44,3 +44,5 @@ TODO:
 - display currently active users
 - changelog popup
 - use binary data in files
+- gpu acceleration
+- privacy policy

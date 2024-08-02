@@ -100,10 +100,15 @@ if (logsVersion == 0) {
 
 
 io.on("connection", socket => {
-    let ip = socket.handshake.address.split(":").slice(-1).pop();
-    if (ip == null) {
-	ip = "127.0.0.1";
-	console.warn("Undefined IP, setting to "+ip);
+    let ip = (socket.handshake.headers['x-forwarded-for'] || socket.conn.remoteAddress).split(',')[0].split(":").slice(-1).pop();
+
+    // check if a client with this ip already connected
+    let ok = true;
+    Object.keys(clients).forEach(ip2 => { if (ip == ip2) ok = false; });
+    if (!ok) {
+	console.error("A client with this IP is already connected");
+	socket.emit("duplicateIp");
+	return;
     }
 
     clients[ip] = User.decodeFile(ip, colorsLengths[0], 10);
