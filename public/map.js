@@ -56,25 +56,24 @@ function encodeMap(pixels) {
 // version files handling
 
 function logPixelChange(x, y, col, version) {
-    let newline;
-    if (++version == versionFileSize) {
-	version = 0;
-	newline = "";
-    }
-    else newline = "\n";
+    version = version%versionFileSize+1;
+    const newline = version == 1 ? "" : "\n";
 
-    // store x and y in two bytes, and col in one byte
+    /*// store x and y in two bytes, and col in one byte
     x = String.fromCharCode(x>>8)+String.fromCharCode(x&255);
     y = String.fromCharCode(y>>8)+String.fromCharCode(y&255);
-    col = String.fromCharCode(col);
+    col = String.fromCharCode(col);*/
     fs.appendFileSync(dirs.logsFolder+parseInt(version/versionFileSize)+".log", newline+x+"."+y+"."+col);
 
     return version;
 }
 
+getFile = version => parseInt((version-1)/versionFileSize);
+
 function makeClientUpdate(clientVersion, serverVersion, serverGrid) {
     // make the client update its local map version
-    
+
+    console.log(clientVersion+" "+serverVersion);
     if (clientVersion == serverVersion) return "";
 
     // first byte of message: either 0 or 1
@@ -82,8 +81,8 @@ function makeClientUpdate(clientVersion, serverVersion, serverGrid) {
     // if 1: message contains the full, updated map file
     let message;
 
-    const serverFile = parseInt(serverVersion/versionFileSize);
-    if (clientVersion == null || clientVersion > serverVersion || serverFile != parseInt(clientVersion/versionFileSize)) {
+    const serverFile = getFile(serverVersion);
+    if (clientVersion == null || clientVersion > serverVersion || serverFile != getFile(clientVersion)) {
 	// need to read multiple log files to update the client: send the server map instead
 	// in case an error occured with the client version, reset their map safely here
 	message = String.fromCharCode(1)+encodeMap(serverGrid);
@@ -92,12 +91,11 @@ function makeClientUpdate(clientVersion, serverVersion, serverGrid) {
         // only send the relevant changes to the client to then apply
 	message = String.fromCharCode(0);
 
-	let changes = fs.readFileSync(dirs.logsFolder+serverFile+".log").split("\n");
+	let changes = String(fs.readFileSync(dirs.logsFolder+serverFile+".log")).split("\n");
 
-	const stop = serverVersion%versionFileSize;
-	for (let i = clientVersion%versionFileSize; i < stop; i++) {
-	    message += changes[i];
-	}
+	const start = (clientVersion-1)%versionFileSize+1;
+	const stop = (serverVersion-1)%versionFileSize+1;
+	for (let i = start; i < stop; i++) message += "\n"+changes[i];
     }
 
     return message;
@@ -112,16 +110,23 @@ function applyUpdate(message, updateFunction, setGrid) {
     if (message[0].charCodeAt(0) == 0) {
 	// individual changes to apply
 	let n = 0;
-	for (let i = 1; i < message.length; i++) {
+	/*for (let i = 1; i < message.length; i++) {
 	    const x = (message.charCodeAt(i++)<<8) + message.charCodeAt(i++);
 	    const y = (message.charCodeAt(i++)<<8) + message.charCodeAt(i++);
-	    const col = message.charCodeAt(i);
+	    const col = message.charCodeAt(i);*/
+	console.log(message.substring(1));
+	message.split("\n").slice(1).forEach(line => {
+	    let [x, y, col] = line.split(".");
+	    x = Number(x);
+	    y = Number(y);
+	    col = Number(col);
+	    if (isNaN(x) || isNaN(y) || isNaN(col)) console.log("Error reading request, change "+i);
 
 	    updateFunction(x, y, col);
 	    n++;
-	}
+	});
 
-	console.log("Caught up, applied "+n+"change"+(n == 1 ? "" : "s"));
+	console.log("Caught up, applied "+n+" change"+(n == 1 ? "" : "s"));
     }
     else {
 	// full map update

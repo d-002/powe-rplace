@@ -8,6 +8,8 @@ every 10s? the server sends map updates to every user (list of changes stored in
 each log file contains 1024 changes to avoid reading too much information
 new clients and outdated clients (with an update process requiring to read multiple files) read from the current map file instead
 
+/!\ version 0 is the initial version, with no changes. Hence in every file of say 10 changes, the contents are the changes that lead to versions 1+10n to 10+10n, not 0+10n to 9+10n.
+
 downtime handling:
 down page, using get parameters to make for different pages: maintenance, server loading (redirected to when the server is starting)
 display a link to refresh the page, auto-refresh after 10s, show countdown
@@ -41,3 +43,4 @@ TODO:
 - landing page
 - display currently active users
 - changelog popup
+- use binary data in files

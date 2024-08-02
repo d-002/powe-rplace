@@ -19,7 +19,8 @@ function updateSettings() {
 	canvas.height = scrH;
 }
 
-function drawPixel(x, y, col) {
+function drawPixel(x, y, col, p=true) {
+	if (p) console.log("dP "+x+" "+y+" "+col);
 	localGrid[y][x] = col;
 	ctx.fillStyle = colors[col];
 	const _x = x*size, _y = y*size;
@@ -27,12 +28,12 @@ function drawPixel(x, y, col) {
 }
 
 function updateAllCanvas() {
-	ctx.fillStyle = 'gray';
+	ctx.fillStyle = "gray";
 	ctx.fillRect(0, 0, scrW, scrH);
 
 	for (let x = 0; x < W; x++)
 		for (let y = 0; y < H; y++)
-			drawPixel(x, y, localGrid[y][x]);
+			drawPixel(x, y, localGrid[y][x], false);
 }
 
 function click(evt) {

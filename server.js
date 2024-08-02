@@ -46,10 +46,10 @@ let ready = false; // display loading page while not ready
 
 // create directories and files if non-existant
 console.log("Checking files...");
-const mainDir = __dirname+'/files';
+const mainDir = __dirname+"/files";
 if (!fs.existsSync(mainDir)) {
     fs.mkdirSync(mainDir);
-    console.log('Created main dir');
+    console.log("Created main dir");
 }
 
 Array.from(Object.keys(dirs)).forEach(name => {
@@ -58,7 +58,7 @@ Array.from(Object.keys(dirs)).forEach(name => {
 
     if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir);
-	console.log('Created dir '+dir);
+	console.log("Created dir "+dir);
     }
 });
 
@@ -93,8 +93,9 @@ updateOptions();
 console.log("Reading canvas array...");
 let serverGrid = decodeMap(String(fs.readFileSync(files.grid)));
 
-function getUserPath(ip) {
-    return dirs[accountsFolder]+ip;
+if (logsVersion == 0) {
+    console.log("Writing initial grid to grid file");
+    fs.writeFileSync(files.grid, encodeMap(serverGrid))
 }
 
 
@@ -132,13 +133,13 @@ io.on("connection", socket => {
 	socket.emit("pixelFeedback", (hash << 8) + (ok ? 0 : 1));
 	if (ok)	{
 	    serverGrid[y][x] = col;
-	    logsVersion = userPlacePixel(clients[ip], logsVersion);
+	    logsVersion = logPixelChange(x, y, col, logsVersion);
+	    userPlacePixel(clients[ip], logsVersion);
 
 	    console.log("Placed pixel at ("+x+", "+y+"), col "+col);
 	    clients[ip].encodeToFile();
 	    updateOptions();
 
-	    logsVersion = logPixelChange(x, y, col, logsVersion);
 	    fs.writeFileSync(files.grid, encodeMap(serverGrid));
 	    console.log("... done saving");
 	}
@@ -148,6 +149,7 @@ io.on("connection", socket => {
 	// execute code at certain time intervals, triggered here
 	const now = Date.now();
 	if (now - prevBroadcast > broadcastDelay) {
+	    console.log("broadcast")
 	    prevBroadcast = now;
 	    interval();
 	}
