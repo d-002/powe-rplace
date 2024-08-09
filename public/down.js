@@ -12,7 +12,8 @@ const options = {
     "starting": ["Server starting, please wait a few moments then refresh the page.", "", "/", true],
     "dupe-ip": ["A client with the same IP address has been detected. Please only join once per address.", "Back to homepage", "/", false],
     "timeout": ["You timed out. Please retry connecting.", "Back to homepage", "/", false],
-    "maintenance": ["The server is momentarily down for maintenance. Our apologies for the inconvenience.", "Retry", "/", false]
+    "maintenance": ["The server is momentarily down for maintenance. Our apologies for the inconvenience.", "Retry", "/", false],
+    "disconnect": ["You disconnected, or the server crashed. Our apologies for the inconvenience.", "Retry", "/", false]
 }
 
 let type = new URLSearchParams(window.location.search).get("reason") || "unknown";

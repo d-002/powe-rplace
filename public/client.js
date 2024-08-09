@@ -162,4 +162,6 @@ socket.on("disconnect", () => {
     socket.disconnect();
     socket.removeAllListeners();
     socket = null;
+
+    window.location.href="/down?reason=disconnect";
 });

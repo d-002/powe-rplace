@@ -19,8 +19,9 @@ function resizeCanvas(evt) {
 function drawPixel(x, y, col) {
     localGrid[y][x] = col;
     ctx.fillStyle = colors[col];
-    const _x = (x+options.x)*scale*options.zoom, _y = (y+options.y)*scale*options.zoom;
-    ctx.fillRect(_x, _y, scale-1, scale-1);
+    const size = scale*options.zoom;
+    const _x = (x+options.x)*size, _y = (y+options.y)*size;
+    ctx.fillRect(_x, _y, size-1, size-1);
 }
 
 function updateAllCanvas() {

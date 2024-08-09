@@ -35,25 +35,24 @@ powerups:
 - pre-place (must have window open)
 Only store relevant information in users files (pixels placed...) and parse privileges with powerups file
 
-TODO (doing now):
-button to reset position
-button to refresh map manually, timeout
-
 TODO:
-- mobile version (when width < height, updated on screen resize?)
-- handle server stops (different script redirect)
-- less file writes: options, user data, map file
-- timeout for manual map refresh button
-- add changelog etc popup
-- login support to sync data from ip, implement passkey system in local storage
 - landing page
-- display currently active users
-- changelog popup
-- use binary data in files
-- gpu acceleration
 - privacy policy
-- ddos protection / ip ban in admin?
+- colors pickup
+- settings
+- button to reset position
+- button to refresh map manually, timeout
+- show or hide borders
+- movement and zoom system
+- better info system (queue, fadeout, default text (countdown))
+- less file writes: options, user data, map file
+- mobile version (when width < height, updated on screen resize (with timeout)?)
+- movement animations
+- changelog popup
+- login support to sync data from ip, implement passkey system in local storage
+- ddos protection / ip ban in admin
+- display currently active users
+- gpu acceleration
 - show and record graph of downtime
 - user data system: create account, or checksum in localstorage for connection by ip
-- option to refresh the map client-side (help)
 - send email / admin logs on error
