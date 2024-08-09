@@ -35,7 +35,13 @@ powerups:
 - pre-place (must have window open)
 Only store relevant information in users files (pixels placed...) and parse privileges with powerups file
 
+movement system:
+chunk system: depending on the zoom, chunks of data are stored in uint8 buffers, and then blitted onto the screen
+on zoom change, existing chunks can be displayed while the new ones generate: every time a chunk is generated, all the previous chunks check if they are covered, and then they are removed from the chunks array
+on pixels update, only the relevant pixels are updated in the corresponding chunks, which are in turn blitted
+
 TODO:
+- movement and zoom system
 - landing page
 - privacy policy
 - colors pickup
@@ -43,7 +49,6 @@ TODO:
 - button to reset position
 - button to refresh map manually, timeout
 - show or hide borders
-- movement and zoom system
 - better info system (queue, fadeout, default text (countdown))
 - less file writes: options, user data, map file
 - mobile version (when width < height, updated on screen resize (with timeout)?)

@@ -2,18 +2,20 @@ import { animate } from "./animated-bg.js";
 
 let startTime;
 let interval;
-let link;
+let title, link;
 
 let timer = 10000;
 
-// error name: [info, link content, link address, initiate countdown (will override link content)]
+// error name: [title, subtitle, info, initiate countdown]
 const options = {
-    "unknown": ["Unknown error.", "Back to homepage", "/", false],
-    "starting": ["Server starting, please wait a few moments then refresh the page.", "", "/", true],
-    "dupe-ip": ["A client with the same IP address has been detected. Please only join once per address.", "Back to homepage", "/", false],
-    "timeout": ["You timed out. Please retry connecting.", "Back to homepage", "/", false],
-    "maintenance": ["The server is momentarily down for maintenance. Our apologies for the inconvenience.", "Retry", "/", false],
-    "disconnect": ["You disconnected, or the server crashed. Our apologies for the inconvenience.", "Retry", "/", false]
+    "unknown": ["Oops.", "", "Unknown error.", 0],
+    "starting": ["500", "Internal Server Error", "Server starting, please wait a few moments then refresh the page.", 10000],
+    "dupe-ip": ["501", "Not Implemented", "A client with the same IP address has been detected. Please only join once per address.", 0],
+    "timeout": ["408", "Request Timeout", "You timed out. Please retry connecting.", 0],
+    "disconnect": ["408", "Request Timeout", "Your connection with the server has been interrupted without warning. Our apologies for the inconvenience.", 0],
+    "maintenance": ["503", "Service Unavailable", "The server is momentarily down for maintenance. Our apologies for the inconvenience.", 30000],
+    "404": ["404", "Not Found", "The requested resource has not been found.", 0],
+    "403": ["403", "Forbidden", "You are not authorized to view this resource.", 0]
 }
 
 let type = new URLSearchParams(window.location.search).get("reason") || "unknown";
@@ -37,9 +39,13 @@ function update() {
 }
 
 window.onload = () => {
-    const [info, linkContent, linkAddr, countdown] = options[type];
-    document.getElementById("info").innerHTML = info;
-    link = document.getElementById("link");
+    const [title, subtitle, info, countdown] = options[type];
+    timer = countdown;
+    const id = i => document.getElementById(i);
+    id("info").innerHTML = info;
+    id("title").innerHTML = title;
+    id("subtitle").innerHTML = subtitle;
+    link = id("link");
 
     if (countdown) {
         startTime = Date.now();
@@ -47,8 +53,8 @@ window.onload = () => {
         interval = window.setInterval(update, 100);
     }
     else {
-        link.innerHTML = linkContent;
-        link.href = linkAddr;
+        link.innerHTML = "Back to homepage";
+        link.href = "/";
     }
 
     animate(window, document.getElementById("canvas-bg"));

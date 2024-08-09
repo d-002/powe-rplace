@@ -16,7 +16,7 @@ let timeoutDelay = 10000;
 let maintenanceTime = 0;
 let interval;
 
-let hashPixel = (x, y, col) => (x << col) + (y*123 << col+10) & 0xffff;
+let hashPixel = (x, y, col) => x+"."+y+"."+col;
 
 // WARNING: this object is only used to get a copy of the privileges, things like socket, version, ip are not defined
 let user;

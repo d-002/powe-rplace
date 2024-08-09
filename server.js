@@ -19,6 +19,7 @@ const app = express();
 const http = require("http");
 const fs = require("fs");
 const server = http.createServer(app);
+const helmet = require('helmet');
 
 const { Server } = require("socket.io");
 const io = new Server(server);
@@ -36,6 +37,14 @@ initAccounts(fs, files, dirs);
 initMap(fs, files, dirs);
 
 app.use(express.static(__dirname+"/public"));
+/*app.use(helmet());
+app.use(function(req, res, next) {
+    if (req.url == "/" || req.url == "/down" || req.url.startsWith("/down?")) next();
+    else {
+        res.status(404);
+        res.redirect("/down?reason=404")
+    }
+});*/
 
 let ready = false; // display loading page while not ready
 let maintenance;
@@ -131,6 +140,8 @@ io.on("connection", socket => {
     clients[ip] = user;
     user.socket = socket;
     console.log("New connection from "+ip);
+
+    socket.on("error", err => console.error("Error in socket: "+err));
 
     socket.on("placePixel", message => {
         // parse request, check if correct
