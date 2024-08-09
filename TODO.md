@@ -41,6 +41,7 @@ on zoom change, existing chunks can be displayed while the new ones generate: ev
 on pixels update, only the relevant pixels are updated in the corresponding chunks, which are in turn blitted
 
 TODO:
+- fix errors with animated background
 - movement and zoom system
 - landing page
 - privacy policy
@@ -48,7 +49,6 @@ TODO:
 - settings
 - button to reset position
 - button to refresh map manually, timeout
-- fix errors with animated background
 - auto send map again if checksum is different
 - show or hide borders
 - better info system (queue, fadeout, default text (countdown))

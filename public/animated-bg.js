@@ -58,7 +58,18 @@ class Trail extends Point {
     }
 
     update(f) {
-        this.x = mod(this.x + this.dx, Math.ceil(W/size));
+        const modX = Math.ceil(W/size);
+        this.x += this.dx;
+        let off = false;
+        if (this.x < -2) {
+            off = true;
+            this.x = modX+2;
+        }
+        else if (this.x >= modX+2) {
+            off = true;
+            this.x = -2;
+        }
+        if (off) this.y = parseInt(Math.random()*H/size); // change height when offscreen
         this.y = this.y%(Math.ceil(H/size)); // in case the screen gets resized
 
         // reached a new tile: edit the trail
@@ -122,9 +133,13 @@ function _animate() {
             const a2 = alpha(1 - i/trail.length);
             const [x, _y, col] = trail.trail[i];
 
+            if (x < 0 || x >= canvMult.length) continue;
+
             let j = 0;
             for (let y = _y-trail.height; y <= _y+trail.height; y++) {
                 const offset = trail.offset[j];
+
+                if (y < 0 || y >= canvMult[0].length) continue;
 
                 colFromPos(x, y);
                 ctx.globalAlpha = a1*a2*canvMult[x][y];
