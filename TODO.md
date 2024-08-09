@@ -48,10 +48,13 @@ TODO:
 - settings
 - button to reset position
 - button to refresh map manually, timeout
+- fix errors with animated background
+- auto send map again if checksum is different
 - show or hide borders
 - better info system (queue, fadeout, default text (countdown))
 - less file writes: options, user data, map file
 - mobile version (when width < height, updated on screen resize (with timeout)?)
+- animated background refresh size less frequently, randomize y when out of bounds, make sure no disappear off the edges
 - movement animations
 - changelog popup
 - login support to sync data from ip, implement passkey system in local storage

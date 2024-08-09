@@ -38,7 +38,7 @@ function decodeMap(data, suppressErrors) {
     if (pixels.length != H) {
         if (!suppressErrors) throw new Error("Failed to load canvas, length "+pixels.length);
 
-        console.error("White canvas, failed to load, length "+pixels.length);
+        console.error("Setting grid to white canvas since failed to load, data length "+pixels.length);
 
         // white canvas if failed to load
         pixels = new Array(H).fill(null);
@@ -104,7 +104,7 @@ function makeClientUpdate(clientVersion, serverVersion, serverGrid) {
 function applyUpdate(message, updateFunction, setGrid) {
     if (message.length == 0) {
         console.log("Already up-to-date");
-        return;
+        return 0;
     }
 
     if (message[0].charCodeAt(0) == 0) {
@@ -127,6 +127,8 @@ function applyUpdate(message, updateFunction, setGrid) {
         setGrid(decodeMap(message.substring(1)));
         console.log("Caught up, refreshed entire map");
     }
+
+    return 1;
 }
 
 // module is manually set to null on the client to avoid errors

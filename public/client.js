@@ -81,17 +81,25 @@ function clientScriptUpdate() {
 }
 
 socket.on("mapUpdate", data => {
+    let changes;
     try {
-        applyUpdate(data, drawPixel, grid => { localGrid = grid });
+        changes = applyUpdate(data, drawPixel, grid => { localGrid = grid });
     }
     catch (err) {
         console.error("Error loading the map: "+err);
         return;
     }
 
-    state.mapOk = true;
-    updateLocalStorage();
-    updateAllCanvas();
+    // TODO change this, checksum checks go here
+    if (!state.mapOk && !changes) {
+        console.warn("Up to date with server, but wrong map, refreshing");
+        socket.emit("help");
+    }
+    else {
+        state.mapOk = true;
+        updateLocalStorage();
+        updateAllCanvas();
+    }
 });
 
 socket.on("pixelFeedback", data => {
