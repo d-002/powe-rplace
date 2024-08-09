@@ -9,17 +9,21 @@ function initAccounts(_fs, _files, _dirs) {
 // users and powerups settings
 const privileges = {
     "colors": [8, 16, 24],
-    "cooldown": [0]
+    "cooldown": [10000],
+
+    // other options, not included in User objects, but exported into other scripts as well
+    "helpCooldown": 10000
 }
 
 class User {
-    constructor(ip, version, lastPixel, nPlaced) {
+    constructor(ip, version, lastPixel, lastHelp, nPlaced) {
         // this.socket can be undefined if the object is only used as a container for its settings
         this.socket = undefined;
 
         this.ip = ip;
         this.version = version;
         this.lastPixel = lastPixel;
+        this.lastHelp = lastHelp;
 
         // build privileges from stats
         this.nColors = privileges.colors[Math.min(parseInt(nPlaced/100), 2)];
@@ -35,6 +39,7 @@ class User {
         let nColors = privileges.colors[0];
         let version = 0;
         let lastPixel = 0;
+        let lastHelp = 0;
         let pixelCooldown = privileges.cooldown[0];
 
         try {
@@ -42,18 +47,19 @@ class User {
             nColors = parseInt(lines[0]);
             version = Number(lines[1]);
             lastPixel = Number(lines[2]);
-            pixelCooldown = parseInt(lines[3]);
+            lastHelp = Number(lines[3]);
+            pixelCooldown = parseInt(lines[4]);
         }
         catch (err) {
             console.error("Error loading user file: "+ip);
             console.error(err);
         }
 
-        return new User(ip, nColors, version, lastPixel, pixelCooldown);
+        return new User(ip, nColors, version, lastPixel, lastHelp, pixelCooldown);
     }
 
     encode() {
-        return this.nColors+"\n"+this.version+"\n"+this.lastPixel+"\n"+this.pixelCooldown;
+        return this.nColors+"\n"+this.version+"\n"+this.lastPixel+"\n"+this.lastHelp+"\n"+this.pixelCooldown;
     }
 
     encodeToFile() {

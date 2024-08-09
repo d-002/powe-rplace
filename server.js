@@ -29,7 +29,7 @@ let clients = {}; // ip: User object
 
 // execute certain actions once in a while, triggered when someone places a pixel
 let prevBroadcast = Date.now();
-const broadcastDelay = 2000;
+const broadcastDelay = 60000;
 
 // init modules
 initAccounts(fs, files, dirs);
@@ -122,7 +122,7 @@ fs.readdirSync(dirs.accounts).forEach(ip => {
 
 io.on("connection", socket => {
     let ip = (socket.handshake.headers["x-forwarded-for"] || socket.conn.remoteAddress).split(",")[0].split(":").slice(-1)[0];
-    ip += "-"+parseInt(Date.now()/1000)%1000;
+    ip += "-"+Date.now()%1000;
 
     // check if a client with this ip already connected
     let ok = true;
@@ -152,6 +152,8 @@ io.on("connection", socket => {
 	else ok = false;
 	if (isNaN(x) || x < 0 || x >= W) ok = false;
 	else if (isNaN(y) || y < 0 || y >= H) ok = false;
+	else if (isNaN(col) || isNaN(hash)) ok = false;
+	if (isNaN(hash)) hash = 0; // to make sure the user can read a 0 in the first bit to indicate the message was wrong
 
 	let cooldown;
 	[inCooldown, cooldown] = isInCooldown(inCooldown, clients[ip]);
@@ -190,7 +192,11 @@ io.on("connection", socket => {
 
     socket.on("help", _ => {
 	// triggered when the map in the user's local storage doesn't exist
-	updateClientIp(ip, null);
+	if (Date.now()-clients[ip].lastHelp > privileges.helpCooldown) {
+	    clients[ip].lastHelp = Date.now();
+            updateClientIp(ip, null);
+	}
+	else socket.emit("noHelp");
     });
 
     socket.on("disconnect", () => {
