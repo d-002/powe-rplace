@@ -68,9 +68,7 @@ function logPixelChange(x, y, col, version) {
     x = String.fromCharCode(x>>8)+String.fromCharCode(x&255);
     y = String.fromCharCode(y>>8)+String.fromCharCode(y&255);
     col = String.fromCharCode(col);
-    fs.appendFileSync(getFile(++version), x+y+col);
-
-    return version;
+    fs.appendFileSync(getFile(version), x+y+col);
 }
 
 function makeClientUpdate(clientVersion, serverVersion, serverGrid) {

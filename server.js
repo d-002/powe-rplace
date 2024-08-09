@@ -1,4 +1,4 @@
-const { initAccounts, privileges, User, isInCooldown, userPlacePixel } = require(__dirname+"/public/accounts.js");
+const { initAccounts, privileges, User } = require(__dirname+"/public/accounts.js");
 const { colors, W, H, initMap, decodeMap, encodeMap, logPixelChange, makeClientUpdate, applyUpdate } = require(__dirname+"/public/map.js");
 
 // files
@@ -112,29 +112,24 @@ if (logsVersion == 0) {
     fs.writeFileSync(files.grid, encodeMap(serverGrid))
 }
 
-console.log("Initial users in cooldown read...");
-let inCooldown = [];
-const now = Date.now();
-fs.readdirSync(dirs.accounts).forEach(ip => {
-    const user = User.decodeFile(ip);
-    if (now-user.lastPixel < user.pixelCooldown || user.lastPixel <= 0) inCooldown.push(user);
-});
-
 io.on("connection", socket => {
     let ip = (socket.handshake.headers["x-forwarded-for"] || socket.conn.remoteAddress).split(",")[0].split(":").slice(-1)[0];
     ip += "-"+Date.now()%1000;
 
     // check if a client with this ip already connected
     let ok = true;
-    Object.keys(clients).forEach(ip2 => { if (ip == ip2) ok = false; });
+    Object.keys(clients).forEach(ip2 => {
+        if (ip == ip2) ok = false;
+    });
     if (!ok) {
-    console.error("Duplicate connection from "+ip);
-    socket.emit("duplicateIp");
-    return;
+        console.error("Duplicate connection from "+ip);
+        socket.emit("duplicateIp");
+        return;
     }
 
-    clients[ip] = User.decodeFile(ip);
-    clients[ip].socket = socket;
+    const user = User.decodeFile(ip)
+    clients[ip] = user;
+    user.socket = socket;
     console.log("New connection from "+ip);
 
     socket.on("placePixel", message => {
@@ -155,21 +150,20 @@ io.on("connection", socket => {
         else if (isNaN(col) || isNaN(hash)) ok = false;
         if (isNaN(hash)) hash = 0; // to make sure the user can read a 0 in the first bit to indicate the message was wrong
 
-        let cooldown;
-        [inCooldown, cooldown] = isInCooldown(inCooldown, clients[ip]);
-        ok &= !cooldown;
+        ok &= Date.now()-user.lastPixel >= user.pixelCooldown;
 
         // tell the user if the placement was authorized
         socket.emit("pixelFeedback", (hash << 8) + (ok ? 0 : 1));
         if (ok) {
             serverGrid[y][x] = col;
-            logsVersion = logPixelChange(x, y, col, logsVersion);
+            logPixelChange(x, y, col, logsVersion);
             fs.writeFileSync(files.grid, encodeMap(serverGrid));
 
-            // update the current user (otherwise will not be updated, since its version will change)
-            updateClientIp(ip, clients[ip].version, logsVersion-1);
-
-            userPlacePixel(clients[ip], logsVersion);
+            user.lastPixel = Date.now();
+            user.nPlaced++;
+            // update the current user (tell about changes that happened since last broadcast)
+            updateClientIp(ip, user.version);
+            user.version = ++logsVersion;
 
             console.log("Placed pixel at ("+x+", "+y+"), col "+col);
             updateOptions();
@@ -180,20 +174,20 @@ io.on("connection", socket => {
         if (now - prevBroadcast > broadcastDelay) {
             console.log("Broadcast")
             prevBroadcast = now;
-            interval(clients[ip]);
+            interval(user);
         }
     });
 
     socket.on("initial", _ => {
         // triggered on init, should be fine afterwards, forces a "normal" update of the map
-        updateClientIp(ip, clients[ip].version);
-        socket.emit("userUpdate", clients[ip].encode());
+        updateClientIp(ip, user.version);
+        socket.emit("userUpdate", user.encode());
     });
 
     socket.on("help", _ => {
         // triggered when the map in the user's local storage doesn't exist
-        if (Date.now()-clients[ip].lastHelp > privileges.helpCooldown) {
-            clients[ip].lastHelp = Date.now();
+        if (Date.now()-user.lastHelp > privileges.helpCooldown) {
+            user.lastHelp = Date.now();
             updateClientIp(ip, null);
         }
         else socket.emit("noHelp");
@@ -201,16 +195,16 @@ io.on("connection", socket => {
 
     socket.on("disconnect", () => {
         console.log("Disconnection from "+ip);
-    socket.disconnect();
-    socket.removeAllListeners();
-    socket = null;
-    delete clients[ip];
+        socket.disconnect();
+        socket.removeAllListeners();
+        socket = null;
+        delete clients[ip];
     });
 });
 
-function updateClientIp(ip, clientVersion, serverVersion=logsVersion) {
+function updateClientIp(ip, clientVersion) {
     const client = clients[ip];
-    client.socket.emit("mapUpdate", makeClientUpdate(clientVersion, serverVersion, serverGrid));
+    client.socket.emit("mapUpdate", makeClientUpdate(clientVersion, logsVersion, serverGrid));
     client.version = logsVersion;
     client.encodeToFile();
 }

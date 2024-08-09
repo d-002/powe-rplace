@@ -25,6 +25,8 @@ class User {
         this.lastPixel = lastPixel;
         this.lastHelp = lastHelp;
 
+        this.nPlaced = nPlaced;
+
         // build privileges from stats
         this.nColors = privileges.colors[Math.min(parseInt(nPlaced/100), 2)];
         this.pixelCooldown = privileges.cooldown[0];
@@ -40,7 +42,7 @@ class User {
         let version = 0;
         let lastPixel = 0;
         let lastHelp = 0;
-        let pixelCooldown = privileges.cooldown[0];
+        let nPlaced = privileges.cooldown[0];
 
         try {
             const lines = data.split("\n");
@@ -48,18 +50,18 @@ class User {
             version = Number(lines[1]);
             lastPixel = Number(lines[2]);
             lastHelp = Number(lines[3]);
-            pixelCooldown = parseInt(lines[4]);
+            nPlaced = parseInt(lines[4]);
         }
         catch (err) {
             console.error("Error loading user file: "+ip);
             console.error(err);
         }
 
-        return new User(ip, nColors, version, lastPixel, lastHelp, pixelCooldown);
+        return new User(ip, version, lastPixel, lastHelp, nPlaced);
     }
 
     encode() {
-        return this.nColors+"\n"+this.version+"\n"+this.lastPixel+"\n"+this.lastHelp+"\n"+this.pixelCooldown;
+        return this.nColors+"\n"+this.version+"\n"+this.lastPixel+"\n"+this.lastHelp+"\n"+this.nPlaced;
     }
 
     encodeToFile() {
@@ -67,27 +69,4 @@ class User {
     }
 }
 
-function isInCooldown(array, target) {
-    // check a list for users in cooldown, and remove them if they are not
-    // also check if a specific user is in cooldown
-    
-    let newArray = [];
-    let result = false;
-    array.forEach(user => {
-        if (Date.now()-prev < user.pixelCooldown || prev <= 0) {
-            if (user.ip == target.ip) result = true;
-            newArray.push(user);
-        }
-    });
-
-    return [array, result];
-}
-
-function userPlacePixel(user, version) {
-    user.lastPixel = Date.now();
-    user.version = version;
-
-    user.encodeToFile();
-}
-
-if (module != null) module.exports = { initAccounts, privileges, User, isInCooldown, userPlacePixel };
+if (module != null) module.exports = { initAccounts, privileges, User };
