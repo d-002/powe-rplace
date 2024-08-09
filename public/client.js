@@ -1,9 +1,5 @@
 let socket = io();
 
-// options loaded from user save
-let zoom = 1, pos = [0, 0], currentColor = 1;
-let size = 50;
-
 // pixels pre-placed locally, waiting for server to accept or overrule
 let placedLocally = {}; // hash: [x, y, prev col, timestamp]
 
@@ -11,7 +7,8 @@ let localGrid = [];
 
 let state = {
     "mapOk": false, // if the map is in sync with the server
-    "userOk": false // if the user has been loaded
+    "userOk": false, // if the user has been loaded
+    "optionsOk": false
 };
 let stateOk = () => !Object.values(state).includes(false);
 
@@ -24,22 +21,29 @@ let hashPixel = (x, y, col) => (x << col) + (y*123 << col+10) & 0xffff;
 // WARNING: this object is only used to get a copy of the privileges, things like socket, version, ip are not defined
 let user;
 
+let options = {
+    x: 0,
+    y: 0,
+    zoom: 1,
+    color: 0
+};
+
 function click(evt) {
     if (!stateOk()) {
         showInfo("Some data is still loading, you can't place a pixel right now.");
         return;
     }
 
-    const x = parseInt(evt.x/size);
-    const y = parseInt(evt.y/size);
-    const hash = hashPixel(x, y, currentColor);
+    const x = parseInt((evt.x-window.scrollX)/scale/options.zoom - options.x);
+    const y = parseInt((evt.y-window.scrollY)/scale/options.zoom - options.y);
+    const hash = hashPixel(x, y, options.color);
     if (x < 0 || x >= W || y < 0 || y >= H) return;
 
     placedLocally[hash] = [x, y, localGrid[y][x], Date.now()];
-    drawPixel(x, y, currentColor);
+    drawPixel(x, y, options.color);
     updateLocalStorage();
 
-    socket.emit("placePixel", x+"."+y+"."+currentColor+"."+hash);
+    socket.emit("placePixel", x+"."+y+"."+options.color+"."+hash);
 }
 
 function clientScriptUpdate() {
@@ -84,32 +88,59 @@ socket.on("pixelFeedback", data => {
 
 socket.on("userUpdate", data => {
     user = User.decodeString(undefined, data);
+    options.color = (options.color%user.nColors+user.nColors) % user.nColors;
 
     state.userOk = true;
 });
 
 function updateLocalStorage() {
     localStorage.setItem("map", encodeMap(localGrid));
+
+    localStorage.setItem("options", options.x+" "+options.y+" "+options.zoom+" "+options.color);
 }
 
 function loadLocalStorage() {
-    let item = localStorage.getItem("map");
-    if (item == null) console.warn("No map found in local storage");
+    // load map
+    let map = localStorage.getItem("map");
+    let error = false;
+    if (map == null) console.log("No map found in local storage");
     else {
         try {
-            localGrid = decodeMap(item, false);
-            return;
+            localGrid = decodeMap(map, false);
+
+            state.mapOk = true;
         }
         catch {
             console.warn("Error loading map from local storage");
+            error = true;
         }
     }
 
-    // loading the map failed
-    state.mapOk = false;
-    socket.emit("help");
+    if (error) {
+        // loading the map failed
+        state.mapOk = false;
+        socket.emit("help");
 
-    showInfo("Failed to read map locally, asking for refresh...");
+        showInfo("Failed to read map locally, asking for refresh...");
+    }
+
+    // load options
+    let data = localStorage.getItem("options");
+    if (data == null) console.log("No options found in local storage");
+    else try {
+        data = data.split(" ");
+        options.x = Number(data[0]) || 0;
+        options.y = Number(data[1]) || 0;
+        options.zoom = Number(data[2]) || 1;
+        options.color = parseInt(data[3]) || 0;
+        if (options.zoom < minZoom) options.zoom = minZoom;
+        if (options.zoom > maxZoom) options.zoom = maxZoom;
+    }
+    catch(err) {
+        showInfo("Failed to parse options, settings may be reset: "+err);
+    }
+
+    state.optionsOk = true;
 }
 
 socket.on("noHelp", () => {
@@ -125,4 +156,10 @@ socket.on("maintenance", data => {
     maintenanceTime = Number(data);
     if (isNaN(maintenanceTime)) maintenanceTime = Date.now()+60000;
     console.log("Maintenance planned, starting in "+Math.ceil((maintenanceTime-Date.now())/1000)+"s");
+});
+
+socket.on("disconnect", () => {
+    socket.disconnect();
+    socket.removeAllListeners();
+    socket = null;
 });

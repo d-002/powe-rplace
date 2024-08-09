@@ -43,8 +43,8 @@ let maintenance;
 // landing page
 app.get("/", (req, res) => {
     if (maintenance) {
-	res.redirect("/down?reason=maintenance");
-	checkMaintenance();
+    res.redirect("/down?reason=maintenance");
+    checkMaintenance();
     }
     else if (ready) res.sendFile(__dirname+"/index.html");
     else res.redirect("/down?reason=starting");
@@ -70,7 +70,7 @@ Array.from(Object.keys(dirs)).forEach(name => {
 
     if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir);
-	console.log("Created dir "+dir);
+    console.log("Created dir "+dir);
     }
 });
 
@@ -80,7 +80,7 @@ Array.from(Object.keys(files)).forEach(name => {
 
     if (!fs.existsSync(file)) {
         fs.writeFileSync(file, '');
-	console.log('Created file '+file);
+    console.log('Created file '+file);
     }
 });
 
@@ -128,9 +128,9 @@ io.on("connection", socket => {
     let ok = true;
     Object.keys(clients).forEach(ip2 => { if (ip == ip2) ok = false; });
     if (!ok) {
-	console.error("Duplicate connection from "+ip);
-	socket.emit("duplicateIp");
-	return;
+    console.error("Duplicate connection from "+ip);
+    socket.emit("duplicateIp");
+    return;
     }
 
     clients[ip] = User.decodeFile(ip);
@@ -138,70 +138,73 @@ io.on("connection", socket => {
     console.log("New connection from "+ip);
 
     socket.on("placePixel", message => {
-	// parse request, check if correct
-	let ok = true;
-	let x, y, col, hash;
+        // parse request, check if correct
+        let ok = true;
+        let x, y, col, hash;
 
-	let s = message.split(".");
-	if (s.length == 4) {
-	    x = parseInt(s[0]);
-	    y = parseInt(s[1]);
-	    col = parseInt(s[2]);
-	    hash = parseInt(s[3]);
-	}
-	else ok = false;
-	if (isNaN(x) || x < 0 || x >= W) ok = false;
-	else if (isNaN(y) || y < 0 || y >= H) ok = false;
-	else if (isNaN(col) || isNaN(hash)) ok = false;
-	if (isNaN(hash)) hash = 0; // to make sure the user can read a 0 in the first bit to indicate the message was wrong
+        let s = message.split(".");
+        if (s.length == 4) {
+            x = parseInt(s[0]);
+            y = parseInt(s[1]);
+            col = parseInt(s[2]);
+            hash = parseInt(s[3]);
+        }
+        else ok = false;
+        if (isNaN(x) || x < 0 || x >= W) ok = false;
+        else if (isNaN(y) || y < 0 || y >= H) ok = false;
+        else if (isNaN(col) || isNaN(hash)) ok = false;
+        if (isNaN(hash)) hash = 0; // to make sure the user can read a 0 in the first bit to indicate the message was wrong
 
-	let cooldown;
-	[inCooldown, cooldown] = isInCooldown(inCooldown, clients[ip]);
-	ok &= !cooldown;
+        let cooldown;
+        [inCooldown, cooldown] = isInCooldown(inCooldown, clients[ip]);
+        ok &= !cooldown;
 
-	// tell the user if the placement was authorized
-	socket.emit("pixelFeedback", (hash << 8) + (ok ? 0 : 1));
-	if (ok)	{
-	    serverGrid[y][x] = col;
-	    logsVersion = logPixelChange(x, y, col, logsVersion);
-	    fs.writeFileSync(files.grid, encodeMap(serverGrid));
+        // tell the user if the placement was authorized
+        socket.emit("pixelFeedback", (hash << 8) + (ok ? 0 : 1));
+        if (ok) {
+            serverGrid[y][x] = col;
+            logsVersion = logPixelChange(x, y, col, logsVersion);
+            fs.writeFileSync(files.grid, encodeMap(serverGrid));
 
-	    // update the current user (otherwise will not be updated, since its version will change)
-	    updateClientIp(ip, clients[ip].version, logsVersion-1);
+            // update the current user (otherwise will not be updated, since its version will change)
+            updateClientIp(ip, clients[ip].version, logsVersion-1);
 
-	    userPlacePixel(clients[ip], logsVersion);
+            userPlacePixel(clients[ip], logsVersion);
 
-	    console.log("Placed pixel at ("+x+", "+y+"), col "+col);
-	    updateOptions();
-	}
+            console.log("Placed pixel at ("+x+", "+y+"), col "+col);
+            updateOptions();
+        }
 
-	// execute code at certain time intervals, triggered here
-	const now = Date.now();
-	if (now - prevBroadcast > broadcastDelay) {
-	    console.log("Broadcast")
-	    prevBroadcast = now;
-	    interval(clients[ip]);
-	}
+        // execute code at certain time intervals, triggered here
+        const now = Date.now();
+        if (now - prevBroadcast > broadcastDelay) {
+            console.log("Broadcast")
+            prevBroadcast = now;
+            interval(clients[ip]);
+        }
     });
 
     socket.on("initial", _ => {
-	// triggered on init, should be fine afterwards, forces a "normal" update of the map
+        // triggered on init, should be fine afterwards, forces a "normal" update of the map
         updateClientIp(ip, clients[ip].version);
-	socket.emit("userUpdate", clients[ip].encode());
+        socket.emit("userUpdate", clients[ip].encode());
     });
 
     socket.on("help", _ => {
-	// triggered when the map in the user's local storage doesn't exist
-	if (Date.now()-clients[ip].lastHelp > privileges.helpCooldown) {
-	    clients[ip].lastHelp = Date.now();
+        // triggered when the map in the user's local storage doesn't exist
+        if (Date.now()-clients[ip].lastHelp > privileges.helpCooldown) {
+            clients[ip].lastHelp = Date.now();
             updateClientIp(ip, null);
-	}
-	else socket.emit("noHelp");
+        }
+        else socket.emit("noHelp");
     });
 
     socket.on("disconnect", () => {
         console.log("Disconnection from "+ip);
-	delete clients[ip];
+    socket.disconnect();
+    socket.removeAllListeners();
+    socket = null;
+    delete clients[ip];
     });
 });
 
@@ -214,8 +217,8 @@ function updateClientIp(ip, clientVersion, serverVersion=logsVersion) {
 
 function interval(ignore) {
     Object.values(clients).forEach(user => {
-	if (user == ignore) return;
-	updateClientIp(user.ip, user.version);
+        if (user == ignore) return;
+        updateClientIp(user.ip, user.version);
     });
 
     checkMaintenance();
@@ -224,13 +227,13 @@ function interval(ignore) {
 function checkMaintenance() {
     const value = Number(fs.readFileSync(files.maintenance));
     if (value != maintenance) {
-	maintenance = value;
-	console.log("Maintenance set to "+maintenance);
+        maintenance = value;
+        console.log("Maintenance set to "+maintenance);
 
-	// notify all clients
-	if (maintenance) Object.values(clients).forEach(user => user.socket.emit("maintenance", maintenance));
+        // notify all clients
+        if (maintenance) Object.values(clients).forEach(user => user.socket.emit("maintenance", maintenance));
 
-	return true;
+        return true;
     }
 
     return false;
@@ -238,8 +241,8 @@ function checkMaintenance() {
 
 // error handling
 process.on("uncaughtException", function (err) {
-	console.log("PREVENTED SERVER CRASH, logging...");
-	console.error(err);
+    console.log("PREVENTED SERVER CRASH, logging...");
+    console.error(err);
 });
 
 server.listen(port, () => console.log("Listening on port "+port));

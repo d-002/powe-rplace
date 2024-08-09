@@ -36,7 +36,8 @@ powerups:
 Only store relevant information in users files (pixels placed...) and parse privileges with powerups file
 
 TODO (doing now):
-get options from local storage save
+fix initial always refreshing everything
+button to reset position
 fix memory leak
 button to refresh map manually, timeout
 

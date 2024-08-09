@@ -5,10 +5,10 @@ def format(file):
     with open(file, encoding='utf-8') as f:
         data = f.read()
 
-    edited = data.replace('\t', '    ')
+    edited = data.replace('\t', ' '*8)
 
     with open(file, 'w', encoding='utf-8') as f:
-        f.write(edited.replace('\t', '    '))
+        f.write(edited)
     print('Edited', file)
 
 def edit_files(path):

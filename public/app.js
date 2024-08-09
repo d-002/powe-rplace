@@ -19,8 +19,8 @@ function resizeCanvas(evt) {
 function drawPixel(x, y, col) {
     localGrid[y][x] = col;
     ctx.fillStyle = colors[col];
-    const _x = x*size, _y = y*size;
-    ctx.fillRect(_x, _y, size-1, size-1);
+    const _x = (x+options.x)*scale*options.zoom, _y = (y+options.y)*scale*options.zoom;
+    ctx.fillRect(_x, _y, scale-1, scale-1);
 }
 
 function updateAllCanvas() {
@@ -53,7 +53,7 @@ window.onload = () => {
     dom.canvas.addEventListener("click", click);
     window.addEventListener("resize", resizeCanvas);
 
-    document.addEventListener("keydown", () => { currentColor = (currentColor+1) % colors.length });
+    document.addEventListener("keydown", () => { options.color = (options.color+1) % colors.length });
 
     interval = window.setInterval(update, 100);
 

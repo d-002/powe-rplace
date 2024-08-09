@@ -10,6 +10,10 @@ const colors = ['#fff', '#000', '#f00', '#00f', '#f80', '#080', '#ff0', '#a0c', 
 const W = 16;
 const H = 16;
 
+const minZoom = 0.1;
+const maxZoom = 10;
+const scale = 20;
+
 const versionFileSize = 1024;
 
 // map packet decoding/encoding
