@@ -1,38 +1,38 @@
 @font-face {
-	font-family: "pixelify";
-	src: url("https://d-002.github.io/other-fonts/pixelify.ttf");
+    font-family: "pixelify";
+    src: url("https://d-002.github.io/other-fonts/pixelify.ttf");
 }
 
 @font-face {
-	font-family: "stifly";
-	src: url("https://d-002.github.io/other-fonts/stifly.ttf");
+    font-family: "stifly";
+    src: url("https://d-002.github.io/other-fonts/stifly.ttf");
 }
 
 body, html {
-	margin: 0;
-	padding: 0;
-	width: 100%;
-	height: 100%;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
 }
 
 body {
-	font-family: "pixelify", sans-serif;
-	font-weight: bold;
-	font-size: 24px;
+    font-family: "pixelify", sans-serif;
+    font-weight: bold;
+    font-size: 24px;
 
-	background-color: var(--bg1);
-	color: var(--fg1);
+    background-color: var(--bg1);
+    color: var(--fg1);
 
-	--bg1: #f7f7f7;
-	--fg1: #171717;
-	--link1: #186bd8;
+    --bg1: #f7f7f7;
+    --fg1: #171717;
+    --link1: #186bd8;
 }
 
 a {
-	text-decoration: none;
-	color: var(--link1);
+    text-decoration: none;
+    color: var(--link1);
 }
 
 a:not(.nohref):hover {
-	text-decoration: underline;
+    text-decoration: underline;
 }

@@ -19,8 +19,8 @@ app.get("/down", (req, res) => {
 
 // error handling
 process.on("uncaughtException", function (err) {
-	console.log("PREVENTED SERVER CRASH, logging...");
-	console.error(err);
+    console.log("PREVENTED SERVER CRASH, logging...");
+    console.error(err);
 });
 
 server.listen(port, () => console.log("Listening on port "+port));

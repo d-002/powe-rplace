@@ -13,14 +13,13 @@ new clients and outdated clients (with an update process requiring to read multi
 downtime handling:
 down page, using get parameters to make for different pages: maintenance, server loading (redirected to when the server is starting)
 display a link to refresh the page, auto-refresh after 10s, show countdown
-show downtime list, graph, reasons for downtime [TODO]
+show downtime list, graph, reasons for downtime
 
 admin page:
 special page, not linked in the website, verification system needed [TODO]
 can set up maintenance: edit a file with the shutdown time, server reads this file every minute and notifies the current clients
 in the normal page, if the shutdown time is different than 0 and reached, the client refreshes the page (/!\ add some more time, like 10s, to make sure the backend is restarted in maintenance mode).
-On the backend, the server restarts when the time is reached, so most clients requests are ignored, also need to handle timeout when placing a pixel.
-No editing the package.json file, the server should execute a different script now knowing the server state to successfully redirect clients.
+Need to edit the package.json file after the pages are in maintenance, but it shouldn't be an issue since files already need to be edited.
 
 This way, editing regular files can be done in maintenance mode, and editing maintenance files can be done in normal mode.
 
@@ -34,11 +33,20 @@ powerups:
 - access more colors
 - place pixels faster
 - pre-place (must have window open)
+Only store relevant information in users files (pixels placed...) and parse privileges with powerups file
+
+TODO (doing now): change accounts.js access, read from file and string, use ranks and not color options etc, read those from account.js and map.js (review infos placements? new file?)
+fix version system
+map loading issues
+handle timeout and localStorage being wrongly updated
+button to refresh map manually, timeout
 
 TODO:
+- mobile version (when width < height, updated on screen resize?)
 - handle server stops (different script redirect)
 - less file writes: options, user data, map file
-- add message popup for when things change
+- timeout for manual map refresh button
+- add changelog etc popup
 - login support to sync data from ip, implement passkey system in local storage
 - landing page
 - display currently active users
@@ -46,3 +54,7 @@ TODO:
 - use binary data in files
 - gpu acceleration
 - privacy policy
+- ddos protection / ip ban in admin?
+- show and record graph of downtime
+- option to refresh the map client-side (help)
+- send email / admin logs on error

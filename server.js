@@ -1,16 +1,15 @@
-const { initAccounts, User, isInCooldown, userPlacePixel } = require(__dirname+"/accounts.js");
-const { colors, colorsLengths, W, H, initMap, decodeMap, encodeMap, logPixelChange, makeClientUpdate, applyUpdate } = require(__dirname+"/public/map.js");
+const { initAccounts, privileges, User, isInCooldown, userPlacePixel } = require(__dirname+"/public/accounts.js");
+const { colors, W, H, initMap, decodeMap, encodeMap, logPixelChange, makeClientUpdate, applyUpdate } = require(__dirname+"/public/map.js");
 
 // files
 const files = {
     "options": "/files/options.txt",
-    "inCooldown": "/files/inCooldown.csv",
     "grid": "/files/grid.csv",
     "maintenance": "/files/maintenance.txt"
 }
 const dirs = {
-    "logsFolder": "/files/logs/",
-    "accountsFolder": "/files/accounts/"
+    "logs": "/files/logs/",
+    "accounts": "/files/accounts/"
 }
 
 
@@ -30,7 +29,7 @@ let clients = {}; // ip: User object
 
 // execute certain actions once in a while, triggered when someone places a pixel
 let prevBroadcast = Date.now();
-const broadcastDelay = 10000;
+const broadcastDelay = 2000;
 
 // init modules
 initAccounts(fs, files, dirs);
@@ -106,16 +105,24 @@ function updateOptions() {
 updateOptions();
 
 console.log("Reading canvas array...");
-let serverGrid = decodeMap(String(fs.readFileSync(files.grid)));
+let serverGrid = decodeMap(String(fs.readFileSync(files.grid)), true);
 
 if (logsVersion == 0) {
     console.log("Writing initial grid to grid file");
     fs.writeFileSync(files.grid, encodeMap(serverGrid))
 }
 
+console.log("Initial users in cooldown read...");
+let inCooldown = [];
+const now = Date.now();
+fs.readdirSync(dirs.accounts).forEach(ip => {
+    const user = User.decodeFile(ip);
+    if (now-user.lastPixel < user.pixelCooldown || user.lastPixel <= 0) inCooldown.push(user);
+});
 
 io.on("connection", socket => {
-    let ip = (socket.handshake.headers['x-forwarded-for'] || socket.conn.remoteAddress).split(',')[0].split(":").slice(-1)[0];
+    let ip = (socket.handshake.headers["x-forwarded-for"] || socket.conn.remoteAddress).split(",")[0].split(":").slice(-1)[0];
+    ip += "-"+parseInt(Date.now()/1000)%1000;
 
     // check if a client with this ip already connected
     let ok = true;
@@ -126,18 +133,16 @@ io.on("connection", socket => {
 	return;
     }
 
-    clients[ip] = User.decodeFile(ip, colorsLengths[0], 2000);
+    clients[ip] = User.decodeFile(ip);
     clients[ip].socket = socket;
     console.log("New connection from "+ip);
-
-    updateClientIp(ip, clients[ip].version);
 
     socket.on("placePixel", message => {
 	// parse request, check if correct
 	let ok = true;
 	let x, y, col, hash;
 
-	let s = message.split(" ");
+	let s = message.split(".");
 	if (s.length == 4) {
 	    x = parseInt(s[0]);
 	    y = parseInt(s[1]);
@@ -148,29 +153,39 @@ io.on("connection", socket => {
 	if (isNaN(x) || x < 0 || x >= W) ok = false;
 	else if (isNaN(y) || y < 0 || y >= H) ok = false;
 
-	ok &= !isInCooldown(clients[ip]);
+	let cooldown;
+	[inCooldown, cooldown] = isInCooldown(inCooldown, clients[ip]);
+	ok &= !cooldown;
 
+	// tell the user if the placement was authorized
 	socket.emit("pixelFeedback", (hash << 8) + (ok ? 0 : 1));
 	if (ok)	{
 	    serverGrid[y][x] = col;
 	    logsVersion = logPixelChange(x, y, col, logsVersion);
+	    fs.writeFileSync(files.grid, encodeMap(serverGrid));
+
+	    // update the current user (otherwise will not be updated, since its version will change)
+	    updateClientIp(ip);
+
 	    userPlacePixel(clients[ip], logsVersion);
 
 	    console.log("Placed pixel at ("+x+", "+y+"), col "+col);
-	    clients[ip].encodeToFile();
 	    updateOptions();
-
-	    fs.writeFileSync(files.grid, encodeMap(serverGrid));
 	}
-
 
 	// execute code at certain time intervals, triggered here
 	const now = Date.now();
 	if (now - prevBroadcast > broadcastDelay) {
 	    console.log("Broadcast")
 	    prevBroadcast = now;
-	    interval();
+	    interval(clients[ip]);
 	}
+    });
+
+    socket.on("initial", _ => {
+	// triggered on init, should be fine afterwards, forces a "normal" update of the map
+        updateClientIp(ip, clients[ip].version);
+	socket.emit("userUpdate", clients[ip].encode());
     });
 
     socket.on("help", _ => {
@@ -191,8 +206,9 @@ function updateClientIp(ip, version) {
     client.encodeToFile();
 }
 
-function interval() {
+function interval(ignore) {
     Object.values(clients).forEach(user => {
+	if (user == ignore) return;
 	updateClientIp(user.ip, user.version);
     });
 
