@@ -60,11 +60,11 @@ function encodeMap(pixels) {
 let getFile = version => dirs.logs+parseInt((version-1)/versionFileSize)+".log";
 
 function logPixelChange(x, y, col, version) {
-    /*// store x and y in two bytes, and col in one byte
+    // store x and y in two bytes, and col in one byte
     x = String.fromCharCode(x>>8)+String.fromCharCode(x&255);
     y = String.fromCharCode(y>>8)+String.fromCharCode(y&255);
-    col = String.fromCharCode(col);*/
-    fs.appendFileSync(getFile(++version), (version%versionFileSize == 1 ? "" : "\n")+x+"."+y+"."+col);
+    col = String.fromCharCode(col);
+    fs.appendFileSync(getFile(++version), x+y+col);
 
     return version;
 }
@@ -89,11 +89,11 @@ function makeClientUpdate(clientVersion, serverVersion, serverGrid) {
         // only send the relevant changes to the client to then apply
         message = String.fromCharCode(0);
 
-        let changes = String(fs.readFileSync(serverFile)).split("\n");
+        let changes = String(fs.readFileSync(serverFile));
 
-        const start = (clientVersion-1)%versionFileSize+1;
-        const stop = (serverVersion-1)%versionFileSize+1;
-        for (let i = start; i < stop; i++) message += "\n"+changes[i];
+        const start = clientVersion%versionFileSize;
+        const stop = serverVersion%versionFileSize || versionFileSize;
+        message += changes.substring(start*5, stop*5);
     }
 
     return message;
@@ -108,21 +108,15 @@ function applyUpdate(message, updateFunction, setGrid) {
     if (message[0].charCodeAt(0) == 0) {
         // individual changes to apply
         let n = 0;
-        /*for (let i = 1; i < message.length; i++) {
+        for (let i = 1; i < message.length; i++) {
             const x = (message.charCodeAt(i++)<<8) + message.charCodeAt(i++);
             const y = (message.charCodeAt(i++)<<8) + message.charCodeAt(i++);
-            const col = message.charCodeAt(i);*/
-        message.split("\n").slice(1).forEach(line => {
-            let [x, y, col] = line.split(".");
-            x = Number(x);
-            y = Number(y);
-            col = Number(col);
-            if (isNaN(x) || isNaN(y) || isNaN(col)) console.error("Error reading request, change "+i+" ("+line+")");
+            const col = message.charCodeAt(i);
+            console.log(x+" "+y+" "+col);
 
             updateFunction(x, y, col);
-            console.log(x+" "+y+" "+col);
             n++;
-        });
+        }
 
         console.log("Caught up, applied "+n+" change"+(n == 1 ? "" : "s"));
     }

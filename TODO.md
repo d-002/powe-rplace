@@ -38,8 +38,10 @@ Only store relevant information in users files (pixels placed...) and parse priv
 TODO (doing now): change accounts.js access, read from file and string, use ranks and not color options etc, read those from account.js and map.js (review infos placements? new file?)
 fix version system
 map loading issues
+NaN user versions
 handle timeout and localStorage being wrongly updated
 button to refresh map manually, timeout
+make sure can't place if user is undefined on the client (or create an empty one at the start)
 
 TODO:
 - mobile version (when width < height, updated on screen resize?)

@@ -165,7 +165,7 @@ io.on("connection", socket => {
 	    fs.writeFileSync(files.grid, encodeMap(serverGrid));
 
 	    // update the current user (otherwise will not be updated, since its version will change)
-	    updateClientIp(ip);
+	    updateClientIp(ip, clients[ip].version, logsVersion-1);
 
 	    userPlacePixel(clients[ip], logsVersion);
 
@@ -199,9 +199,9 @@ io.on("connection", socket => {
     });
 });
 
-function updateClientIp(ip, version) {
+function updateClientIp(ip, clientVersion, serverVersion=logsVersion) {
     const client = clients[ip];
-    client.socket.emit("mapUpdate", makeClientUpdate(version, logsVersion, serverGrid));
+    client.socket.emit("mapUpdate", makeClientUpdate(clientVersion, serverVersion, serverGrid));
     client.version = logsVersion;
     client.encodeToFile();
 }
