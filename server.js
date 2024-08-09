@@ -93,6 +93,9 @@ Array.from(Object.keys(files)).forEach(name => {
     }
 });
 
+// create dummy file to make the glitch.com editor display the logs folder
+fs.writeFileSync(dirs.logs+"foo.txt", "bar");
+
 checkMaintenance();
 
 // read options
