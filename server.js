@@ -123,7 +123,7 @@ if (logsVersion == 0) {
 
 io.on("connection", socket => {
     let ip = (socket.handshake.headers["x-forwarded-for"] || socket.conn.remoteAddress).split(",")[0].split(":").slice(-1)[0];
-    ip += "-"+Date.now()%1000;
+    //ip += "-"+Date.now()%1000;
 
     // check if a client with this ip already connected
     let ok = true;
@@ -153,18 +153,17 @@ io.on("connection", socket => {
             x = parseInt(s[0]);
             y = parseInt(s[1]);
             col = parseInt(s[2]);
-            hash = parseInt(s[3]);
+            hash = s[3];
         }
         else ok = false;
         if (isNaN(x) || x < 0 || x >= W) ok = false;
         else if (isNaN(y) || y < 0 || y >= H) ok = false;
-        else if (isNaN(col) || isNaN(hash)) ok = false;
-        if (isNaN(hash)) hash = 0; // to make sure the user can read a 0 in the first bit to indicate the message was wrong
+        else if (isNaN(col)) ok = false;
 
         ok &= Date.now()-user.lastPixel >= user.pixelCooldown;
 
         // tell the user if the placement was authorized
-        socket.emit("pixelFeedback", (hash << 8) + (ok ? 0 : 1));
+        socket.emit("pixelFeedback", String.fromCharCode(ok ? 0 : 1)+hash);
         if (ok) {
             serverGrid[y][x] = col;
             logPixelChange(x, y, col, logsVersion);

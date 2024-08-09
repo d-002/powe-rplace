@@ -12,7 +12,8 @@ const privileges = {
     "cooldown": [10000],
 
     // other options, not included in User objects, but exported into other scripts as well
-    "helpCooldown": 10000
+    "helpCooldown": 10000,
+    "timeoutDelay": 10000 // only used on the client, to guess when it has been disconnected
 }
 
 class User {
@@ -38,23 +39,20 @@ class User {
 
     static decodeString(ip, data) {
         // base values, will be overriden upon successful load of data
-        let nColors = privileges.colors[0];
         let version = 0;
         let lastPixel = 0;
         let lastHelp = 0;
-        let nPlaced = privileges.cooldown[0];
+        let nPlaced = 0;
 
         try {
             const lines = data.split("\n");
-            nColors = parseInt(lines[0]);
-            version = Number(lines[1]);
-            lastPixel = Number(lines[2]);
-            lastHelp = Number(lines[3]);
-            nPlaced = parseInt(lines[4]);
+            version = Number(lines[1]) || 0;
+            lastPixel = Number(lines[2]) || 0;
+            lastHelp = Number(lines[3]) || 0;
+            nPlaced = parseInt(lines[4]) || 0;
         }
         catch (err) {
-            console.error("Error loading user file: "+ip);
-            console.error(err);
+            console.error("Error loading user file "+ip+": "+err);
         }
 
         return new User(ip, version, lastPixel, lastHelp, nPlaced);

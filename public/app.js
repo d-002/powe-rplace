@@ -54,7 +54,7 @@ window.onload = () => {
     dom.canvas.addEventListener("click", click);
     window.addEventListener("resize", resizeCanvas);
 
-    document.addEventListener("keydown", () => { options.color = (options.color+1) % colors.length });
+    document.addEventListener("keydown", () => { options.color = (options.color+1) % user.nColors });
 
     interval = window.setInterval(update, 100);
 

@@ -1,5 +1,24 @@
 let socket = io();
 
+class _socket {
+    constructor(s) {
+        this.s = s;
+    }
+
+    emit(type, data) {
+        console.log("emit "+type+" "+(data||"").substring(0, 50));
+        this.s.emit(type, data);
+    }
+
+    on(type, callback) {
+        this.s.on(type, data => {
+            console.log("recv "+type+" "+String(data).substring(0, 50));
+            callback(data);
+        });
+    }
+}
+socket = new _socket(socket);
+
 // pixels pre-placed locally, waiting for server to accept or overrule
 let placedLocally = {}; // hash: [x, y, prev col, timestamp]
 
@@ -12,11 +31,15 @@ let state = {
 };
 let stateOk = () => !Object.values(state).includes(false);
 
-let timeoutDelay = 10000;
 let maintenanceTime = 0;
 let interval;
 
-let hashPixel = (x, y, col) => x+"."+y+"."+col;
+let hash = x => {
+    const h = String.fromCharCode(x);
+    if (h == ".") return " ";
+    return h;
+}
+let hashPixel = (x, y, col) => hash(x)+hash(y)+hash(col);
 
 // WARNING: this object is only used to get a copy of the privileges, things like socket, version, ip are not defined
 let user;
@@ -49,9 +72,10 @@ function click(evt) {
 function clientScriptUpdate() {
     const now = Date.now();
     let timeout = false;
-    Object.values(placedLocally).forEach(options => { if (now-options[3] > timeoutDelay) timeout = true; });
+    Object.values(placedLocally).forEach(options => { if (now-options[3] > privileges.timeoutDelay) timeout = true; });
 
-    if (timeout) window.location.href="/down?reason=timeout";
+    if (timeout) console.warn("timeout");
+    //if (timeout) window.location.href="/down?reason=timeout";
 
     if (maintenanceTime != 0 && Date.now() > maintenanceTime+2000) window.location.href = "/down?reason=maintenance";
 }
@@ -61,7 +85,8 @@ socket.on("mapUpdate", data => {
         applyUpdate(data, drawPixel, grid => { localGrid = grid });
     }
     catch (err) {
-        if (!needHelp) console.error("Error loading the map, while not needing help: "+err);
+        console.error("Error loading the map: "+err);
+        return;
     }
 
     state.mapOk = true;
@@ -70,9 +95,9 @@ socket.on("mapUpdate", data => {
 });
 
 socket.on("pixelFeedback", data => {
-    // the last byte is for the error, the rest is the pixel hash
-    const err = data & 0xff;
-    const hash = data >> 8;
+    // first char for the error, the rest is the pixel hash
+    const err = data.charCodeAt(0);
+    const hash = data.substring(1);
 
     const local = placedLocally[hash];
     if (local == null) return;
@@ -111,7 +136,6 @@ function loadLocalStorage() {
             state.mapOk = true;
         }
         catch {
-            console.warn("Error loading map from local storage");
             error = true;
         }
     }
@@ -159,9 +183,12 @@ socket.on("maintenance", data => {
 });
 
 socket.on("disconnect", () => {
-    socket.disconnect();
-    socket.removeAllListeners();
-    socket = null;
+    try {
+        socket.disconnect();
+        socket.removeAllListeners();
+        socket = null;
+    }
+    catch { }
 
     window.location.href="/down?reason=disconnect";
 });

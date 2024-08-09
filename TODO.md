@@ -60,4 +60,5 @@ TODO:
 - gpu acceleration
 - show and record graph of downtime
 - user data system: create account, or checksum in localstorage for connection by ip
+- dark theme
 - send email / admin logs on error

@@ -36,8 +36,6 @@ function decodeMap(data) {
     }
 
     if (pixels.length != H) {
-        if (!suppressErrors) throw new Error("Failed to load canvas, length "+pixels.length);
-
         console.error("White canvas, failed to load, length "+pixels.length);
 
         // white canvas if failed to load
