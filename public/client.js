@@ -56,8 +56,8 @@ function click(evt) {
         return;
     }
 
-    const x = Math.floor((evt.x+window.scrollX)/scale/options.zoom - options.x);
-    const y = Math.floor((evt.y+window.scrollY)/scale/options.zoom - options.y);
+    const x = Math.floor((evt.x+window.scrollX-cW/2)/scale/options.zoom + options.x);
+    const y = Math.floor((evt.y+window.scrollY-cH/2)/scale/options.zoom + options.y);
     const hash = hashPixel(x, y, options.color);
     if (x < 0 || x >= W || y < 0 || y >= H) return;
 
@@ -65,7 +65,7 @@ function click(evt) {
     drawPixel(x, y, options.color);
     updateLocalStorage();
 
-    socket.emit("placePixel", x+"."+y+"."+options.color+"."+hash);
+    window.setTimeout(() => socket.emit("placePixel", x+"."+y+"."+options.color+"."+hash), 0);
 }
 
 function clientScriptUpdate() {

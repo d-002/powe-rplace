@@ -70,9 +70,9 @@ class Chunk {
         const mult = scale*options.zoom;
         const x = (this.x-options.x)*mult + cW/2;
         const y = (this.y-options.y)*mult + cH/2;
-        const size = Math.floor(Chunk.size*scale*options.zoom/this.zoom)+1;
+        const size = Chunk.size*scale*options.zoom/this.zoom;
 
-        return [Math.floor(x), Math.floor(y), size, size];
+        return [x, y, size, size];
     }
 
     visible() {
@@ -112,7 +112,31 @@ class ChunkSystem {
         return [Math.floor(x/size), Math.floor(y/size)];
     }
 
+    editPixel(x, y) {
+        const zoom = this.getZoom();
+        const [cx, cy] = this.gridToChunk(x, y, zoom);
+        const key = cx+"."+cy+"."+zoom;
+
+        const inChunks = Object.keys(this.chunks).includes(key);
+
+        if (!Object.keys(this.queue).includes(key)) {
+            // make sure the chunk is now considered loading
+            if (inChunks) this.queue[key] = this.chunks[key];
+            else return; // no need to do anything, the chunk is unloaded
+        }
+        if (inChunks) {
+            delete this.chunks[key];
+        }
+
+        const chunk = this.queue[key];
+        chunk.ready = false;
+
+        window.setTimeout(() => chunk.init(), 0);
+    }
+
     onMove() {
+        ctx.clearRect(0, 0, cW, cH);
+
         const zoom = this.getZoom();
 
         const keys = Object.keys(this.chunks);
@@ -130,7 +154,6 @@ class ChunkSystem {
 
         const [leftC, topC] = this.gridToChunk(left, top, zoom);
         const [rightC, bottomC] = this.gridToChunk(right, bottom, zoom);
-        //console.log(zoom+" "+topC+" "+rightC+" "+bottomC+" "+leftC);
 
         const targetCount = (rightC-leftC+1)*(bottomC-topC+1);
 
@@ -226,10 +249,7 @@ function resizeCanvas(evt) {
 
 function drawPixel(x, y, col) {
     localGrid[y][x] = col;
-    ctx.fillStyle = "#"+colors[col];
-    const size = scale*options.zoom;
-    const _x = (x+options.x)*size, _y = (y+options.y)*size;
-    ctx.fillRect(_x, _y, size-1, size-1);
+    chunkSystem.editPixel(x, y);
 }
 
 function showInfo(message) {
@@ -253,6 +273,7 @@ let c;
 window.onload = () => {
     Object.keys(dom).forEach(id => dom[id] = document.getElementById(id));
     ctx = dom.canvas.getContext("2d");
+    ctx.imageSmoothingEnabled = false;
     resizeCanvas(null);
     loadLocalStorage();
 
@@ -276,7 +297,7 @@ window.onload = () => {
         else options.color = (options.color+1) % user.nColors;
     });
 
-    interval = window.setInterval(update, 100);
+    interval = window.setInterval(update, 30);
 
     socket.emit("initial");
 }
