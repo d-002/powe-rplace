@@ -5,10 +5,10 @@ function initMap(_fs, _files, _dirs) {
     dirs = _dirs;
 }
 
-const colors = ['#fff', '#000', '#f00', '#00f', '#f80', '#080', '#ff0', '#a0c', '#800', '#008', '#840', '#068', '#fd0', '#880', '#af0', '#707', '#bbb', '#444', '#f88', '#88f', '#fc8', '#8f8', '#ffc', '#f7e'];
+const colors = ['fff', '000', 'f00', '00f', 'f80', '080', 'ff0', 'a0c', '800', '008', '840', '068', 'fd0', '880', 'af0', '707', 'bbb', '444', 'f88', '88f', 'fc8', '8f8', 'ffc', 'f7e'];
 
-const W = 16;
-const H = 16;
+const W = 1000;
+const H = 1000;
 
 const minZoom = 0.1;
 const maxZoom = 10;
@@ -38,11 +38,11 @@ function decodeMap(data, suppressErrors) {
     if (pixels.length != H) {
         if (!suppressErrors) throw new Error("Failed to load canvas, length "+pixels.length);
 
-        console.error("Setting grid to white canvas since failed to load, data length "+pixels.length);
+        console.error("Setting grid to white canvas since failed to load, data length "+data.length);
 
         // white canvas if failed to load
         pixels = new Array(H).fill(null);
-        for (let y = 0; y < H; y++) pixels[y] = new Array(W).fill(0);
+        for (let y = 0; y < H; y++) pixels[y] = new Array(W).fill(y%24);
     }
 
     return pixels;
@@ -82,7 +82,10 @@ function makeClientUpdate(clientVersion, serverVersion, serverGrid) {
     let message;
 
     const serverFile = getFile(serverVersion);
-    if (clientVersion == null || clientVersion > serverVersion || serverFile != getFile(clientVersion)) {
+    if (clientVersion > serverVersion) clientVersion = 0;
+
+    if (clientVersion == null || serverFile != getFile(clientVersion)) {
+        clientVersion ||= 0;
         // need to read multiple log files to update the client: send the server map instead
         // in case an error occured with the client version, reset their map safely here
         message = String.fromCharCode(1)+encodeMap(serverGrid);
@@ -114,7 +117,6 @@ function applyUpdate(message, updateFunction, setGrid) {
             const x = (message.charCodeAt(i++)<<8) + message.charCodeAt(i++);
             const y = (message.charCodeAt(i++)<<8) + message.charCodeAt(i++);
             const col = message.charCodeAt(i);
-            console.log(x+" "+y+" "+col);
 
             updateFunction(x, y, col);
             n++;

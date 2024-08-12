@@ -40,8 +40,14 @@ chunk system: depending on the zoom, chunks of data are stored in uint8 buffers,
 on zoom change, existing chunks can be displayed while the new ones generate: every time a chunk is generated, all the previous chunks check if they are covered, and then they are removed from the chunks array
 on pixels update, only the relevant pixels are updated in the corresponding chunks, which are in turn blitted
 
+on cam change: get the chunks of the correct zoom that collide with the screen and store them in a temporary array
+- if all the needed chunks exist, display them, then delete all the chunks with a different zoom
+- if not enough chunks exist, display the existing ones of other zoom, then the chunks of normal zoom from the temporary array, and iterate through all wanted chunks and add to a queue (if not in already) the chunks that do not exist
+remove from the queue the chunks that are no longer needed: different zoom or not colliding
+once every second: delete the chunks that are not visible but are still cached
+on update: blit the chunks when out of the queue
+
 TODO:
-- fix errors with animated background
 - movement and zoom system
 - landing page
 - privacy policy
@@ -53,6 +59,7 @@ TODO:
 - show or hide borders
 - better info system (queue, fadeout, default text (countdown))
 - less file writes: options, user data, map file
+- async map files updates, but be careful about permissions
 - mobile version (when width < height, updated on screen resize (with timeout)?)
 - animated background refresh size less frequently, randomize y when out of bounds, make sure no disappear off the edges
 - movement animations

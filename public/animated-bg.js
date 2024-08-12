@@ -133,16 +133,16 @@ function _animate() {
             const a2 = alpha(1 - i/trail.length);
             const [x, _y, col] = trail.trail[i];
 
-            if (x < 0 || x >= canvMult.length) continue;
+            if (x < 0 || x >= canvMult[0].length) continue;
 
             let j = 0;
             for (let y = _y-trail.height; y <= _y+trail.height; y++) {
                 const offset = trail.offset[j];
 
-                if (y < 0 || y >= canvMult[0].length) continue;
+                if (y < 0 || y >= canvMult.length) continue;
 
                 colFromPos(x, y);
-                ctx.globalAlpha = a1*a2*canvMult[x][y];
+                ctx.globalAlpha = a1*a2*canvMult[y][x];
                 ctx.fillRect((x+trail.offset[j++])*size, y*size, size-1, size-1);
                 j++;
             }
@@ -166,10 +166,10 @@ function animResize() {
     canvMult = [];
     ctx.fillStyle = "white";
 
-    for (let x = 0; x <= W/size; x++) {
+    for (let y = 0; y <= H/size; y++) {
         canvMult.push([]);
-        for (let y = 0; y <= H/size; y++) {
-            canvMult[x].push(Math.random()*0.6 + 0.2);
+        for (let x = 0; x <= W/size; x++) {
+            canvMult[y].push(Math.random()*0.6 + 0.2);
             ctx.fillRect(x*size, y*size, size-1, size-1);
         }
     }

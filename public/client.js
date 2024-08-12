@@ -32,7 +32,6 @@ let state = {
 let stateOk = () => !Object.values(state).includes(false);
 
 let maintenanceTime = 0;
-let interval;
 
 let hash = x => {
     const h = String.fromCharCode(x);
@@ -57,8 +56,8 @@ function click(evt) {
         return;
     }
 
-    const x = parseInt((evt.x-window.scrollX)/scale/options.zoom - options.x);
-    const y = parseInt((evt.y-window.scrollY)/scale/options.zoom - options.y);
+    const x = Math.floor((evt.x+window.scrollX)/scale/options.zoom - options.x);
+    const y = Math.floor((evt.y+window.scrollY)/scale/options.zoom - options.y);
     const hash = hashPixel(x, y, options.color);
     if (x < 0 || x >= W || y < 0 || y >= H) return;
 
@@ -74,8 +73,7 @@ function clientScriptUpdate() {
     let timeout = false;
     Object.values(placedLocally).forEach(options => { if (now-options[3] > privileges.timeoutDelay) timeout = true; });
 
-    if (timeout) console.warn("timeout");
-    //if (timeout) window.location.href="/down?reason=timeout";
+    if (timeout) window.location.href="/down?reason=timeout";
 
     if (maintenanceTime != 0 && Date.now() > maintenanceTime+2000) window.location.href = "/down?reason=maintenance";
 }
@@ -92,13 +90,13 @@ socket.on("mapUpdate", data => {
 
     // TODO change this, checksum checks go here
     if (!state.mapOk && !changes) {
-        console.warn("Up to date with server, but wrong map, refreshing");
+        console.warn("Up to date with server, but map not loaded, refreshing");
         socket.emit("help");
     }
     else {
         state.mapOk = true;
         updateLocalStorage();
-        updateAllCanvas();
+        chunkSystem.onMove();
     }
 });
 

@@ -13,7 +13,7 @@ const dirs = {
 }
 
 
-// set up server
+console.log("Setting up server...");
 const express = require("express");
 const app = express();
 const http = require("http");

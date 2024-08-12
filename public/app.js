@@ -7,29 +7,229 @@ let dom = {
     info: null
 }
 
+let interval;
+
+const cSize = 16;
+let chunkSystem;
+class Chunk {
+    static size = 16;
+
+    // a chunk is a wrapper around a byte array for image data
+    // the size this array is cSize*scale px wide when viewed at a certain zoom,
+    // scaled up or down depending on the actual zoom
+    // the zoom used should be a power of 2
+    constructor(x, y, zoom) {
+        this.ready = false;
+
+        this.x = x;
+        this.y = y;
+        this.zoom = zoom;
+    }
+
+    static toImage(buffer) {
+        const image = new Image();
+        image.src = URL.createObjectURL(new Blob([buffer], { type: 'image/png' }));
+        return image;
+    }
+
+    init() {
+        const pixSize = scale*this.zoom;
+        const width = scale*Chunk.size;
+        const number = Math.ceil(Chunk.size/this.zoom);
+
+        let buffer = new Uint8ClampedArray(4*width*width);
+
+        for (let x = 0; x < number; x++) for (let y = 0; y < number; y++) {
+            let r, g, b, a;
+            if (x+this.x < 0 || x+this.x >= W || y+this.y < 0 || y+this.y >= H) {
+                // out of bounds
+                [r, g, b, a] = [0, 0, 0, 127];
+            }
+            else {
+                const col = colors[localGrid[y+this.y][x+this.x]];
+                r = parseInt(col[0], 16)*17;
+                g = parseInt(col[1], 16)*17;
+                b = parseInt(col[2], 16)*17;
+                a = 255;
+            }
+
+            for (let dx = 0; dx < pixSize; dx++) for (let dy = 0; dy < pixSize; dy++) {
+                let i = (Math.floor(x*pixSize)+dx + (Math.floor(y*pixSize)+dy)*width)*4;
+                buffer[i++] = r;
+                buffer[i++] = g;
+                buffer[i++] = b;
+                buffer[i] = a;
+            }
+        }
+
+        this.image = toImage(new ImageData(buffer, width, width));
+        this.ready = true;
+    }
+
+    getPos() {
+        const mult = scale*options.zoom;
+        const x = (this.x-options.x)*mult + cW/2;
+        const y = (this.y-options.y)*mult + cH/2;
+        const size = Math.floor(Chunk.size*scale*options.zoom/this.zoom)+1;
+
+        return [Math.floor(x), Math.floor(y), size, size];
+    }
+
+    visible() {
+        const [x, y, w, h] = this.getPos();
+        return x < cW && y < cH && x+w >= 0 && y+h >= 0;
+    }
+
+    display() {
+        const [x, y, w, h] = this.getPos();
+        ctx.drawImage(this.image, x, y, w, h);
+    }
+}
+
+class ChunkSystem {
+    constructor() {
+        this.chunks = {}; // generated chunks: {"x.y.zoom": Chunk}
+        this.queue = {}; // chunks still generating
+    }
+
+    getZoom() {
+        const shift = Math.floor(Math.log2(options.zoom))
+        if (shift < 0) return 1/(1<<-shift);
+        return 1<<shift;
+    }
+
+    getGridPos(x, y) {
+        // convert pixel coordinates into grid coordinates
+        x = options.x + (x-cW/2)/scale/options.zoom;
+        y = options.y + (y-cH/2)/scale/options.zoom;
+
+        return [x, y];
+    }
+
+    gridToChunk(x, y, zoom) {
+        // find the top left of the chunk containing the given position
+        const size = Math.floor(Chunk.size/zoom);
+        return [Math.floor(x/size), Math.floor(y/size)];
+    }
+
+    onMove() {
+        const zoom = this.getZoom();
+
+        const keys = Object.keys(this.chunks);
+
+        // get the chunks that collide with the screen
+        let visible = {};
+        keys.forEach(key => {
+            const chunk = this.chunks[key];
+            if (chunk.zoom == zoom && chunk.visible()) visible[key] = chunk;
+        });
+
+        // get the chunks that need to be displayed right now
+        const [left, top] = this.getGridPos(0, 0);
+        const [right, bottom] = this.getGridPos(cW-1, cH-1);
+
+        const [leftC, topC] = this.gridToChunk(left, top, zoom);
+        const [rightC, bottomC] = this.gridToChunk(right, bottom, zoom);
+        //console.log(zoom+" "+topC+" "+rightC+" "+bottomC+" "+leftC);
+
+        const targetCount = (rightC-leftC+1)*(bottomC-topC+1);
+
+        if (Object.values(visible).length == targetCount) {
+            // enough chunks are ready: display them
+            Object.values(visible).forEach(chunk => chunk.display());
+
+            // delete the chunks that are on another zoom level
+            Object.keys(this.chunks).forEach(key => {
+                if (this.chunks[key].zoom != zoom) delete this.chunks[key];
+            });
+        }
+        else {
+            // not enough chunks are ready
+            // display the "old" chunks (different zoom) at the back
+            Object.values(this.chunks).forEach(chunk => {
+                if (chunk.zoom != zoom) chunk.display();
+            });
+
+            // display the new chunks on top
+            Object.values(visible).forEach(chunk => chunk.display());
+
+            // schedule missing chunks
+            const keys2 = Object.keys(this.queue);
+            const mult = Math.floor(Chunk.size/zoom);
+
+            for (let x = leftC; x <= rightC; x++)
+            for (let y = topC; y <= bottomC; y++) {
+                const key = x+"."+y+"."+zoom;
+                if (!keys.includes(key) && !keys2.includes(key)) {
+                    const chunk = new Chunk(x*mult, y*mult, zoom);
+                    this.queue[key] = chunk;
+                    window.setTimeout(() => chunk.init(), 0);
+                    console.log("create "+key);
+                }
+            }
+        }
+    }
+
+    update() {
+        const zoom = this.getZoom();
+
+        let changed = false;
+        Object.keys(this.queue).forEach(key => {
+            const chunk = this.queue[key];
+            if (chunk.ready) {
+                this.chunks[key] = chunk;
+                delete this.queue[key];
+                chunk.display(zoom);
+                changed = true;
+                console.log("loaded "+key);
+            }
+        });
+
+        if (changed && Object.keys(this.queue).length == 0) {
+            // no more items in the queue: display everything again
+            // to delete non necessary chunks
+            this.onMove();
+        }
+    }
+
+    otherChecks() {
+        const zoom = this.getZoom();
+
+        Object.keys(this.chunks).forEach(key => {
+            if (!this.chunks[key].visible()) console.log("del "+key);
+            if (!this.chunks[key].visible()) delete this.chunks[key];
+        });
+    }
+}
+
+// used to convert ImageData into Image
+const _canvas = document.createElement("canvas");
+_canvas.width = Chunk.size*scale;
+_canvas.height = Chunk.size*scale;
+const _ctx = _canvas.getContext("2d");
+
+function toImage(data) {
+    const image = new Image();
+    _ctx.putImageData(data, 0, 0);
+    image.src = _canvas.toDataURL(data);
+    return image;
+}
+
 function resizeCanvas(evt) {
     cW = window.innerWidth;
     cH = window.innerHeight;
     dom.canvas.width = cW;
     dom.canvas.height = cH;
 
-    if (evt != null) updateAllCanvas();
+    if (evt != null) chunkSystem.onMove();
 }
 
 function drawPixel(x, y, col) {
     localGrid[y][x] = col;
-    ctx.fillStyle = colors[col];
+    ctx.fillStyle = "#"+colors[col];
     const size = scale*options.zoom;
     const _x = (x+options.x)*size, _y = (y+options.y)*size;
     ctx.fillRect(_x, _y, size-1, size-1);
-}
-
-function updateAllCanvas() {
-    ctx.clearRect(0, 0, cW, cH);
-
-    for (let x = 0; x < W; x++)
-    for (let y = 0; y < H; y++)
-        drawPixel(x, y, localGrid[y][x]);
 }
 
 function showInfo(message) {
@@ -43,8 +243,13 @@ function update() {
 }
 
 function appUpdate() {
+    if (state.mapOk) {
+        chunkSystem.onMove();
+        chunkSystem.update();
+        chunkSystem.otherChecks();
+    }
 }
-
+let c;
 window.onload = () => {
     Object.keys(dom).forEach(id => dom[id] = document.getElementById(id));
     ctx = dom.canvas.getContext("2d");
@@ -54,11 +259,20 @@ window.onload = () => {
     dom.canvas.addEventListener("click", click);
     window.addEventListener("resize", resizeCanvas);
 
+    chunkSystem = new ChunkSystem();
+    c = chunkSystem;
+
     document.addEventListener("keydown", event => {
         if (event.key == "a") {
             localStorage.clear();
             window.location.reload();
         }
+        else if (event.key == "z") options.y -= 0.9/options.zoom;
+        else if (event.key == "q") options.x -= 0.9/options.zoom;
+        else if (event.key == "s") options.y += 0.9/options.zoom;
+        else if (event.key == "d") options.x += 0.9/options.zoom;
+        else if (event.key == "o") options.zoom /= 1.2;
+        else if (event.key == "p") options.zoom *= 1.2;
         else options.color = (options.color+1) % user.nColors;
     });
 
