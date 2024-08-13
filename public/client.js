@@ -17,7 +17,7 @@ class _socket {
         });
     }
 }
-//socket = new _socket(socket);
+socket = new _socket(socket);
 
 // pixels pre-placed locally, waiting for server to accept or overrule
 let placedLocally = {}; // hash: [x, y, prev col, timestamp]
@@ -63,8 +63,6 @@ function click(evt) {
 
     placedLocally[hash] = [x, y, localGrid[y][x], Date.now()];
     drawPixel(x, y, options.color);
-    console.log("draw "+x+" "+y);
-    updateLocalStorage();
 
     socket.emit("placePixel", x+"."+y+"."+options.color+"."+hash);
 }
@@ -111,12 +109,10 @@ socket.on("pixelFeedback", data => {
     const [x, y, col, _] = local;
     delete placedLocally[hash];
 
-    if (err != 0) {
-        // revert placement
-        drawPixel(x, y, col);
-        updateLocalStorage();
-        console.log("cancel "+x+" "+y);
-    }
+    // allowed change: update client-side map
+    if (err == 0) updateLocalStorage();
+    // revert placement
+    else drawPixel(x, y, col);
 });
 
 socket.on("userUpdate", data => {

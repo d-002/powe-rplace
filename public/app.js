@@ -272,7 +272,11 @@ function appUpdate() {
         chunkSystem.otherChecks();
     }
 }
-let c;
+
+function slowUpdate() {
+    updateLocalStorage();
+}
+
 window.onload = () => {
     Object.keys(dom).forEach(id => dom[id] = document.getElementById(id));
     ctx = dom.canvas.getContext("2d");
@@ -284,7 +288,6 @@ window.onload = () => {
     window.addEventListener("resize", resizeCanvas);
 
     chunkSystem = new ChunkSystem();
-    c = chunkSystem;
 
     document.addEventListener("keydown", event => {
         if (event.key == "a") {
@@ -309,6 +312,8 @@ window.onload = () => {
     });
 
     interval = window.setInterval(update, 100);
+
+    window.setInterval(slowUpdate, 1000);
 
     socket.emit("initial");
 }
