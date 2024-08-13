@@ -28,7 +28,7 @@ class Chunk {
 
     static toImage(buffer) {
         const image = new Image();
-        image.src = URL.createObjectURL(new Blob([buffer], { type: 'image/png' }));
+        image.src = URL.createObjectURL(new Blob([buffer], { type: "image/png" }));
         return image;
     }
 
@@ -39,7 +39,8 @@ class Chunk {
 
         let buffer = new Uint8ClampedArray(4*width*width);
 
-        for (let x = 0; x < number; x++) for (let y = 0; y < number; y++) {
+        for (let x = 0; x < number; x++)
+        for (let y = 0; y < number; y++) {
             let r, g, b, a;
             if (x+this.x < 0 || x+this.x >= W || y+this.y < 0 || y+this.y >= H) {
                 // out of bounds
@@ -62,8 +63,24 @@ class Chunk {
             }
         }
 
-        this.image = toImage(new ImageData(buffer, width, width));
+        // convert the pixel array into an Image
+        this.image = new Image();
+        _ctx.putImageData(new ImageData(buffer, width, width), 0, 0);
+        this.image.src = _canvas.toDataURL();
         this.ready = true;
+    }
+
+    edit(x, y) {
+        const pixSize = scale*this.zoom;
+        const number = Math.ceil(Chunk.size/this.zoom);
+
+        // display the image on a canvas and edit it
+        _ctx.drawImage(this.image, 0, 0);
+        _ctx.fillStyle = "#"+colors[localGrid[y][x]];
+        _ctx.fillRect(x%number*pixSize, y%number*pixSize, scale*this.zoom, scale*this.zoom);
+
+        // get the image data back
+        this.image.src = _canvas.toDataURL();
     }
 
     getPos() {
@@ -119,19 +136,15 @@ class ChunkSystem {
 
         const inChunks = Object.keys(this.chunks).includes(key);
 
-        if (!Object.keys(this.queue).includes(key)) {
-            // make sure the chunk is now considered loading
-            if (inChunks) this.queue[key] = this.chunks[key];
+        let chunk;
+
+        if (Object.keys(this.queue).includes(key)) chunk = this.queue[key];
+        else {
+            if (inChunks) chunk = this.chunks[key];
             else return; // no need to do anything, the chunk is unloaded
         }
-        if (inChunks) {
-            delete this.chunks[key];
-        }
 
-        const chunk = this.queue[key];
-        chunk.ready = false;
-
-        window.setTimeout(() => chunk.init(), 0);
+        window.setTimeout(() => chunk.edit(x, y), 0);
     }
 
     onMove() {
@@ -187,7 +200,6 @@ class ChunkSystem {
                     const chunk = new Chunk(x*mult, y*mult, zoom);
                     this.queue[key] = chunk;
                     window.setTimeout(() => chunk.init(), 0);
-                    console.log("create "+key);
                 }
             }
         }
@@ -204,7 +216,6 @@ class ChunkSystem {
                 delete this.queue[key];
                 chunk.display(zoom);
                 changed = true;
-                console.log("loaded "+key);
             }
         });
 
@@ -219,7 +230,6 @@ class ChunkSystem {
         const zoom = this.getZoom();
 
         Object.keys(this.chunks).forEach(key => {
-            if (!this.chunks[key].visible()) console.log("del "+key);
             if (!this.chunks[key].visible()) delete this.chunks[key];
         });
     }
@@ -230,13 +240,6 @@ const _canvas = document.createElement("canvas");
 _canvas.width = Chunk.size*scale;
 _canvas.height = Chunk.size*scale;
 const _ctx = _canvas.getContext("2d");
-
-function toImage(data) {
-    const image = new Image();
-    _ctx.putImageData(data, 0, 0);
-    image.src = _canvas.toDataURL(data);
-    return image;
-}
 
 function resizeCanvas(evt) {
     cW = window.innerWidth;
@@ -294,10 +297,18 @@ window.onload = () => {
         else if (event.key == "d") options.x += 0.9/options.zoom;
         else if (event.key == "o") options.zoom /= 1.2;
         else if (event.key == "p") options.zoom *= 1.2;
+        else if (event.key == "u") {
+            options.x = cW/2/scale/options.zoom;
+            options.y = cH/2/scale/options.zoom;
+        }
+        else if (event.key == "i") {
+            options.x = 0;
+            options.y = 0;
+        }
         else options.color = (options.color+1) % user.nColors;
     });
 
-    interval = window.setInterval(update, 30);
+    interval = window.setInterval(update, 100);
 
     socket.emit("initial");
 }

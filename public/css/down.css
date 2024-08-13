@@ -9,7 +9,7 @@ div.flex {
 }
 
 h1 {
-    font-family: "stifly";
+    font-family: "stifly", sans-serif;
     font-size: 128px;
     margin: 20px 0 40px 0;
 }

@@ -9,7 +9,6 @@ let timer = 10000;
 // error name: [title, subtitle, info, initiate countdown]
 const options = {
     "unknown": ["Oops.", "", "Unknown error.", 0],
-    "starting": ["500", "Internal Server Error", "Server starting, please wait a few moments then refresh the page.", 10000],
     "dupe-ip": ["501", "Not Implemented", "A client with the same IP address has been detected. Please only join once per address.", 0],
     "timeout": ["408", "Request Timeout", "You timed out. Please retry connecting.", 0],
     "disconnect": ["408", "Request Timeout", "Your connection with the server has been interrupted without warning. Our apologies for the inconvenience.", 0],

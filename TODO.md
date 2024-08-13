@@ -48,6 +48,7 @@ once every second: delete the chunks that are not visible but are still cached
 on update: blit the chunks when out of the queue
 
 TODO:
+- bug placing a pixel multiple times places it
 - movement and zoom system
 - landing page
 - privacy policy

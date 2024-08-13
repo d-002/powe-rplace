@@ -46,17 +46,15 @@ app.use(function(req, res, next) {
     }
 });*/
 
-let ready = false; // display loading page while not ready
 let maintenance;
 
 // landing page
 app.get("/", (req, res) => {
     if (maintenance) {
-    res.redirect("/down?reason=maintenance");
-    checkMaintenance();
+        res.redirect("/down?reason=maintenance");
+        checkMaintenance();
     }
-    else if (ready) res.sendFile(__dirname+"/index.html");
-    else res.redirect("/down?reason=starting");
+    else res.sendFile(__dirname+"/index.html");
 });
 
 app.get("/down", (req, res) => {
@@ -253,4 +251,3 @@ process.on("uncaughtException", function (err) {
 });
 
 server.listen(port, () => console.log("Listening on port "+port));
-ready = true;
