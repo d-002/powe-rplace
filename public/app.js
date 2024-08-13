@@ -48,7 +48,7 @@ class Chunk {
             let r, g, b, a;
             if (x+this.x < 0 || x+this.x >= W || y+this.y < 0 || y+this.y >= H) {
                 // out of bounds
-                [r, g, b, a] = [0, 0, 0, 127];
+                [r, g, b, a] = [127, 127, 127, 255];
             }
             else {
                 const col = colors[localGrid[y+this.y][x+this.x]];
@@ -201,9 +201,7 @@ class ChunkSystem {
             for (let y = topC; y <= bottomC; y++) {
                 const key = x+"."+y+"."+zoom;
                 if (!keys.includes(key) && !keys2.includes(key)) {
-                    const chunk = new Chunk(x*mult, y*mult, zoom);
-                    this.queue[key] = chunk;
-                    window.setTimeout(() => chunk.init(), 0);
+                    this.queue[key] = new Chunk(x*mult, y*mult, zoom);
                 }
             }
         }
@@ -212,14 +210,15 @@ class ChunkSystem {
     update() {
         const zoom = this.getZoom();
 
-        let changed = false;
+        let changed = 0;
         Object.keys(this.queue).forEach(key => {
             const chunk = this.queue[key];
+            if (!chunk.ready && !changed) chunk.init();
             if (chunk.ready) {
                 this.chunks[key] = chunk;
                 delete this.queue[key];
                 chunk.display(zoom);
-                changed = true;
+                changed++;
             }
         });
 
