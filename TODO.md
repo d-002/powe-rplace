@@ -33,6 +33,8 @@ powerups:
 - access more colors
 - place pixels faster
 - pre-place (must have window open)
+- colors pickup
+
 Only store relevant information in users files (pixels placed...) and parse privileges with powerups file
 
 movement system:
@@ -48,11 +50,9 @@ once every second: delete the chunks that are not visible but are still cached
 on update: blit the chunks when out of the queue
 
 TODO:
-- bug placing a pixel multiple times places it
-- movement and zoom system
+- movement animations
 - landing page
 - privacy policy
-- colors pickup
 - settings
 - button to reset position
 - button to refresh map manually, timeout
@@ -62,8 +62,6 @@ TODO:
 - less file writes: options, user data, map file
 - async map files updates, but be careful about permissions
 - mobile version (when width < height, updated on screen resize (with timeout)?)
-- animated background refresh size less frequently, randomize y when out of bounds, make sure no disappear off the edges
-- movement animations
 - changelog popup
 - login support to sync data from ip, implement passkey system in local storage
 - ddos protection / ip ban in admin

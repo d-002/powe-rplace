@@ -9,8 +9,12 @@ let dom = {
 
 let interval;
 
-const cSize = 16;
 let chunkSystem;
+let movement;
+
+let fps = 60;
+
+const cSize = 16;
 class Chunk {
     static size = 16;
 
@@ -235,6 +239,46 @@ class ChunkSystem {
     }
 }
 
+class Movement {
+    constructor() {
+        this.zoomTime = 0;
+        this.zoomA = 1;
+        this.zoomB = 1;
+
+        window.addEventListener("wheel", event => this.zoom(event.deltaY < 0));
+    }
+
+    zoom(zoomIn) {
+        this.zoomA = options.zoom
+        if (this.zoomTime == 0) this.zoomB = options.zoom; // reset zoom
+
+        this.zoomTime = Date.now();
+        if (zoomIn) this.zoomB *= 1.2;
+        else this.zoomB /= 1.2;
+
+        if (this.zoomB < minZoom) this.zoomB = minZoom;
+        else if (this.zoomB > maxZoom) this.zoomB = maxZoom;
+    }
+
+    update() {
+        // returns true when the view changed, otherwise false
+
+        let changed = false;
+        if (this.zoomTime != 0) {
+            const t = (Date.now()-this.zoomTime)/300;
+            if (t < 1) {
+                options.zoom = this.zoomA + (this.zoomB-this.zoomA)*smoothstep(t);
+                changed = true;
+            }
+            else this.zoomTime = 0;
+        }
+
+        return changed;
+    }
+}
+
+let smoothstep = x => (3-2*x)*x*x;
+
 // used to convert ImageData into Image
 const _canvas = document.createElement("canvas");
 _canvas.width = Chunk.size*scale;
@@ -267,14 +311,14 @@ function update() {
 
 function appUpdate() {
     if (state.mapOk) {
-        chunkSystem.onMove();
+        if (movement.update()) chunkSystem.onMove();
         chunkSystem.update();
-        chunkSystem.otherChecks();
     }
 }
 
 function slowUpdate() {
     updateLocalStorage();
+    chunkSystem.otherChecks();
 }
 
 window.onload = () => {
@@ -288,8 +332,10 @@ window.onload = () => {
     window.addEventListener("resize", resizeCanvas);
 
     chunkSystem = new ChunkSystem();
+    movement = new Movement();
 
     document.addEventListener("keydown", event => {
+        if (!state.userOk) return;
         if (event.key == "a") {
             localStorage.clear();
             window.location.reload();
@@ -311,7 +357,7 @@ window.onload = () => {
         else options.color = (options.color+1) % user.nColors;
     });
 
-    interval = window.setInterval(update, 100);
+    interval = window.setInterval(update, 1000/fps);
 
     window.setInterval(slowUpdate, 1000);
 
