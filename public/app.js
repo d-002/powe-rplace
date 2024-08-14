@@ -28,6 +28,8 @@ class Chunk {
         this.x = x;
         this.y = y;
         this.zoom = zoom;
+
+        this.image = null;
     }
 
     static toImage(buffer) {
@@ -37,6 +39,12 @@ class Chunk {
     }
 
     init() {
+        // generate image if not generated yet, then wait until it is loaded into this.image
+        if (this.image != null) {
+            this.ready = this.image.complete;
+            return;
+        }
+
         const pixSize = scale*this.zoom;
         const width = scale*Chunk.size;
         const number = Math.ceil(Chunk.size/this.zoom);
@@ -71,7 +79,6 @@ class Chunk {
         this.image = new Image();
         _ctx.putImageData(new ImageData(buffer, width, width), 0, 0);
         this.image.src = _canvas.toDataURL();
-        this.ready = true;
     }
 
     edit(x, y) {
@@ -210,7 +217,7 @@ class ChunkSystem {
     update() {
         const zoom = this.getZoom();
 
-        let changed = 0;
+        let changed = false;
         Object.keys(this.queue).forEach(key => {
             const chunk = this.queue[key];
             if (!chunk.ready && !changed) chunk.init();
@@ -218,7 +225,7 @@ class ChunkSystem {
                 this.chunks[key] = chunk;
                 delete this.queue[key];
                 chunk.display(zoom);
-                changed++;
+                changed = true;
             }
         });
 
