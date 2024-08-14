@@ -50,8 +50,6 @@ once every second: delete the chunks that are not visible but are still cached
 on update: blit the chunks when out of the queue
 
 TODO:
-- fix bug last chunk not displaying
-- limit movement out of canvas (function to get margins)
 - movement animations
 - landing page
 - privacy policy

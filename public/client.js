@@ -157,10 +157,15 @@ function loadLocalStorage() {
     if (data == null) console.log("No options found in local storage");
     else try {
         data = data.split(" ");
-        options.x = Number(data[0]) || W/2;
-        options.y = Number(data[1]) || H/2;
+        options.x = Number(data[0]);
+        if (isNaN(options.x)) options.x = W/2;
+        if (isNaN(options.y)) options.y = H/2;
         options.zoom = Number(data[2]) || 1;
         options.color = parseInt(data[3]) || 0;
+        if (options.x < 0) options.x = 0;
+        if (options.x > W) options.x = W;
+        if (options.y < 0) options.y = 0;
+        if (options.y > H) options.y = H;
         if (options.zoom < minZoom) options.zoom = minZoom;
         if (options.zoom > maxZoom) options.zoom = maxZoom;
     }
