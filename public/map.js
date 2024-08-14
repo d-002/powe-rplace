@@ -85,7 +85,7 @@ function makeClientUpdate(clientVersion, serverVersion, serverGrid) {
     if (clientVersion > serverVersion) clientVersion = 0;
 
     if (clientVersion == null || serverFile != getFile(clientVersion)) {
-        clientVersion ||= 0;
+        if (!clientVersion) clientVersion = 0;
         // need to read multiple log files to update the client: send the server map instead
         // in case an error occured with the client version, reset their map safely here
         message = String.fromCharCode(1)+encodeMap(serverGrid);
