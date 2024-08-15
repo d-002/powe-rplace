@@ -3,6 +3,7 @@ let cW, cH;
 
 let dom = {
     canvas: null,
+    minimap: null,
     colors: null,
     info: null
 }
@@ -11,10 +12,13 @@ let interval;
 
 let chunkSystem;
 let movement;
+let minimap;
 
 let fps = 60;
 
 let isMobile;
+
+let minimapSize = 200;
 
 const cSize = 16;
 class Chunk {
@@ -56,17 +60,13 @@ class Chunk {
         for (let x = 0; x < number; x++)
         for (let y = 0; y < number; y++) {
             let r, g, b, a;
-            if (x+this.x < 0 || x+this.x >= W || y+this.y < 0 || y+this.y >= H) {
-                // out of bounds
-                [r, g, b, a] = [127, 127, 127, 255];
-            }
-            else {
-                const col = colors[localGrid[y+this.y][x+this.x]];
-                r = parseInt(col[0], 16)*17;
-                g = parseInt(col[1], 16)*17;
-                b = parseInt(col[2], 16)*17;
-                a = 255;
-            }
+            if (x+this.x < 0 || x+this.x >= W || y+this.y < 0 || y+this.y >= H) continue;
+
+            const col = colors[localGrid[y+this.y][x+this.x]];
+            r = parseInt(col[0], 16)*17;
+            g = parseInt(col[1], 16)*17;
+            b = parseInt(col[2], 16)*17;
+            a = 255;
 
             for (let dx = 0; dx < pixSize; dx++) for (let dy = 0; dy < pixSize; dy++) {
                 let i = (Math.floor(x*pixSize)+dx + (Math.floor(y*pixSize)+dy)*width)*4;
@@ -94,8 +94,7 @@ class Chunk {
 
         // get the image data back
         this.image.src = _canvas.toDataURL();
-
-        this.image.onload = () => this.display();
+        this.ready = false; // flag to wait for the image to load
     }
 
     getPos() {
@@ -216,11 +215,14 @@ class ChunkSystem {
                 }
             }
         }
+
+        minimap.display();
     }
 
     update() {
         const zoom = this.getZoom();
 
+        // handle initial chunks loading, one by one to reducs lag spikes
         let changed = false;
         Object.keys(this.queue).forEach(key => {
             const chunk = this.queue[key];
@@ -230,6 +232,14 @@ class ChunkSystem {
                 delete this.queue[key];
                 chunk.display(zoom);
                 changed = true;
+            }
+        });
+
+        // handle chunk edits (wait for image load)
+        Object.values(this.chunks).forEach(chunk => {
+            if (!chunk.ready) {
+                chunk.ready = chunk.image.complete;
+                if (chunk.ready) chunk.display();
             }
         });
 
@@ -358,6 +368,36 @@ class Movement {
     }
 }
 
+class Minimap {
+    constructor() {
+        this.w = 200;
+        this.h = Math.floor(this.w*H/W);
+
+        dom.minimap.width = this.w;
+        dom.minimap.height = this.h;
+        this.ctx = dom.minimap.getContext("2d");
+
+        this.ctx.fillStyle = "#0005";
+        this.ctx.strokeStyle = "#fff";
+        this.ctx.lineWidth = 2;
+    }
+
+    display() {
+        this.ctx.clearRect(0, 0, this.w, this.h);
+        this.ctx.fillRect(0, 0, this.w, this.h);
+
+        const x = options.x/W*this.w;
+        const y = options.y/H*this.h;
+        const w = cW/scale/options.zoom/W*this.w;
+        const h = cH/scale/options.zoom/H*this.h;
+
+        this.ctx.fillRect(x - w/2, y - h/2, w, h);
+        this.ctx.beginPath();
+        this.ctx.rect(x - w/2, y - h/2, w, h);
+        this.ctx.stroke();
+    }
+}
+
 // used to convert ImageData into Image
 const _canvas = document.createElement("canvas");
 _canvas.width = Chunk.size*scale;
@@ -415,6 +455,7 @@ window.onload = () => {
 
     chunkSystem = new ChunkSystem();
     movement = new Movement();
+    minimap = new Minimap();
 
     document.addEventListener("keydown", event => {
         if (!state.userOk) return;

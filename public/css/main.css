@@ -8,6 +8,14 @@
     image-rendering: pixelated;
 }
 
+#minimap {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+
+    border: 2px solid white;
+}
+
 #panel {
     position: fixed;
     bottom: 0;
