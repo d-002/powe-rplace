@@ -14,6 +14,8 @@ let movement;
 
 let fps = 60;
 
+let isMobile;
+
 const cSize = 16;
 class Chunk {
     static size = 16;
@@ -92,6 +94,8 @@ class Chunk {
 
         // get the image data back
         this.image.src = _canvas.toDataURL();
+
+        this.display();
     }
 
     getPos() {
@@ -247,43 +251,112 @@ class ChunkSystem {
 
 class Movement {
     constructor() {
-        this.zoomTime = 0;
+        this.time = 0;
         this.zoomA = 1;
         this.zoomB = 1;
+        this.posA = [0, 0];
+        this.posB = [0, 0];
 
-        window.addEventListener("wheel", event => this.zoom(event.deltaY < 0));
+        dom.canvas.addEventListener("wheel", evt => this.zoom(evt));
+        dom.canvas.addEventListener("mousedown", evt => this.press(evt));
+        dom.canvas.addEventListener("mouseup", evt => this.release(evt, false));
+        dom.canvas.addEventListener("mouseout", evt => this.release(evt, true));
+        dom.canvas.addEventListener("mousemove", evt => this.move(evt));
+
+        this.pressed = false;
+        this.mouse = [0, 0];
+        this.mouseA = [0, 0]; // mouse pos at the start of a movement
     }
 
-    zoom(zoomIn) {
-        this.zoomA = options.zoom
-        if (this.zoomTime == 0) this.zoomB = options.zoom; // reset zoom
+    evtToCoords(evt) {
+        const x = (evt.x+window.scrollX-cW/2)/scale/options.zoom + options.x;
+        const y = (evt.y+window.scrollY-cH/2)/scale/options.zoom + options.y;
 
-        this.zoomTime = Date.now();
-        if (zoomIn) this.zoomB *= 1.2;
+        return [x, y];
+    }
+
+    zoom(evt) {
+        this.release(evt);
+
+        this.zoomA = options.zoom;
+        if (this.time == 0) this.zoomB = options.zoom; // reset zoom
+
+        // set up zoom change and animation
+        this.time = Date.now();
+        if (evt.deltaY < 0) this.zoomB *= 1.2;
         else this.zoomB /= 1.2;
 
-        if (this.zoomB < minZoom) this.zoomB = minZoom;
-        else if (this.zoomB > maxZoom) this.zoomB = maxZoom;
+        this.zoomB = Math.min(Math.max(this.zoomB, minZoom), maxZoom);
+
+        // zoom around the cursor
+        let [x, y] = this.evtToCoords(evt);
+
+        this.posA = this.posB = [options.x, options.y];
+        const mult = this.zoomA/this.zoomB;
+        x = Math.min(Math.max(x + (options.x-x)*mult, 0), W);
+        y = Math.min(Math.max(y + (options.y-y)*mult, 0), H);
+        this.posB = [x, y];
+    }
+
+    press(evt) {
+        if (this.pressed) return;
+        this.pressed = true;
+
+        this.move(evt);
+        this.posA = [options.x, options.y];
+        this.mouseA = this.mouse;
+        this.zoomA = options.zoom;
+
+        event.preventDefault();
+    }
+
+    move(evt) {
+        this.mouse = [evt.x, evt.y];
+    }
+
+    release(evt, offscreen) {
+        if (!this.pressed) return;
+
+        if (!offscreen) {
+            const dx = evt.x-this.mouseA[0];
+            const dy = evt.y-this.mouseA[1];
+
+            if (dx*dx + dy*dy <= 4) click(evt);
+        }
+
+        this.pressed = false;
     }
 
     update() {
         // returns true when the view changed, otherwise false
 
         let changed = false;
-        if (this.zoomTime != 0) {
-            const t = (Date.now()-this.zoomTime)/300;
+        if (this.time != 0) {
+            let t = (Date.now()-this.time)/300;
             if (t < 1) {
-                options.zoom = this.zoomA + (this.zoomB-this.zoomA)*smoothstep(t);
+                t = (3-2*t)*t*t;
+
+                options.zoom = this.zoomA + (this.zoomB-this.zoomA)*t;
+                options.x = this.posA[0] + (this.posB[0]-this.posA[0])*t;
+                options.y = this.posA[1] + (this.posB[1]-this.posA[1])*t;
                 changed = true;
             }
-            else this.zoomTime = 0;
+            else this.time = 0;
+        }
+
+        if (this.pressed) {
+            const dx = (this.mouseA[0]-this.mouse[0])/scale/this.zoomA;
+            const dy = (this.mouseA[1]-this.mouse[1])/scale/this.zoomA;
+
+            options.x = this.posA[0]+dx;
+            options.y = this.posA[1]+dy;
+
+            changed = true;
         }
 
         return changed;
     }
 }
-
-let smoothstep = x => (3-2*x)*x*x;
 
 // used to convert ImageData into Image
 const _canvas = document.createElement("canvas");
@@ -298,10 +371,14 @@ function resizeCanvas(evt) {
     dom.canvas.height = cH;
 
     if (evt != null) chunkSystem.onMove();
+
+    // also update isMobile
+    isMobile = false;
+(function (a) {if (/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i.test(a,)||/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0, 4),))isMobile = true;})(navigator.userAgent || navigator.vendor || window.opera);
 }
 
 function drawPixel(x, y, col) {
-    localGrid[y][x] = col;
+    localGrid[y][x] = (col%user.nColors + user.nColors)%user.nColors;
     chunkSystem.editPixel(x, y);
 }
 
@@ -334,7 +411,6 @@ window.onload = () => {
     resizeCanvas(null);
     loadLocalStorage();
 
-    dom.canvas.addEventListener("click", click);
     window.addEventListener("resize", resizeCanvas);
 
     chunkSystem = new ChunkSystem();

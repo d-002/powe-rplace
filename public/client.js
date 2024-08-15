@@ -56,8 +56,9 @@ function click(evt) {
         return;
     }
 
-    const x = Math.floor((evt.x+window.scrollX-cW/2)/scale/options.zoom + options.x);
-    const y = Math.floor((evt.y+window.scrollY-cH/2)/scale/options.zoom + options.y);
+    let [x, y] = movement.evtToCoords(evt);
+    x = Math.floor(x);
+    y = Math.floor(y);
     const hash = hashPixel(x, y, options.color);
     if (x < 0 || x >= W || y < 0 || y >= H) return;
 
@@ -160,14 +161,10 @@ function loadLocalStorage() {
         options.x = Number(data[0]);
         if (isNaN(options.x)) options.x = W/2;
         if (isNaN(options.y)) options.y = H/2;
-        options.zoom = Number(data[2]) || 1;
+        options.x = Math.min(Math.max(options.x, 0), W);
+        options.y = Math.min(Math.max(options.y, 0), H);
+        options.zoom = Math.min(Math.max(Number(data[2]) || 1, minZoom), maxZoom);
         options.color = parseInt(data[3]) || 0;
-        if (options.x < 0) options.x = 0;
-        if (options.x > W) options.x = W;
-        if (options.y < 0) options.y = 0;
-        if (options.y > H) options.y = H;
-        if (options.zoom < minZoom) options.zoom = minZoom;
-        if (options.zoom > maxZoom) options.zoom = maxZoom;
     }
     catch(err) {
         showInfo("Failed to parse options, settings may be reset: "+err);

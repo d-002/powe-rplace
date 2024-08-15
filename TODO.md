@@ -51,6 +51,7 @@ on update: blit the chunks when out of the queue
 
 TODO:
 - movement animations
+- minimap
 - landing page
 - privacy policy
 - settings
@@ -69,5 +70,6 @@ TODO:
 - gpu acceleration
 - show and record graph of downtime
 - user data system: create account, or checksum in localstorage for connection by ip
+- better zoom and pos management
 - dark theme
 - send email / admin logs on error
