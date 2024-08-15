@@ -71,15 +71,28 @@ function logPixelChange(x, y, col, version) {
     fs.appendFileSync(getFile(version), x+y+col);
 }
 
+function getChecksum(grid) {
+    if (grid.length == 0) return 0;
+    let sum = grid.length+grid[0].length;
+
+    for (let y = 0; y < grid.length; y++)
+    for (let x = 0; x < grid[0].length; x++)
+        sum += grid[y][x];
+    
+    return sum & 65535;
+}
+
 function makeClientUpdate(clientVersion, serverVersion, serverGrid) {
     // make the client update its local map version
+    
+    // first char of message: grid checksum
+    let message = String.fromCharCode(getChecksum(serverGrid));
 
-    if (clientVersion == serverVersion) return "";
+    if (clientVersion == serverVersion) return message;
 
-    // first byte of message: either 0 or 1
+    // second char of message: either 0 or 1
     // if 0: message contains only a list of changes
     // if 1: message contains the full, updated map file
-    let message;
 
     const serverFile = getFile(serverVersion);
     if (clientVersion > serverVersion) clientVersion = 0;
@@ -88,11 +101,11 @@ function makeClientUpdate(clientVersion, serverVersion, serverGrid) {
         if (!clientVersion) clientVersion = 0;
         // need to read multiple log files to update the client: send the server map instead
         // in case an error occured with the client version, reset their map safely here
-        message = String.fromCharCode(1)+encodeMap(serverGrid);
+        message += String.fromCharCode(1)+encodeMap(serverGrid);
     }
     else {
         // only send the relevant changes to the client to then apply
-        message = String.fromCharCode(0);
+        message += String.fromCharCode(0);
 
         let changes = String(fs.readFileSync(serverFile));
 

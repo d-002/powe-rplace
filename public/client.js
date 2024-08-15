@@ -79,9 +79,19 @@ function clientScriptUpdate() {
 }
 
 socket.on("mapUpdate", data => {
+    console.log(data);
+    data = String(data);
+    let checksum = data.charCodeAt(0);
+
     let changes;
     try {
-        changes = applyUpdate(data, drawPixel, grid => { localGrid = grid });
+        changes = applyUpdate(data.substring(1), drawPixel, grid => { localGrid = grid });
+
+        if (checksum != getChecksum(localGrid)) {
+            console.warn("Map is desync, refreshing");
+            socket.emit("help");
+            return;
+        }
     }
     catch (err) {
         console.error("Error loading the map: "+err);

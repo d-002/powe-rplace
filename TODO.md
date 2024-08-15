@@ -50,13 +50,14 @@ once every second: delete the chunks that are not visible but are still cached
 on update: blit the chunks when out of the queue
 
 TODO:
-- movement animations
+- bug dupe connection
 - minimap
 - landing page
 - privacy policy
 - settings
 - button to reset position
 - button to refresh map manually, timeout
+- button to show debug?
 - auto send map again if checksum is different
 - show or hide borders
 - better info system (queue, fadeout, default text (countdown))
