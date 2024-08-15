@@ -79,8 +79,6 @@ function clientScriptUpdate() {
 }
 
 socket.on("mapUpdate", data => {
-    console.log(data);
-    data = String(data);
     let checksum = data.charCodeAt(0);
 
     let changes;

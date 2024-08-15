@@ -401,6 +401,8 @@ class Minimap {
 }
 
 class Clouds {
+    static n = 10;
+
     constructor() {
         this.images = [];
         this.pos = [];
@@ -409,9 +411,11 @@ class Clouds {
             image.src = "img/"+i+".png";
             this.images.push(image);
 
-            if (i < 6)
-                this.pos.push([Math.floor(Math.random()*17), Math.random()*cW/4, Math.random()*cH/4, Math.ceil(Math.random()*3), 0, 0]);
+            if (i <= Clouds.n)
+                this.pos.push([Math.floor(Math.random()*17), Math.random()*(cW+50)-50, Math.random()*cH, Math.random()*5+5, 0, 0]);
         }
+
+        this.pos.sort(pos => -pos[3]);
 
         this.ctx = dom.clouds.getContext("2d");
 
@@ -439,7 +443,7 @@ class Clouds {
             if (!this.ready) return;
         }
 
-        if (Date.now()-this.last < 500) return;
+        if (Date.now()-this.last < 50) return;
         this.last = Date.now();
 
         // don't update when the clouds aren't visible
@@ -455,16 +459,16 @@ class Clouds {
             x += step;
 
             let wrap = false;
-            if (x < -width*scale) {
-                x += cW/4;
+            if (x < -width) {
+                x += cW;
                 wrap = true;
             }
-            else if (x >= cW/4) {
-                x -= cW/4+width*scale;
+            else if (x >= cW) {
+                x -= cW+width;
                 wrap = true;
             }
 
-            if (wrap) y = Math.random()*cH/4;
+            if (wrap) y = Math.random()*cH;
             this.pos[i] = [j, x, y, step, width, height];
 
             this.ctx.drawImage(this.images[j], x, y, width, height);
@@ -481,8 +485,8 @@ const _ctx = _canvas.getContext("2d");
 function resizeCanvas(evt) {
     cW = window.innerWidth;
     cH = window.innerHeight;
-    dom.clouds.width = cW/4;
-    dom.clouds.height = cH/4;
+    dom.clouds.width = cW;
+    dom.clouds.height = cH;
     dom.canvas.width = cW;
     dom.canvas.height = cH;
 
