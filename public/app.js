@@ -2,6 +2,7 @@ let ctx;
 let cW, cH;
 
 let dom = {
+    clouds: null,
     canvas: null,
     minimap: null,
     colors: null,
@@ -13,6 +14,7 @@ let interval;
 let chunkSystem;
 let movement;
 let minimap;
+let clouds;
 
 let fps = 60;
 
@@ -377,7 +379,7 @@ class Minimap {
         dom.minimap.height = this.h;
         this.ctx = dom.minimap.getContext("2d");
 
-        this.ctx.fillStyle = "#0005";
+        this.ctx.fillStyle = "#0004";
         this.ctx.strokeStyle = "#fff";
         this.ctx.lineWidth = 2;
     }
@@ -398,6 +400,78 @@ class Minimap {
     }
 }
 
+class Clouds {
+    constructor() {
+        this.images = [];
+        this.pos = [];
+        for (let i = 1; i <= 17; i++) {
+            const image = new Image();
+            image.src = "img/"+i+".png";
+            this.images.push(image);
+
+            if (i < 6)
+                this.pos.push([Math.floor(Math.random()*17), Math.random()*cW/4, Math.random()*cH/4, Math.ceil(Math.random()*3), 0, 0]);
+        }
+
+        this.ctx = dom.clouds.getContext("2d");
+
+        this.ready = false;
+
+        this.last = 0;
+    }
+
+    isReady() {
+        for (let i = 0; i < this.images.length; i++) {
+            if (this.images[i].complete) {
+                if (i >= this.pos.length) continue;
+                const j = this.pos[i][0];
+                this.pos[i][4] = this.images[j].width;
+                this.pos[i][5] = this.images[j].height;
+            }
+            else return false;
+        }
+        return true;
+    }
+
+    update() {
+        if (!this.ready) {
+            this.ready = this.isReady();
+            if (!this.ready) return;
+        }
+
+        if (Date.now()-this.last < 500) return;
+        this.last = Date.now();
+
+        // don't update when the clouds aren't visible
+        const w = cW/scale/options.zoom;
+        const h = cH/scale/options.zoom;
+
+        if (options.x > w && options.x < W-w && options.y > h && options.y < H-h) return;
+
+        this.ctx.clearRect(0, 0, cW, cH);
+
+        for (let i = 0; i < this.pos.length; i++) {
+            let [j, x, y, step, width, height] = this.pos[i];
+            x += step;
+
+            let wrap = false;
+            if (x < -width*scale) {
+                x += cW/4;
+                wrap = true;
+            }
+            else if (x >= cW/4) {
+                x -= cW/4+width*scale;
+                wrap = true;
+            }
+
+            if (wrap) y = Math.random()*cH/4;
+            this.pos[i] = [j, x, y, step, width, height];
+
+            this.ctx.drawImage(this.images[j], x, y, width, height);
+        }
+    }
+}
+
 // used to convert ImageData into Image
 const _canvas = document.createElement("canvas");
 _canvas.width = Chunk.size*scale;
@@ -407,6 +481,8 @@ const _ctx = _canvas.getContext("2d");
 function resizeCanvas(evt) {
     cW = window.innerWidth;
     cH = window.innerHeight;
+    dom.clouds.width = cW/4;
+    dom.clouds.height = cH/4;
     dom.canvas.width = cW;
     dom.canvas.height = cH;
 
@@ -423,7 +499,7 @@ function drawPixel(x, y, col) {
 }
 
 function showInfo(message) {
-    console.warn(message);
+    console.log(message);
     dom.info.innerHTML = message;
 }
 
@@ -437,6 +513,7 @@ function appUpdate() {
         if (movement.update()) chunkSystem.onMove();
         chunkSystem.update();
     }
+    clouds.update();
 }
 
 function slowUpdate() {
@@ -456,6 +533,7 @@ window.onload = () => {
     chunkSystem = new ChunkSystem();
     movement = new Movement();
     minimap = new Minimap();
+    clouds = new Clouds();
 
     document.addEventListener("keydown", event => {
         if (!state.userOk) return;

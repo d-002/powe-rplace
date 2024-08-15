@@ -1,4 +1,8 @@
-#canvas {
+body {
+    background-color: #35c4ec;
+}
+
+#canvas, #clouds {
     position: fixed;
     top: 0;
     left: 0;
