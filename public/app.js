@@ -95,7 +95,7 @@ class Chunk {
         // get the image data back
         this.image.src = _canvas.toDataURL();
 
-        this.display();
+        this.image.onload = () => this.display();
     }
 
     getPos() {
@@ -378,7 +378,7 @@ function resizeCanvas(evt) {
 }
 
 function drawPixel(x, y, col) {
-    localGrid[y][x] = (col%user.nColors + user.nColors)%user.nColors;
+    localGrid[y][x] = (col%colors.length + colors.length)%colors.length;
     chunkSystem.editPixel(x, y);
 }
 
