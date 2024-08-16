@@ -50,11 +50,12 @@ once every second: delete the chunks that are not visible but are still cached
 on update: blit the chunks when out of the queue
 
 TODO:
+- bug not editing pixels
 - css
 - colors div scroll
 - settings
-- landing page
 - privacy policy
+- bug dupe connection when connecting twice fast
 - button to reset position
 - button to refresh map manually, timeout
 - button to show debug? (memory usage, pos, chunks loaded)

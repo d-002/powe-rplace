@@ -15,6 +15,8 @@
         <script src="chunks.js"></script>
         <script src="app.js"></script>
         <script src="client.js"></script>
+
+        <script src="animated-bg.js" type="module"></script>
     </head>
 
     <body>
@@ -32,20 +34,33 @@
             <div id="colors"></div>
         </div>
 
-        <div id="popup" class="show">
+        <div id="popup" class="show" style="display: none">
             <div id="startup">
                 <h2>Welcome to</h2>
                 <h1>powe-r/place</h1>
-                <a href="javascript:close()">Close</a>
+                <p>A fun and anarchy server where everyone can play! Place a pixel every few seconds anywhere in this canvas. Build giant pixel art, or destroy everything!</p>
+                <p>But that's not all!</p>
+                <p>As the name suggests, powe-r/place introduces <strong>powerups</strong>! Get rewards by playing and unlock special perks...</p>
+                <br class="line" />
+                <p><strong class="red">This game is in ALPHA. Report bugs and suggest features on the <a href="https://github.com/d-002/powe-rplace" target="_blank">GitHub</a>!</strong></p>
+                <div id="termsok">
+                    <a href="javascript:close()" class="button">Close</a>
+                </div>
+                <div id="noterms">
+                    <br class="line" />
+                    <p>To use this site, you must read and agree to the <a href="/terms" target="_blank">Terms of use</a> and privacy policy of powe-r/place.</p>
+                    <a href="javascript:agree()" class="button">I agree to the terms</a>
+                </div>
+                <br class="line" />
             </div>
-            <div id="settings" style="display: none">
+            <div id="settings">
                 <h1>Settings</h1>
                 <p>Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.</p>
                 <p>Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.</p>
                 <p>Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.</p>
                 <p>Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.</p>
                 <p>Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.</p>
-                <a href="javascript:close()">Close</a>
+                <a href="javascript:close()" class="button">Close</a>
             </div>
         </div>
     </body>

@@ -186,3 +186,7 @@ export function animate(_window, _canvas) {
     _start();
     interval = window.setInterval(_animate, 1000/fps);
 }
+
+export function stopAnimation() {
+    window.clearInterval(interval);
+}

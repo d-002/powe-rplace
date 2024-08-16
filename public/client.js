@@ -25,6 +25,8 @@ let placedLocally = {}; // hash: [x, y, prev col, timestamp]
 let localGrid = [];
 let changedMap = false;
 
+let acceptedTerms = false;
+
 let state = {
     "mapOk": false, // if the map is in sync with the server
     "userOk": false, // if the user has been loaded
@@ -138,13 +140,20 @@ socket.on("userUpdate", data => {
 });
 
 function updateLocalStorage() {
-    if (changedMap) localStorage.setItem("map", encodeMap(localGrid));
-    changedMap = false;
+    localStorage.setItem("terms", acceptedTerms ? 1 : 0);
+
+    if (changedMap) {
+        localStorage.setItem("map", encodeMap(localGrid));
+        changedMap = false;
+    }
 
     localStorage.setItem("options", options.x+" "+options.y+" "+options.zoom+" "+options.color+" "+options.lines);
 }
 
 function loadLocalStorage() {
+    // load important stuff
+    acceptedTerms = localStorage.getItem("terms") == "1";
+
     // load map
     let map = localStorage.getItem("map");
     let error = false;
@@ -174,6 +183,7 @@ function loadLocalStorage() {
     else try {
         data = data.split(" ");
         options.x = Number(data[0]);
+        options.y = Number(data[1]);
         if (isNaN(options.x)) options.x = W/2;
         if (isNaN(options.y)) options.y = H/2;
         options.x = Math.min(Math.max(options.x, 0), W);

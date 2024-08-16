@@ -37,16 +37,6 @@ initAccounts(fs, files, dirs);
 initMap(fs, files, dirs);
 
 app.use(express.static(__dirname+"/public"));
-/*app.use(helmet());
-app.use(function(req, res, next) {
-    if (req.url == "/" || req.url == "/down" || req.url.startsWith("/down?")) next();
-    else {
-        res.status(404);
-        res.redirect("/down?reason=404")
-    }
-});*/
-
-let maintenance;
 
 // landing page
 app.get("/", (req, res) => {
@@ -62,6 +52,21 @@ app.get("/down", (req, res) => {
     if (checkMaintenance() && !maintenance) res.redirect("/");
     else res.sendFile(__dirname+"/down.html");
 });
+
+app.get("/terms", (req, res) => {
+    res.sendFile(__dirname+"/terms.html");
+});
+
+app.use(helmet());
+app.use(function(req, res, next) {
+    if (req.url == "/" || req.url == "/down" || req.url.startsWith("/down?")) next();
+    else {
+        res.status(404);
+        res.redirect("/down?reason=404")
+    }
+});
+
+let maintenance;
 
 // create directories and files if non-existant
 console.log("Checking files...");

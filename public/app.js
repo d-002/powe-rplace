@@ -11,7 +11,9 @@ let dom = {
 
     popup: null,
     startup: null,
-    settings: null
+    settings: null,
+    termsok: null,
+    noterms: null
 }
 
 let interval;
@@ -237,16 +239,27 @@ class Clouds {
     }
 }
 
+function startup() {
+    showPopup(dom.startup, dom.settings, acceptedTerms);
+
+    if (acceptedTerms) dom.noterms.style.display = "none";
+    else dom.termsok.style.display = "none";
+}
+
 function settings() {
-    dom.startup.style.display = "none";
-    dom.settings.style.display = null;
+    showPopup(dom.settings, dom.startup, true);
+}
+
+function showPopup(show, hide, listener) {
+    hide.style.display = "none";
+    show.style.display = null;
 
     dom.popup.style.display = null;
     dom.popup.className = "";
     dom.popup.offsetWidth;
     dom.popup.className = "show";
 
-    dom.popup.addEventListener("click", close);
+    if (listener) dom.popup.addEventListener("click", close);
 }
 
 function close() {
@@ -257,6 +270,12 @@ function close() {
     dom.popup.removeEventListener("click", close);
 
     window.setTimeout(() => {dom.popup.style.display = "none"}, 500);
+}
+
+function agree() {
+    acceptedTerms = true;
+    updateLocalStorage();
+    close();
 }
 
 // used to convert ImageData into Image
@@ -341,6 +360,8 @@ window.onload = () => {
     ctx.imageSmoothingEnabled = false;
     resizeCanvas(null);
     loadLocalStorage();
+
+    startup();
 
     window.addEventListener("resize", resizeCanvas);
 
