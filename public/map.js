@@ -7,8 +7,8 @@ function initMap(_fs, _files, _dirs) {
 
 const colors = ['fff', '000', 'f00', '00f', 'f80', '080', 'ff0', 'a0c', '800', '008', '840', '068', 'fd0', '880', 'af0', '707', 'bbb', '444', 'f88', '88f', 'fc8', '8f8', 'ffc', 'f7e'];
 
-const W = 1000;
-const H = 1000;
+const W = 64;
+const H = 64;
 
 const minZoom = 0.1;
 const maxZoom = 10;
@@ -42,7 +42,7 @@ function decodeMap(data, suppressErrors) {
 
         // white canvas if failed to load
         pixels = new Array(H).fill(null);
-        for (let y = 0; y < H; y++) pixels[y] = new Array(W).fill(y%24);
+        for (let y = 0; y < H; y++) pixels[y] = new Array(W).fill(0);
     }
 
     return pixels;

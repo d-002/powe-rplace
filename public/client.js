@@ -48,7 +48,8 @@ let options = {
     x: 0,
     y: 0,
     zoom: 1,
-    color: 0
+    color: 0,
+    lines: 1
 };
 
 function click(evt) {
@@ -137,7 +138,7 @@ function updateLocalStorage() {
     if (changedMap) localStorage.setItem("map", encodeMap(localGrid));
     changedMap = false;
 
-    localStorage.setItem("options", options.x+" "+options.y+" "+options.zoom+" "+options.color);
+    localStorage.setItem("options", options.x+" "+options.y+" "+options.zoom+" "+options.color+" "+options.lines);
 }
 
 function loadLocalStorage() {
@@ -176,6 +177,7 @@ function loadLocalStorage() {
         options.y = Math.min(Math.max(options.y, 0), H);
         options.zoom = Math.min(Math.max(Number(data[2]) || 1, minZoom), maxZoom);
         options.color = parseInt(data[3]) || 0;
+        options.lines = parseInt(data[4]) || 0;
     }
     catch(err) {
         showInfo("Failed to parse options, settings may be reset: "+err);

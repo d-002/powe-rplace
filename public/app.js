@@ -61,21 +61,23 @@ class Chunk {
 
         for (let x = 0; x < number; x++)
         for (let y = 0; y < number; y++) {
-            let r, g, b, a;
             if (x+this.x < 0 || x+this.x >= W || y+this.y < 0 || y+this.y >= H) continue;
 
             const col = colors[localGrid[y+this.y][x+this.x]];
-            r = parseInt(col[0], 16)*17;
-            g = parseInt(col[1], 16)*17;
-            b = parseInt(col[2], 16)*17;
-            a = 255;
+            const r = parseInt(col[0], 16)*17;
+            const g = parseInt(col[1], 16)*17;
+            const b = parseInt(col[2], 16)*17;
 
             for (let dx = 0; dx < pixSize; dx++) for (let dy = 0; dy < pixSize; dy++) {
                 let i = (Math.floor(x*pixSize)+dx + (Math.floor(y*pixSize)+dy)*width)*4;
-                buffer[i++] = r;
-                buffer[i++] = g;
-                buffer[i++] = b;
-                buffer[i] = a;
+                if (options.lines && options.zoom > 0.5 && !(dx && dy))
+                    buffer[i++] = buffer[i++] = buffer[i++] = 127;
+                else {
+                    buffer[i++] = r;
+                    buffer[i++] = g;
+                    buffer[i++] = b;
+                }
+                buffer[i] = 255;
             }
         }
 
