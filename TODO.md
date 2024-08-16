@@ -65,6 +65,7 @@ TODO:
 - async map files updates, but be careful about permissions
 - mobile version (when width < height, updated on screen resize (with timeout)?)
 - changelog popup
+- click on minimap
 - login support to sync data from ip, implement passkey system in local storage
 - ddos protection / ip ban in admin
 - display currently active users

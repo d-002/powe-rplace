@@ -85,9 +85,7 @@ socket.on("mapUpdate", data => {
 
     let changes;
     try {
-        localGrid.forEach(l=>{if (l.reduce((a,b)=>a+b,0)) console.log(l)});
         changes = applyUpdate(data.substring(1), drawPixel, grid => { localGrid = grid });
-        localGrid.forEach(l=>{if (l.reduce((a,b)=>a+b,0)) console.log(l)});
         if (changes) changedMap = true;
 
         if (checksum != getChecksum(localGrid)) {
@@ -184,6 +182,8 @@ function loadLocalStorage() {
     catch(err) {
         showInfo("Failed to parse options, settings may be reset: "+err);
     }
+
+    updateCol(dom.selected, options.color);
 
     state.optionsOk = true;
 }

@@ -11,6 +11,8 @@
         <script>let module = null;</script>
         <script src="map.js"></script>
         <script src="accounts.js"></script>
+
+        <script src="chunks.js"></script>
         <script src="app.js"></script>
         <script src="client.js"></script>
     </head>
@@ -18,8 +20,13 @@
     <body>
         <canvas id="clouds"></canvas>
         <canvas id="canvas"></canvas>
-        <canvas id="minimap"></canvas>
-        <div id="colors"><p>hw</p></div>
+
+        <div id="sidebar">
+            <canvas id="minimap"></canvas>
+            <div id="colors">
+                <a id="selected"></a>
+            </div>
+        </div>
         <p id="info"></p>
     </body>
 </html>
