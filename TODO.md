@@ -51,16 +51,16 @@ on update: blit the chunks when out of the queue
 
 TODO:
 - css
-- colors div animations
 - colors div scroll
 - settings
 - landing page
 - privacy policy
 - button to reset position
 - button to refresh map manually, timeout
-- button to show debug?
-- auto send map again if checksum is different
-- show or hide borders
+- button to show debug? (memory usage, pos, chunks loaded)
+- button to show or hide borders
+- show stats, play time
+- instantly go back when going out of bounds
 - better info system (queue, fadeout, default text (countdown))
 - less file writes: options, user data, map file
 - async map files updates, but be careful about permissions

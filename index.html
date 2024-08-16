@@ -20,11 +20,33 @@
     <body>
         <canvas id="clouds"></canvas>
         <canvas id="canvas"></canvas>
+        <p id="info"></p>
 
         <div id="sidebar">
             <canvas id="minimap"></canvas>
+            <div id="settings-button">
+                <a href="javascript:settings()">
+                    <img src="img/settings.png" />
+                </a>
+            </div>
             <div id="colors"></div>
         </div>
-        <p id="info"></p>
+
+        <div id="popup" class="show">
+            <div id="startup">
+                <h2>Welcome to</h2>
+                <h1>powe-r/place</h1>
+                <a href="javascript:close()">Close</a>
+            </div>
+            <div id="settings" style="display: none">
+                <h1>Settings</h1>
+                <p>Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.</p>
+                <p>Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.</p>
+                <p>Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.</p>
+                <p>Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.</p>
+                <p>Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.</p>
+                <a href="javascript:close()">Close</a>
+            </div>
+        </div>
     </body>
 </html>

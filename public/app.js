@@ -4,9 +4,14 @@ let cW, cH;
 let dom = {
     clouds: null,
     canvas: null,
+    info: null,
+
     minimap: null,
     colors: null,
-    info: null
+
+    popup: null,
+    startup: null,
+    settings: null
 }
 
 let interval;
@@ -175,11 +180,8 @@ class Clouds {
         }
 
         this.pos = this.pos.sort((a,b) => a[3]-b[3]);
-
         this.ctx = dom.clouds.getContext("2d");
-
         this.ready = false;
-
         this.last = 0;
     }
 
@@ -233,6 +235,28 @@ class Clouds {
             this.ctx.drawImage(this.images[j], x, y, width, height);
         }
     }
+}
+
+function settings() {
+    dom.startup.style.display = "none";
+    dom.settings.style.display = null;
+
+    dom.popup.style.display = null;
+    dom.popup.className = "";
+    dom.popup.offsetWidth;
+    dom.popup.className = "show";
+
+    dom.popup.addEventListener("click", close);
+}
+
+function close() {
+    dom.popup.className = "";
+    dom.popup.offsetWidth;
+    dom.popup.className = "hide";
+
+    dom.popup.removeEventListener("click", close);
+
+    window.setTimeout(() => {dom.popup.style.display = "none"}, 500);
 }
 
 // used to convert ImageData into Image

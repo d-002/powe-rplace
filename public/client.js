@@ -96,6 +96,9 @@ socket.on("mapUpdate", data => {
     }
     catch (err) {
         console.error("Error loading the map: "+err);
+        console.log("Refreshing");
+
+        socket.emit("help");
         return;
     }
 
