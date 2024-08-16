@@ -23,6 +23,7 @@ socket = new _socket(socket);
 let placedLocally = {}; // hash: [x, y, prev col, timestamp]
 
 let localGrid = [];
+let changedMap = false;
 
 let state = {
     "mapOk": false, // if the map is in sync with the server
@@ -84,6 +85,7 @@ socket.on("mapUpdate", data => {
     let changes;
     try {
         changes = applyUpdate(data.substring(1), drawPixel, grid => { localGrid = grid });
+        if (changes) mapChanged = true;
 
         if (checksum != getChecksum(localGrid)) {
             console.warn("Map is desync, refreshing");
@@ -132,7 +134,8 @@ socket.on("userUpdate", data => {
 });
 
 function updateLocalStorage() {
-    localStorage.setItem("map", encodeMap(localGrid));
+    if (changedMap) localStorage.setItem("map", encodeMap(localGrid));
+    changedMap = false;
 
     localStorage.setItem("options", options.x+" "+options.y+" "+options.zoom+" "+options.color);
 }

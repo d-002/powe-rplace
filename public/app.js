@@ -123,6 +123,8 @@ class ChunkSystem {
     constructor() {
         this.chunks = {}; // generated chunks: {"x.y.zoom": Chunk}
         this.queue = {}; // chunks still generating
+
+        this.lastOther = 0;
     }
 
     getZoom() {
@@ -249,6 +251,12 @@ class ChunkSystem {
             // no more items in the queue: display everything again
             // to delete non necessary chunks
             this.onMove();
+        }
+
+        if (Date.now()-this.lastOther >= 1000) {
+            updateLocalStorage();
+            this.otherChecks();
+            this.lastOther = Date.now();
         }
     }
 
@@ -415,7 +423,7 @@ class Clouds {
                 this.pos.push([Math.floor(Math.random()*17), Math.random()*(cW+50)-50, Math.random()*cH, Math.random()*5+5, 0, 0]);
         }
 
-        this.pos.sort(pos => -pos[3]);
+        this.pos = this.pos.sort(pos => pos[3]);
 
         this.ctx = dom.clouds.getContext("2d");
 
@@ -443,7 +451,7 @@ class Clouds {
             if (!this.ready) return;
         }
 
-        if (Date.now()-this.last < 50) return;
+        if (Date.now()-this.last < 500) return;
         this.last = Date.now();
 
         // don't update when the clouds aren't visible
@@ -499,11 +507,11 @@ function resizeCanvas(evt) {
 
 function drawPixel(x, y, col) {
     localGrid[y][x] = (col%colors.length + colors.length)%colors.length;
+    changedMap = true;
     chunkSystem.editPixel(x, y);
 }
 
 function showInfo(message) {
-    console.log(message);
     dom.info.innerHTML = message;
 }
 
@@ -518,11 +526,6 @@ function appUpdate() {
         chunkSystem.update();
     }
     clouds.update();
-}
-
-function slowUpdate() {
-    updateLocalStorage();
-    chunkSystem.otherChecks();
 }
 
 window.onload = () => {
@@ -563,8 +566,6 @@ window.onload = () => {
     });
 
     interval = window.setInterval(update, 1000/fps);
-
-    window.setInterval(slowUpdate, 1000);
 
     socket.emit("initial");
 }
