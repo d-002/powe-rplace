@@ -85,8 +85,10 @@ socket.on("mapUpdate", data => {
 
     let changes;
     try {
+        localGrid.forEach(l=>{if (l.reduce((a,b)=>a+b,0)) console.log(l)});
         changes = applyUpdate(data.substring(1), drawPixel, grid => { localGrid = grid });
-        if (changes) mapChanged = true;
+        localGrid.forEach(l=>{if (l.reduce((a,b)=>a+b,0)) console.log(l)});
+        if (changes) changedMap = true;
 
         if (checksum != getChecksum(localGrid)) {
             console.warn("Map is desync, refreshing");
@@ -188,7 +190,9 @@ function loadLocalStorage() {
 
 socket.on("noHelp", () => {
     // help was refused, explain why if needed
-    showInfo("You are being rate limited, please try again later.");
+    showInfo("You are being rate limited, map will refresh soon...");
+
+    window.setTimeout(() => socket.emit("help"), privileges.helpCooldown+1000);
 });
 
 socket.on("duplicateIp", () => {

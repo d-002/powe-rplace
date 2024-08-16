@@ -91,10 +91,12 @@ class Chunk {
         const pixSize = scale*this.zoom;
         const number = Math.ceil(Chunk.size/this.zoom);
 
+        const add = options.lines ? 1 : 0;
+
         // display the image on a canvas and edit it
         _ctx.drawImage(this.image, 0, 0);
         _ctx.fillStyle = "#"+colors[localGrid[y][x]];
-        _ctx.fillRect(x%number*pixSize, y%number*pixSize, scale*this.zoom, scale*this.zoom);
+        _ctx.fillRect(x%number*pixSize + add, y%number*pixSize + add, scale*this.zoom - add, scale*this.zoom - add);
 
         // get the image data back
         this.image.src = _canvas.toDataURL();

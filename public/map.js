@@ -78,7 +78,7 @@ function getChecksum(grid) {
     for (let y = 0; y < grid.length; y++)
     for (let x = 0; x < grid[0].length; x++)
         sum += grid[y][x];
-    
+
     return sum & 65535;
 }
 

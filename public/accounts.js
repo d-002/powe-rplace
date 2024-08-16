@@ -12,7 +12,7 @@ const privileges = {
     "cooldown": [10000],
 
     // other options, not included in User objects, but exported into other scripts as well
-    "helpCooldown": 10000,
+    "helpCooldown": 5000,
     "timeoutDelay": 10000 // only used on the client, to guess when it has been disconnected
 }
 
