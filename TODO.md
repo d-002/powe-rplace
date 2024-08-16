@@ -51,7 +51,8 @@ on update: blit the chunks when out of the queue
 
 TODO:
 - css
-- colors div
+- colors div animations
+- colors div scroll
 - settings
 - landing page
 - privacy policy

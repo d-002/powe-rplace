@@ -183,7 +183,8 @@ function loadLocalStorage() {
         showInfo("Failed to parse options, settings may be reset: "+err);
     }
 
-    updateCol(dom.selected, options.color);
+    setcol(options.color);
+    changedMap = false;
 
     state.optionsOk = true;
 }

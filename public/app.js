@@ -6,7 +6,6 @@ let dom = {
     canvas: null,
     minimap: null,
     colors: null,
-    selected: null,
     info: null
 }
 
@@ -175,7 +174,7 @@ class Clouds {
                 this.pos.push([Math.floor(Math.random()*17), Math.random()*(cW+50)-50, Math.random()*cH, Math.random()*5+5, 0, 0]);
         }
 
-        this.pos = this.pos.sort(pos => -pos[3]);
+        this.pos = this.pos.sort((a,b) => a[3]-b[3]);
 
         this.ctx = dom.clouds.getContext("2d");
 
@@ -280,20 +279,39 @@ function appUpdate() {
     clouds.update();
 }
 
-function updateCol(elt, index) {
-    elt.style = "--col: #"+colors[index];
-    elt.setAttribute("index", index);
-}
+function setcol(i) {
+    i = (parseInt(Math.abs(i)) || 0) % (user ? user.nColors : privileges.colors[0]);
 
-function col(i) {
-    options.color = Math.abs(i)%user.nColors;
-    updateCol(dom.selected, options.color);
+    dom.colors.children[options.color&7].children[options.color>>3].classList.remove("selected");
+    dom.colors.children[i&7].children[i>>3].classList.add("selected");
+    dom.colors.style = "pointer-events: none";
+    window.setTimeout(() => {dom.colors.style = ""}, 100);
+
+    i = Math.floor(i) || 0;
+    if (i < 0 || i >= user ? user.nColors : NaN) return;
+    options.color = i;
+
+    updateLocalStorage();
 }
 
 window.onload = () => {
     Object.keys(dom).forEach(id => dom[id] = document.getElementById(id));
 
     showInfo("Loading...");
+
+    for (let y = 0; y < 8; y++) {
+        const div = document.createElement("div");
+        div.style = "--index: "+y;
+        for (let x = 0; x < 3; x++) {
+            const col = document.createElement("a");
+            col.href = "javascript:setcol("+(y+x*8)+")";
+            col.className = "color";
+            col.style = "--col: #"+colors[y + x*8];
+            col.setAttribute("index", y + x*8);
+            div.appendChild(col);
+        }
+        dom.colors.appendChild(div);
+    }
 
     ctx = dom.canvas.getContext("2d");
     ctx.imageSmoothingEnabled = false;
@@ -308,25 +326,11 @@ window.onload = () => {
     clouds = new Clouds();
 
     document.addEventListener("keydown", event => {
-        if (!state.userOk) return;
         if (event.key == "a") {
             localStorage.clear();
             window.location.reload();
         }
-        else options.color = (options.color+1) % user.nColors;
     });
-
-    for (let y = 0; y < 8; y++) {
-        const div = document.createElement("div");
-        for (let x = 0; x < 3; x++) {
-            const col = document.createElement("a");
-            col.href = "javascript:col("+(y+x*8)+")";
-            col.className = "color";
-            updateCol(col, y + x*8);
-            div.appendChild(col);
-        }
-        dom.colors.appendChild(div);
-    }
 
     interval = window.setInterval(update, 1000/fps);
 

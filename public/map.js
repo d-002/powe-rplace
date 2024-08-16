@@ -5,7 +5,11 @@ function initMap(_fs, _files, _dirs) {
     dirs = _dirs;
 }
 
-const colors = ['fff', '000', 'f00', '00f', 'f80', '080', 'ff0', 'a0c', '800', '008', '840', '068', 'fd0', '880', 'af0', '707', 'bbb', '444', 'f88', '88f', 'fc8', '8f8', 'ffc', 'f7e'];
+const colors = [
+    "fff", "000", "f00", "00f", "f80", "080", "ff0", "a0c",
+    "444", "008", "800", "068", "fd0", "af0", "880", "707",
+    "bbb", "840", "f88", "88f", "fc8", "8f8", "ffc", "f7e"
+];
 
 const W = 64;
 const H = 64;
