@@ -46,6 +46,9 @@ window.onload = () => {
     id("subtitle").innerHTML = subtitle;
     link = id("link");
 
+    const tTag = document.getElementsByTagName("title")[0];
+    tTag.innerHTML = title+" - "+tTag.innerHTML;
+
     if (countdown) {
         startTime = Date.now();
         link.className = "nohref";

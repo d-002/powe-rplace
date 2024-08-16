@@ -51,6 +51,7 @@ on update: blit the chunks when out of the queue
 
 TODO:
 - colors div scroll
+- blacklist
 - settings
 - privacy policy
 - bug dupe connection when connecting twice fast

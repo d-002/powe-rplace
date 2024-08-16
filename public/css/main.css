@@ -216,10 +216,12 @@ body {
     height: 100%;
 
     padding: 30px;
+    box-sizing: border-box;
 
     box-shadow: 0 0 15px #0005;
     background-color: var(--bg1);
 
+    overflow-x: hidden;
     overflow-y: auto;
 }
 

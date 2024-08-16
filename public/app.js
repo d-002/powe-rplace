@@ -259,7 +259,10 @@ function showPopup(show, hide, listener) {
     dom.popup.offsetWidth;
     dom.popup.className = "show";
 
-    if (listener) dom.popup.addEventListener("click", close);
+    // close popup by clicking on the transparent part
+    if (listener) dom.popup.addEventListener("click", evt => {
+        if (evt.x+window.scrollX > cW*0.4) close();
+    });
 }
 
 function close() {
