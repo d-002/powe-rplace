@@ -50,8 +50,6 @@ once every second: delete the chunks that are not visible but are still cached
 on update: blit the chunks when out of the queue
 
 TODO:
-- bug not editing pixels
-- css
 - colors div scroll
 - settings
 - privacy policy

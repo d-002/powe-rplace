@@ -20,6 +20,7 @@ class User {
     constructor(ip, version, lastPixel, lastHelp, nPlaced) {
         // this.socket can be undefined if the object is only used as a container for its settings
         this.socket = undefined;
+        this.isDupe = false;
 
         this.ip = ip;
         this.version = version;

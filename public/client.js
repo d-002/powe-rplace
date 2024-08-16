@@ -50,7 +50,7 @@ let options = {
     x: 0,
     y: 0,
     zoom: 1,
-    color: 0,
+    color: 1,
     lines: 1
 };
 

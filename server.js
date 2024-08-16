@@ -132,20 +132,24 @@ io.on("connection", socket => {
     //ip += "-"+Date.now()%1000;
 
     // check if a client with this ip already connected
-    let ok = true;
+    let dupe;
     Object.keys(clients).forEach(ip2 => {
-        if (ip == ip2) ok = false;
+        if (ip == ip2) {
+            dupe = clients[ip].socket;
+            clients[ip].isDupe = true;
+        }
     });
-    if (!ok) {
-        console.error("Duplicate connection from "+ip);
-        socket.emit("duplicateIp");
-        return;
-    }
 
     const user = User.decodeFile(ip)
     clients[ip] = user;
+    clients[ip].isDupe = dupe != null;
     user.socket = socket;
     console.log("New connection from "+ip);
+
+    if (dupe) {
+        console.warn("Duplicate connection from "+ip+", disconnecting others");
+        dupe.emit("duplicateIp");
+    }
 
     socket.on("error", err => console.error("Error in socket: "+err));
 
@@ -195,7 +199,8 @@ io.on("connection", socket => {
     });
 
     socket.on("initial", _ => {
-        // triggered on init, should be fine afterwards, forces a "normal" update of the map
+        // triggered on init, but should be fine to call it afterwards
+        // forces a "normal" update of the map
         updateClientIp(ip, user.version);
         socket.emit("userUpdate", user.encode());
     });
@@ -214,7 +219,10 @@ io.on("connection", socket => {
         socket.disconnect();
         socket.removeAllListeners();
         socket = null;
-        delete clients[ip];
+
+        // don't delete client from storage if it was an older clone ip
+        if (clients[ip].isDupe) clients[ip].isDupe = false;
+        else delete clients[ip];
     });
 });
 
