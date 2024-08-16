@@ -368,8 +368,8 @@ class Movement {
             const dx = (this.mouseA[0]-this.mouse[0])/scale/this.zoomA;
             const dy = (this.mouseA[1]-this.mouse[1])/scale/this.zoomA;
 
-            options.x = this.posA[0]+dx;
-            options.y = this.posA[1]+dy;
+            options.x = Math.min(Math.max(this.posA[0]+dx, 0), W);
+            options.y = Math.min(Math.max(this.posA[1]+dy, 0), H);
 
             changed = true;
         }

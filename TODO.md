@@ -50,9 +50,11 @@ once every second: delete the chunks that are not visible but are still cached
 on update: blit the chunks when out of the queue
 
 TODO:
+- css
+- colors div
+- settings
 - landing page
 - privacy policy
-- settings
 - button to reset position
 - button to refresh map manually, timeout
 - button to show debug?

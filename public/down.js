@@ -28,7 +28,7 @@ function update() {
         link.innerHTML = "Refresh";
         link.className = "";
         window.clearInterval(interval);
-        document.location.href = options[type][2];
+        document.location.href = "/";
     }
     else {
         const value = Math.ceil((timer-t) / 1000);
