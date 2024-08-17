@@ -23,6 +23,8 @@ body {
 
     --bg1: #f7f7f7;
     --fg1: #171717;
+    --fg2: #444;
+    --fg3: #999;
     --link1: #186bd8;
 }
 
@@ -33,4 +35,23 @@ a {
 
 a:not(.nohref):hover {
     text-decoration: underline;
+}
+
+#footer {
+    width: 100%;
+    height: 50px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    box-shadow: 0 0 10px #0003;
+    backdrop-filter: blur(5px);
+
+    font-size: 16px;
+    color: var(--fg2);
+}
+
+#footer a {
+    color: var(--fg3);
 }

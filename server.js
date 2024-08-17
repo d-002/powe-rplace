@@ -58,6 +58,10 @@ app.get("/down", (req, res) => {
     else res.sendFile(__dirname+"/down.html");
 });
 
+app.get("/status", (req, res) => {
+    res.sendFile(__dirname+"/status.html");
+});
+
 app.get("/terms", (req, res) => {
     res.sendFile(__dirname+"/terms.html");
 });

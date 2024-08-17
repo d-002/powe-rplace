@@ -210,10 +210,14 @@ body {
 #popup>div {
     position: fixed;
 
-    top: 0;
     left: 0;
     width: 40%;
     max-width: 600px;
+}
+
+#popup>div:not(#small-footer) {
+    top: 0;
+
     height: 100%;
 
     padding: 30px;
@@ -224,6 +228,22 @@ body {
 
     overflow-x: hidden;
     overflow-y: auto;
+}
+
+#popup>div#small-footer {
+    bottom: 0;
+    height: 50px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-size: 16px;
+    color: var(--fg2);
+}
+
+#small-footer a {
+    color: var(--fg3);
 }
 
 #popup.show>div {

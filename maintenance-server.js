@@ -17,6 +17,14 @@ app.get("/down", (req, res) => {
     res.sendFile(__dirname+"/down.html");
 });
 
+app.get("/terms", (req, res) => {
+    res.sendFile(__dirname+"/terms.html");
+});
+
+app.get("/status", (req, res) => {
+    res.sendFile(__dirname+"/status.html");
+});
+
 // error handling
 process.on("uncaughtException", function (err) {
     console.log("PREVENTED SERVER CRASH, logging...");
