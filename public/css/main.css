@@ -213,6 +213,7 @@ body {
     top: 0;
     left: 0;
     width: 40%;
+    max-width: 600px;
     height: 100%;
 
     padding: 30px;

@@ -5,7 +5,9 @@ const { colors, W, H, initMap, decodeMap, encodeMap, logPixelChange, makeClientU
 const files = {
     "options": "/files/options.txt",
     "grid": "/files/grid.csv",
-    "maintenance": "/files/maintenance.txt"
+    "maintenance": "/files/maintenance.txt",
+    "blacklist": "/files/blacklist.txt",
+    "op": "/files/op.txt"
 }
 const dirs = {
     "logs": "/files/logs/",
@@ -27,6 +29,9 @@ const io = new Server(server);
 const port = process.env.PORT || 3000;
 
 let clients = {}; // ip: User object
+
+let blacklisted = [];
+let op = [];
 
 // execute certain actions once in a while, triggered when someone places a pixel
 let prevBroadcast = Date.now();
@@ -130,6 +135,13 @@ if (logsVersion == 0) {
 io.on("connection", socket => {
     let ip = (socket.handshake.headers["x-forwarded-for"] || socket.conn.remoteAddress).split(",")[0].split(":").slice(-1)[0];
     //ip += "-"+Date.now()%1000;
+    
+    if (blacklist.includes(ip)) {
+        console.log("Blacklisted IP, disconencting");
+        socket.emit("blacklist");
+
+        return;
+    }
 
     // check if a client with this ip already connected
     let dupe;
@@ -224,6 +236,11 @@ io.on("connection", socket => {
         if (clients[ip].isDupe) clients[ip].isDupe = false;
         else delete clients[ip];
     });
+
+    // op options
+    socket.on("updateOp", () => {
+        if (op.includes(ip)) updateOp();
+    });
 });
 
 function updateClientIp(ip, clientVersion) {
@@ -256,6 +273,14 @@ function checkMaintenance() {
 
     return false;
 }
+
+function updateOp() {
+    blacklist = String(fs.readFileSync(files.blacklist)).split("\n");
+    op = String(fs.readFileSync(files.op)).split("\n");
+
+    console.log("Blacklisted:\n"+blacklist+"\nOp:\n"+op);
+}
+updateOp();
 
 // error handling
 process.on("uncaughtException", function (err) {

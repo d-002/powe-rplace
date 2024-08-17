@@ -227,5 +227,7 @@ socket.on("disconnect", () => {
     }
     catch { }
 
-    window.location.href="/down?reason=disconnect";
+    window.location.href = "/down?reason=disconnect";
 });
+
+socket.on("blacklist", () => {window.location.href = "/down?reason=blacklist";});
