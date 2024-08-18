@@ -45,7 +45,7 @@ class Chunk {
 
             for (let dx = 0; dx < pixSize; dx++) for (let dy = 0; dy < pixSize; dy++) {
                 let i = (Math.floor(x*pixSize)+dx + (Math.floor(y*pixSize)+dy)*width)*4;
-                if (options.lines && options.zoom > 0.5 && !(dx && dy))
+                if (options.borders && options.zoom > 0.5 && !(dx && dy))
                     buffer[i++] = buffer[i++] = buffer[i++] = 127;
                 else {
                     buffer[i++] = r;
@@ -66,7 +66,7 @@ class Chunk {
         const pixSize = scale*this.zoom;
         const number = Math.ceil(Chunk.size/this.zoom);
 
-        const add = options.lines ? 1 : 0;
+        const add = options.borders ? 1 : 0;
 
         // display the image on a canvas and edit it
         _ctx.drawImage(this.image, 0, 0);

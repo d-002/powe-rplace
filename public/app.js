@@ -20,9 +20,7 @@ let dom = {
     noterms: null,
 
     // options
-    Tresetpos: null,
     Tborders: null,
-    Trefresh: null,
     Tdebug: null
 }
 
@@ -254,6 +252,8 @@ function startup() {
     showPopup(dom.startup, dom.settings, acceptedTerms);
 
     dom.debug.style.display = options.debug ? null : "none";
+    if (options.borders) toggleElt(dom.Tborders);
+    if (options.debug) toggleElt(dom.Tdebug);
 
     if (acceptedTerms) dom.noterms.style.display = "none";
     else dom.termsok.style.display = "none";
@@ -377,14 +377,37 @@ function populateColors() {
     setcol(options.color);
 }
 
+let toggleElt = elt => elt.className = elt.className ? "" : "active";
+
 // options
 function tResetPos() {
-    options.x = W/2;
-    options.Y = H/2;
+    // smoothly translate
+    const start = Date.now();
+    const prev = [options.x, options.y, options.zoom];
+
+    closeMenu();
+    const interval = window.setInterval(() => {
+        let t = (Date.now()-start)/500;
+        if (t > 1) {
+            options.x = W/2;
+            options.y = H/2;
+            options.zoom = 1;
+            updateLocalStorage();
+            window.clearInterval(interval);
+            return;
+        }
+
+        t = (3 - 2*t)*t*t;
+        options.x = prev[0] + (W/2-prev[0])*t;
+        options.y = prev[1] + (H/2-prev[1])*t;
+        options.zoom = prev[2] + (1-prev[2])*t;
+        chunkSystem.onMove();
+    }, 1000/fps);
 }
 
 function tBorders() {
-    options.lines = 1-options.lines;
+    toggleElt(dom.Tborders);
+    options.borders = 1-options.borders;
     updateLocalStorage();
     chunkSystem.reset();
 }
@@ -395,6 +418,7 @@ function tRefreshMap() {
 }
 
 function tDebug() {
+    toggleElt(dom.Tdebug);
     options.debug = 1-options.debug;
     updateLocalStorage();
 

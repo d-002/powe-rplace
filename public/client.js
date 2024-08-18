@@ -52,7 +52,7 @@ let options = {
     y: 0,
     zoom: 1,
     color: 1,
-    lines: 1,
+    borders: 1,
     debug: 0
 };
 
@@ -151,7 +151,7 @@ function updateLocalStorage() {;
 
     localStorage.setItem("terms", acceptedTerms ? 1 : 0);
 
-    localStorage.setItem("options", options.x+" "+options.y+" "+options.zoom+" "+options.color+" "+options.lines+" "+options.debug);
+    localStorage.setItem("options", options.x+" "+options.y+" "+options.zoom+" "+options.color+" "+options.borders+" "+options.debug);
 }
 
 function loadLocalStorage() {
@@ -194,7 +194,7 @@ function loadLocalStorage() {
         options.y = Math.min(Math.max(options.y, 0), H);
         options.zoom = Math.min(Math.max(Number(data[2]) || 1, minZoom), maxZoom);
         options.color = parseInt(data[3]) || 0;
-        options.lines = parseInt(data[4]) || 0;
+        options.borders = parseInt(data[4]) || 0;
         options.debug = parseInt(data[5]) || 0;
     }
     catch(err) {
