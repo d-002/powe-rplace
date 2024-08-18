@@ -140,7 +140,7 @@ socket.on("userUpdate", data => {
 });
 
 function updateLocalStorage() {
-    localStorage.setItem("terms", acceptedTerms ? 1 : 0);
+    if (state.optionsOk) localStorage.setItem("terms", acceptedTerms ? 1 : 0);
 
     if (changedMap) {
         localStorage.setItem("map", encodeMap(localGrid));
@@ -196,7 +196,6 @@ function loadLocalStorage() {
         showInfo("Failed to parse options, settings may be reset: "+err);
     }
 
-    setcol(options.color);
     changedMap = false;
 
     state.optionsOk = true;

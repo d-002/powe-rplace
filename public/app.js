@@ -17,6 +17,7 @@ let dom = {
 }
 
 let interval;
+let colorsInterval;
 
 let chunkSystem;
 let movement;
@@ -340,15 +341,15 @@ function setcol(i) {
     updateLocalStorage();
 }
 
-window.onload = () => {
-    Object.keys(dom).forEach(id => dom[id] = document.getElementById(id));
+function populateColors() {
+    dom.colors.innerHTML = "";
 
-    showInfo("Loading...");
+    const count = user ? user.nColors>>3 : 1;
 
     for (let y = 0; y < 8; y++) {
         const div = document.createElement("div");
         div.style = "--index: "+y;
-        for (let x = 0; x < 3; x++) {
+        for (let x = 0; x < count; x++) {
             const col = document.createElement("a");
             col.href = "javascript:setcol("+(y+x*8)+")";
             col.className = "color";
@@ -358,6 +359,16 @@ window.onload = () => {
         }
         dom.colors.appendChild(div);
     }
+
+    setcol(options.color);
+}
+
+window.onload = () => {
+    Object.keys(dom).forEach(id => dom[id] = document.getElementById(id));
+
+    showInfo("Loading...");
+
+    populateColors();
 
     ctx = dom.canvas.getContext("2d");
     ctx.imageSmoothingEnabled = false;
@@ -381,6 +392,15 @@ window.onload = () => {
     });
 
     interval = window.setInterval(update, 1000/fps);
+
+    colorsInterval = window.setInterval(() => {
+        if (stateOk()) {
+            console.log(user);
+            console.log(options);
+            populateColors();
+            window.clearInterval(colorsInterval);
+        }
+    }, 100);
 
     socket.emit("initial");
 }
