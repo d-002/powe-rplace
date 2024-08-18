@@ -23,6 +23,7 @@
         <canvas id="clouds"></canvas>
         <canvas id="canvas"></canvas>
         <p id="info"></p>
+        <p id="debug"></p>
 
         <div id="sidebar">
             <canvas id="minimap"></canvas>
@@ -44,7 +45,7 @@
                 <br class="line" />
                 <p><strong class="red">This game is in INDEV. Report bugs and suggest features on the <a href="https://github.com/d-002/powe-rplace" target="_blank">GitHub</a>!</strong></p>
                 <div id="termsok">
-                    <a href="javascript:close()" class="button">Close</a>
+                    <a href="javascript:closeMenu()" class="button">Close</a>
                 </div>
                 <div id="noterms">
                     <br class="line" />
@@ -54,12 +55,13 @@
             </div>
             <div id="settings">
                 <h1>Settings</h1>
-                <p>Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.</p>
-                <p>Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.</p>
-                <p>Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.</p>
-                <p>Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.</p>
-                <p>Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.</p>
-                <a href="javascript:close()" class="button">Close</a>
+                <a href="javascript:tResetPos()">Reset pos</a>
+                <a href="javascript:tBorders()">Toggle pixels borders</a>
+                <a href="javascript:tRefreshMap()">Refresh map (cooldown)</a>
+                <a href="javascript:tDebug()">Show/hide debug</a>
+                <p>User statistics:</p>
+                <div id="userstats"></div>
+                <a href="javascript:closeMenu()" class="button">Close</a>
             </div>
 
             <div id="small-footer">

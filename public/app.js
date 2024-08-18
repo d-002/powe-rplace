@@ -2,18 +2,28 @@ let ctx;
 let cW, cH;
 
 let dom = {
+    // general
     clouds: null,
     canvas: null,
     info: null,
+    debug: null,
 
+    // sidebar
     minimap: null,
     colors: null,
 
+    // popup
     popup: null,
     startup: null,
     settings: null,
     termsok: null,
-    noterms: null
+    noterms: null,
+
+    // options
+    Tresetpos: null,
+    Tborders: null,
+    Trefresh: null,
+    Tdebug: null
 }
 
 let interval;
@@ -243,6 +253,8 @@ class Clouds {
 function startup() {
     showPopup(dom.startup, dom.settings, acceptedTerms);
 
+    dom.debug.style.display = options.debug ? null : "none";
+
     if (acceptedTerms) dom.noterms.style.display = "none";
     else dom.termsok.style.display = "none";
 }
@@ -261,17 +273,18 @@ function showPopup(show, hide, listener) {
     dom.popup.className = "show";
 
     // close popup by clicking on the transparent part
-    if (listener) dom.popup.addEventListener("click", evt => {
-        if (evt.x+window.scrollX > cW*0.4) close();
-    });
+    if (listener) dom.popup.addEventListener("click", closeMenu);
 }
 
-function close() {
+function closeMenu(evt) {
+    // if triggered by a click event, don't close when clicked on the left
+    if (evt && evt.x+window.scrollY < cW*0.4) return;
+
     dom.popup.className = "";
     dom.popup.offsetWidth;
     dom.popup.className = "hide";
 
-    dom.popup.removeEventListener("click", close);
+    dom.popup.removeEventListener("click", closeMenu);
 
     window.setTimeout(() => {dom.popup.style.display = "none"}, 500);
 }
@@ -279,7 +292,7 @@ function close() {
 function agree() {
     acceptedTerms = true;
     updateLocalStorage();
-    close();
+    closeMenu();
 }
 
 // used to convert ImageData into Image
@@ -362,6 +375,30 @@ function populateColors() {
     }
 
     setcol(options.color);
+}
+
+// options
+function tResetPos() {
+    options.x = W/2;
+    options.Y = H/2;
+}
+
+function tBorders() {
+    options.lines = 1-options.lines;
+    updateLocalStorage();
+    chunkSystem.reset();
+}
+
+function tRefreshMap() {
+    socket.emit("help");
+    chunkSystem.reset();
+}
+
+function tDebug() {
+    options.debug = 1-options.debug;
+    updateLocalStorage();
+
+    dom.debug.style.display = options.debug ? null : "none";
 }
 
 window.onload = () => {

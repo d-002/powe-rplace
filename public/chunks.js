@@ -246,5 +246,12 @@ class ChunkSystem {
             if (!this.chunks[key].visible()) delete this.chunks[key];
         });
     }
+
+    reset() {
+        this.queue = [];
+        this.chunks = [];
+
+        this.onMove();
+    }
 }
 

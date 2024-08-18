@@ -24,6 +24,7 @@ let placedLocally = {}; // hash: [x, y, prev col, timestamp]
 
 let localGrid = [];
 let changedMap = false;
+let startedNoHelpTimeout = false;
 
 let acceptedTerms = false;
 
@@ -51,7 +52,8 @@ let options = {
     y: 0,
     zoom: 1,
     color: 1,
-    lines: 1
+    lines: 1,
+    debug: 0
 };
 
 function click(evt) {
@@ -139,15 +141,17 @@ socket.on("userUpdate", data => {
     state.userOk = true;
 });
 
-function updateLocalStorage() {
-    if (state.optionsOk) localStorage.setItem("terms", acceptedTerms ? 1 : 0);
-
+function updateLocalStorage() {;
     if (changedMap) {
         localStorage.setItem("map", encodeMap(localGrid));
         changedMap = false;
     }
 
-    localStorage.setItem("options", options.x+" "+options.y+" "+options.zoom+" "+options.color+" "+options.lines);
+    if (!state.optionsOk) return;
+
+    localStorage.setItem("terms", acceptedTerms ? 1 : 0);
+
+    localStorage.setItem("options", options.x+" "+options.y+" "+options.zoom+" "+options.color+" "+options.lines+" "+options.debug);
 }
 
 function loadLocalStorage() {
@@ -191,6 +195,7 @@ function loadLocalStorage() {
         options.zoom = Math.min(Math.max(Number(data[2]) || 1, minZoom), maxZoom);
         options.color = parseInt(data[3]) || 0;
         options.lines = parseInt(data[4]) || 0;
+        options.debug = parseInt(data[5]) || 0;
     }
     catch(err) {
         showInfo("Failed to parse options, settings may be reset: "+err);
@@ -205,7 +210,14 @@ socket.on("noHelp", () => {
     // help was refused, explain why if needed
     showInfo("You are being rate limited, map will refresh soon...");
 
-    window.setTimeout(() => socket.emit("help"), privileges.helpCooldown+1000);
+    // don't start multiple timeouts at once
+    if (!startedNoHelpTimeout) {
+        startedNoHelpTimeout = true;
+        window.setTimeout(() => {
+            socket.emit("help");
+            startedNoHelpTimeout = false;
+        }, privileges.helpCooldown+1000);
+    }
 });
 
 socket.on("duplicateIp", () => {

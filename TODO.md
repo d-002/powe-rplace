@@ -57,11 +57,10 @@ TODO:
 - button to show debug? (memory usage, pos, chunks loaded)
 - button to show or hide borders
 - show stats, play time
-- instantly go back when going out of bounds
 - better info system (queue, fadeout, default text (countdown))
 - less file writes: options, user data, map file
-- async map files updates, but be careful about permissions
-- mobile version (when width < height, updated on screen resize (with timeout)?)
+- mobile version (when width < height, updated on screen resize (with timeout))
+- add timeout for screen resize for animated bg
 - changelog popup
 - click on minimap
 - login support to sync data from ip, implement passkey system in local storage
