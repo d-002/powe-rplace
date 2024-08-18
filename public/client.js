@@ -17,7 +17,7 @@ class _socket {
         });
     }
 }
-socket = new _socket(socket);
+//socket = new _socket(socket);
 
 // pixels pre-placed locally, waiting for server to accept or overrule
 let placedLocally = {}; // hash: [x, y, prev col, timestamp]
@@ -86,6 +86,11 @@ function clientScriptUpdate() {
 
 socket.on("mapUpdate", data => {
     let checksum = data.charCodeAt(0);
+
+    if (startedNoHelpTimeout) {
+        showInfo("Refreshed the map.");
+        startedNoHelpTimeout = false;
+    }
 
     let changes;
     try {
@@ -208,14 +213,13 @@ function loadLocalStorage() {
 
 socket.on("noHelp", () => {
     // help was refused, explain why if needed
-    showInfo("You are being rate limited, map will refresh soon...");
+    showInfo("You are being rate limited, the map will refresh soon...");
 
     // don't start multiple timeouts at once
     if (!startedNoHelpTimeout) {
         startedNoHelpTimeout = true;
         window.setTimeout(() => {
             socket.emit("help");
-            startedNoHelpTimeout = false;
         }, privileges.helpCooldown+1000);
     }
 });

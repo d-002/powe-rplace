@@ -158,7 +158,7 @@ io.on("connection", socket => {
 
     const user = User.decodeFile(ip)
     clients[ip] = user;
-    clients[ip].isDupe = dupe != null;
+    user.isDupe = dupe != null;
     user.socket = socket;
     console.log("New connection from "+ip);
 
@@ -236,8 +236,9 @@ io.on("connection", socket => {
         socket.removeAllListeners();
         socket = null;
 
+        user.encodeToFile();
         // don't delete client from storage if it was an older clone ip
-        if (clients[ip].isDupe) clients[ip].isDupe = false;
+        if (user.isDupe) user.isDupe = false;
         else delete clients[ip];
     });
 

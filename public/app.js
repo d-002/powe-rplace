@@ -18,6 +18,7 @@ let dom = {
     settings: null,
     termsok: null,
     noterms: null,
+    userstats: null,
 
     // options
     Tborders: null,
@@ -261,6 +262,20 @@ function startup() {
 
 function settings() {
     showPopup(dom.settings, dom.startup, true);
+
+    // edit stats in settings
+    const t = user.getPlayTime()/1000;
+
+    const h = Math.floor(t/3600);
+    const min = Math.floor(t%3600/60);
+    const s = Math.floor(t%60);
+
+    let time = "";
+    if (h) time += " "+h+"h";
+    if (min) time += " "+min+"min";
+    if (s) time += " "+s+"s";
+
+    dom.userstats.innerHTML = "<p>Play time:"+time+"</p>\n<p>Placed pixels: "+user.nPlaced;
 }
 
 function showPopup(show, hide, listener) {

@@ -341,7 +341,7 @@ a.toggle::after {
     --r: 255;
     --g: 38;
     --b: 0;
-    --content: "NO";
+    --content: "no";
 
     content: var(--content);
 
@@ -351,11 +351,13 @@ a.toggle::after {
 
     width: calc(50px + 3px);
     height: calc(100% + 6px);
+
+    text-transform: uppercase;
 }
 
 a.toggle.active::after {
     --r: 37;
     --g: 182;
     --b: 37;
-    --content: "YES";
+    --content: "yes";
 }

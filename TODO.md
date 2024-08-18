@@ -51,11 +51,6 @@ on update: blit the chunks when out of the queue
 
 TODO:
 - colors div scroll
-- settings
-- button to reset position
-- button to refresh map manually, timeout
-- button to show debug? (memory usage, pos, chunks loaded)
-- button to show or hide borders
 - show stats, play time
 - better info system (queue, fadeout, default text (countdown))
 - less file writes: options, user data, map file
@@ -68,6 +63,7 @@ TODO:
 - display currently active users
 - gpu acceleration
 - show and record graph of downtime
+- possible to stop server in admin panel
 - user data system: create account, or checksum in localstorage for connection by ip
 - better zoom and pos management
 - dark theme

@@ -17,10 +17,11 @@ const privileges = {
 }
 
 class User {
-    constructor(ip, version, lastPixel, lastHelp, nPlaced) {
-        // this.socket can be undefined if the object is only used as a container for its settings
+    constructor(ip, version, lastPixel, lastHelp, nPlaced, playTime) {
+        // server-side variables, stay undefined client-side
         this.socket = undefined;
         this.isDupe = false;
+        this.startTime = Date.now();
 
         this.ip = ip;
         this.version = version;
@@ -28,6 +29,8 @@ class User {
         this.lastHelp = lastHelp;
 
         this.nPlaced = nPlaced;
+
+        this.playTime = playTime;
 
         // build privileges from stats
         this.nColors = privileges.colors[Math.min(parseInt(nPlaced/100), 2)];
@@ -44,6 +47,7 @@ class User {
         let lastPixel = 0;
         let lastHelp = 0;
         let nPlaced = 0;
+        let playTime = 0;
 
         try {
             const lines = data.split("\n");
@@ -51,16 +55,21 @@ class User {
             lastPixel = Number(lines[2]) || 0;
             lastHelp = Number(lines[3]) || 0;
             nPlaced = parseInt(lines[4]) || 0;
+            playTime = Number(lines[5]) || 0;
         }
         catch (err) {
             console.error("Error loading user file "+ip+": "+err);
         }
 
-        return new User(ip, version, lastPixel, lastHelp, nPlaced);
+        return new User(ip, version, lastPixel, lastHelp, nPlaced, playTime);
+    }
+
+    getPlayTime() {
+        return Date.now()-this.startTime + this.playTime;
     }
 
     encode() {
-        return this.nColors+"\n"+this.version+"\n"+this.lastPixel+"\n"+this.lastHelp+"\n"+this.nPlaced;
+        return this.nColors+"\n"+this.version+"\n"+this.lastPixel+"\n"+this.lastHelp+"\n"+this.nPlaced+"\n"+this.getPlayTime();
     }
 
     encodeToFile() {
