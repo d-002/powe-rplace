@@ -345,10 +345,11 @@ function populateColors() {
     dom.colors.innerHTML = "";
 
     const count = user ? user.nColors>>3 : 1;
+    const xstyle = "; --x: "+count;
 
     for (let y = 0; y < 8; y++) {
         const div = document.createElement("div");
-        div.style = "--index: "+y;
+        div.style = "--index: "+y+xstyle;
         for (let x = 0; x < count; x++) {
             const col = document.createElement("a");
             col.href = "javascript:setcol("+(y+x*8)+")";
@@ -395,8 +396,6 @@ window.onload = () => {
 
     colorsInterval = window.setInterval(() => {
         if (stateOk()) {
-            console.log(user);
-            console.log(options);
             populateColors();
             window.clearInterval(colorsInterval);
         }
