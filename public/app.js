@@ -377,32 +377,38 @@ function populateColors() {
     setcol(options.color);
 }
 
-let toggleElt = elt => elt.className = elt.className ? "" : "active";
+function toggleElt(elt) {
+    if (elt.className.includes("active")) elt.classList.remove("active");
+    else elt.classList.add("active");
+}
 
 // options
 function tResetPos() {
     // smoothly translate
-    const start = Date.now();
-    const prev = [options.x, options.y, options.zoom];
-
     closeMenu();
-    const interval = window.setInterval(() => {
-        let t = (Date.now()-start)/500;
-        if (t > 1) {
-            options.x = W/2;
-            options.y = H/2;
-            options.zoom = 1;
-            updateLocalStorage();
-            window.clearInterval(interval);
-            return;
-        }
 
-        t = (3 - 2*t)*t*t;
-        options.x = prev[0] + (W/2-prev[0])*t;
-        options.y = prev[1] + (H/2-prev[1])*t;
-        options.zoom = prev[2] + (1-prev[2])*t;
-        chunkSystem.onMove();
-    }, 1000/fps);
+    window.setTimeout(() => {
+        const start = Date.now();
+        const prev = [options.x, options.y, options.zoom];
+
+        const interval = window.setInterval(() => {
+            let t = (Date.now()-start)/500;
+            if (t > 1) {
+                options.x = W/2;
+                options.y = H/2;
+                options.zoom = 1;
+                updateLocalStorage();
+                window.clearInterval(interval);
+                return;
+            }
+
+            t = (3 - 2*t)*t*t;
+            options.x = prev[0] + (W/2-prev[0])*t;
+            options.y = prev[1] + (H/2-prev[1])*t;
+            options.zoom = prev[2] + (1-prev[2])*t;
+            chunkSystem.onMove();
+        }, 1000/fps);
+    }, 500);
 }
 
 function tBorders() {

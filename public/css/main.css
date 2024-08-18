@@ -120,7 +120,7 @@ body {
     border-radius: 35px;
 }
 
-#colors>div:hover 
+#colors>div:hover {
     width: calc(var(--x) * 70px);
 
     background-color: rgba(255, 255, 255, 0.5);
@@ -205,24 +205,44 @@ body {
     animation: fade 0.5s reverse forwards;
 }
 
+br.line {
+    content: "";
+
+    display: block;
+    width: calc(100% + 60px);
+    transform: translateX(-30px);
+
+    border-bottom: 1px solid #0003;
+}
+
+.section {
+    padding: 10px;
+
+    border: 1px solid #0003;
+    border-radius: 4px;
+
+    background-color: #00000005;
+}
+
 #popup>div {
     position: fixed;
 
     left: 0;
     width: 40%;
     max-width: 600px;
+
+    background-color: var(--bg1);
 }
 
 #popup>div:not(#small-footer) {
     top: 0;
 
-    height: 100%;
+    height: calc(100% - 50px);
 
     padding: 30px;
     box-sizing: border-box;
 
     box-shadow: 0 0 15px #0005;
-    background-color: var(--bg1);
 
     overflow-x: hidden;
     overflow-y: auto;
@@ -264,6 +284,8 @@ h2 {
 }
 
 #popup p {
+    margin-top: 0.5em;
+
     font-weight: 500;
 }
 
@@ -276,36 +298,64 @@ h2 {
     color: #f00;
 }
 
-a.button {
-    transition: 0.08s background-color linear;
+a.button, a.toggle, a.toggle::after {
+    --r: 110;
+    --g: 127;
+    --b: 175;
 
     display: block;
 
-    width: 100%;
-    margin-bottom: 30px;
+    margin: 10px 0;
     padding: 5px 0;
 
     text-align: center;
     font-weight: 400;
 
     box-sizing: border-box;
-    border: 3px solid #6e7faf;
-    background-color: #9ca8c9;
+    border: 3px solid rgba(var(--r), var(--g), var(--b), 1);
+    background-color: rgba(var(--r), var(--g), var(--b), 0.5);
     color: #fff;
 }
 
-a.button:hover {
-    text-decoration: none;
+a.button {
+    transition: 0.08s filter linear;
 
-    background-color: #9ca8c9af;
+    width: 100%;
 }
 
-br.line {
-    content: "";
+a.button:hover, a.toggle:hover {
+    text-decoration: none;
 
-    display: block;
-    width: calc(100% + 60px);
-    transform: translateX(-30px);
+    filter: brightness(1.1);
+}
 
-    border-bottom: 1px solid #0003;
+a.toggle {
+    transition: 0.2s filter ease-out;
+
+    position: relative;
+
+    width: calc(100% - 63px);
+}
+
+a.toggle::after {
+    --r: 255;
+    --g: 38;
+    --b: 0;
+    --content: "NO";
+
+    content: var(--content);
+
+    position: absolute;
+    top: -13px;
+    left: calc(100% + 13px);
+
+    width: calc(50px + 3px);
+    height: calc(100% + 6px);
+}
+
+a.toggle.active::after {
+    --r: 37;
+    --g: 182;
+    --b: 37;
+    --content: "YES";
 }
