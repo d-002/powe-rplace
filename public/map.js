@@ -92,16 +92,17 @@ function makeClientUpdate(clientVersion, serverVersion, serverGrid) {
     // first char of message: grid checksum
     let message = String.fromCharCode(getChecksum(serverGrid));
 
-    if (clientVersion == serverVersion) return message;
+    if (clientVersion > serverVersion) clientVersion = 0;
+    if (clientVersion == serverVersion) return [false, message];
 
     // second char of message: either 0 or 1
     // if 0: message contains only a list of changes
     // if 1: message contains the full, updated map file
 
     const serverFile = getFile(serverVersion);
-    if (clientVersion > serverVersion) clientVersion = 0;
 
-    if (clientVersion == null || serverFile != getFile(clientVersion)) {
+    let lengthy = clientVersion == null || serverFile != getFile(clientVersion);
+    if (lengthy) {
         if (!clientVersion) clientVersion = 0;
         // need to read multiple log files to update the client: send the server map instead
         // in case an error occured with the client version, reset their map safely here
@@ -118,7 +119,7 @@ function makeClientUpdate(clientVersion, serverVersion, serverGrid) {
         message += changes.substring(start*5, stop*5);
     }
 
-    return message;
+    return [lengthy, message];
 }
 
 function applyUpdate(message, updateFunction, setGrid) {

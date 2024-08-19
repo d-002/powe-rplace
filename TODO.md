@@ -51,7 +51,6 @@ on update: blit the chunks when out of the queue
 
 TODO:
 - colors div scroll
-- show stats, play time
 - better info system (queue, fadeout, default text (countdown))
 - less file writes: options, user data, map file
 - mobile version (when width < height, updated on screen resize (with timeout))

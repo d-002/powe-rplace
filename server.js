@@ -198,7 +198,7 @@ io.on("connection", socket => {
             user.lastPixel = Date.now();
             user.nPlaced++;
             // update the current user (tell about changes that happened since last broadcast)
-            updateClientIp(ip, user.version);
+            updateClientIp(ip, user.version, false);
             user.version = ++logsVersion;
 
             console.log("Placed pixel at ("+x+", "+y+"), col "+col);
@@ -210,14 +210,14 @@ io.on("connection", socket => {
         if (now - prevBroadcast > broadcastDelay) {
             console.log("Broadcast")
             prevBroadcast = now;
-            interval(user);
+            broadcast(user);
         }
     });
 
     socket.on("initial", _ => {
         // triggered on init, but should be fine to call it afterwards
         // forces a "normal" update of the map
-        updateClientIp(ip, user.version);
+        updateClientIp(ip, user.version, false);
         socket.emit("userUpdate", user.encode());
     });
 
@@ -225,7 +225,7 @@ io.on("connection", socket => {
         // triggered when the map in the user's local storage doesn't exist
         if (Date.now()-user.lastHelp > privileges.helpCooldown) {
             user.lastHelp = Date.now();
-            updateClientIp(ip, null);
+            updateClientIp(ip, null, false);
         }
         else socket.emit("noHelp");
     });
@@ -248,14 +248,15 @@ io.on("connection", socket => {
     });
 });
 
-function updateClientIp(ip, clientVersion) {
+function updateClientIp(ip, clientVersion, save=true) {
     const client = clients[ip];
-    client.socket.emit("mapUpdate", makeClientUpdate(clientVersion, logsVersion, serverGrid));
+    const [lengthy, data] = makeClientUpdate(clientVersion, logsVersion, serverGrid);
+    client.socket.emit("mapUpdate", data);
     client.version = logsVersion;
-    client.encodeToFile();
+    if (save || (lengthy && clientVersion != null)) client.encodeToFile();
 }
 
-function interval(ignore) {
+function broadcast(ignore) {
     Object.values(clients).forEach(user => {
         if (user == ignore) return;
         updateClientIp(user.ip, user.version);
@@ -292,5 +293,10 @@ process.on("uncaughtException", function (err) {
     console.log("PREVENTED SERVER CRASH, logging...");
     console.error(err);
 });
+
+// for play time updates, in case the server crashes
+const interval = setInterval(() => {
+    Object.values(clients).forEach(user => user.encodeToFile());
+}, broadcastDelay);
 
 server.listen(port, () => console.log("Listening on port "+port));

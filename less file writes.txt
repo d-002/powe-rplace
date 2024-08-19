@@ -1,0 +1,43 @@
+WRITE USER FILE
+
+U: encode to file => write user file, in accounts.js
+
+0 updateclientip => U
+1 when placed a pixel, with timeout => interval => U, to change the version after update
+2 help => U, to encode last help time
+3 initial => U, to update the map initially from the user's version
+4 when placed a pixel => U, to update the player for since last broadcast
+
+WRITE OPTIONS
+
+O: updateoptions
+
+5 at the start => O, to write initially to the file
+6 when placed a pixel => O
+
+WRITE MAP
+
+M: write to map file
+
+7 at the start => M, for initial map loading (handles empty or no file)
+8 on pixel change => M
+
+SUMMARY
+
+to keep:
+all users version changes need to be accurate, so they should fall in this category
+(0: used by others, but special cases need to be made)
+1: need to save at some point lol
+5: mandatory
+6: needs to be precise, risk of logs files corruption. Small file write.
+7: mandatory
+8: needs to be precise, risk of logs files corruption. Will stay this way until another system is found, maybe save map in chunks?
+
+to remove:
+2: worst thing that could happen is another help too soon, but it would happen when the server crashes so it doesn't matter
+3, 4: just updating the player version, worst thing is too much data gets sent to the user because of a missed version upgrade
+
+for removed user file writes, still save to file when the entire map needs to be sent, to not do it again
+
+vvvvv impossible for on quit, maintenance not concerned vvvvv
+/!\ on program quit, save everything: code at the end? work with maintenance?
