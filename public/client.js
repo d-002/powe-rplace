@@ -135,6 +135,7 @@ socket.on("pixelFeedback", data => {
 
     // allowed change: update client-side map
     if (err == 0) {
+        user.nPlaced++;
         user.lastPixel = Date.now();
         updateLocalStorage();
     }

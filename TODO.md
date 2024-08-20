@@ -51,10 +51,7 @@ on update: blit the chunks when out of the queue
 
 TODO:
 - colors div scroll
-- better info system (queue, fadeout, default text (countdown))
-- less file writes: options, user data, map file
 - mobile version (when width < height, updated on screen resize (with timeout))
-- add timeout for screen resize for animated bg
 - changelog popup
 - click on minimap
 - login support to sync data from ip, implement passkey system in local storage

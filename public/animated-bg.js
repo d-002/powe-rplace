@@ -8,6 +8,9 @@ let canvMult;
 let points;
 let trails;
 
+let lastResize = 0;
+let sizeOk = true;
+
 class Point {
     constructor() {
         this.setPos();
@@ -103,6 +106,12 @@ function _start() {
 }
 
 function _animate() {
+    // resize, but add a cooldown
+    if (!sizeOk && Date.now()-lastResize > 100) {
+        sizeOk = true;
+        animResize();
+    }
+
     // make sure the points start from the background color
     ctx.fillStyle = "white";
     ctx.globalAlpha = 1;
@@ -157,6 +166,11 @@ function _animate() {
     });
 }
 
+function resized() {
+    lastResize = Date.now();
+    sizeOk = false;
+}
+
 function animResize() {
     W = window.innerWidth;
     H = window.innerHeight;
@@ -179,7 +193,7 @@ export function animate(_window, _canvas) {
     window = _window;
     canvas = _canvas;
 
-    window.addEventListener("resize", animResize);
+    window.addEventListener("resize", resized);
     ctx = canvas.getContext("2d");
     animResize();
 
