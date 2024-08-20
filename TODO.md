@@ -50,6 +50,7 @@ once every second: delete the chunks that are not visible but are still cached
 on update: blit the chunks when out of the queue
 
 TODO:
+- status page
 - colors div scroll
 - mobile version (when width < height, updated on screen resize (with timeout))
 - changelog popup

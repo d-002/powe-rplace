@@ -8,7 +8,7 @@ function initAccounts(_fs, _files, _dirs) {
 
 // users and powerups settings
 const privileges = {
-    "colors": [8, 16, 24],
+    "colors": [8, 16, 24, 32],
     "cooldown": [10000],
 
     // other options, not included in User objects, but exported into other scripts as well
@@ -33,7 +33,7 @@ class User {
         this.playTime = playTime;
 
         // build privileges from stats
-        this.nColors = privileges.colors[Math.min(parseInt(nPlaced/100), 2)];
+        this.nColors = privileges.colors[Math.min(parseInt(nPlaced/100), privileges.colors.length-1)];
         this.pixelCooldown = privileges.cooldown[0];
     }
 
