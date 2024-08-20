@@ -20,6 +20,10 @@
     }
 }
 
+html {
+    height: 100%;
+}
+
 body {
     background-color: #35c4ec;
 }
@@ -32,6 +36,17 @@ body {
     height: 100%;
 
     image-rendering: pixelated;
+}
+
+#info {
+    --a: 1;
+
+    position: fixed;
+    top: 0;
+    left: 50%;
+
+    transform: translateX(-50%);
+    filter: drop-shadow(0 0 3px white) opacity(var(--a));
 }
 
 #sidebar {

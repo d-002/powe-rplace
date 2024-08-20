@@ -58,7 +58,7 @@ let options = {
 
 function click(evt) {
     if (!stateOk()) {
-        showInfo("Some data is still loading, you can't place a pixel right now.");
+        info.show("Some data is still loading, you can't place a pixel right now.");
         return;
     }
 
@@ -88,7 +88,7 @@ socket.on("mapUpdate", data => {
     let checksum = data.charCodeAt(0);
 
     if (startedNoHelpTimeout) {
-        showInfo("Refreshed the map.");
+        info.show("Refreshed the map.");
         startedNoHelpTimeout = false;
     }
 
@@ -134,7 +134,10 @@ socket.on("pixelFeedback", data => {
     delete placedLocally[hash];
 
     // allowed change: update client-side map
-    if (err == 0) updateLocalStorage();
+    if (err == 0) {
+        user.lastPixel = Date.now();
+        updateLocalStorage();
+    }
     // revert placement
     else drawPixel(x, y, col);
 });
@@ -183,7 +186,7 @@ function loadLocalStorage() {
         state.mapOk = false;
         socket.emit("help");
 
-        showInfo("Failed to read map locally, asking for refresh...");
+        info.show("Failed to read map locally, asking for refresh...");
     }
 
     // load options
@@ -203,7 +206,7 @@ function loadLocalStorage() {
         options.debug = parseInt(data[5]) || 0;
     }
     catch(err) {
-        showInfo("Failed to parse options, settings may be reset: "+err);
+        info.show("Failed to parse options, settings may be reset: "+err);
     }
 
     changedMap = false;
@@ -213,7 +216,7 @@ function loadLocalStorage() {
 
 socket.on("noHelp", () => {
     // help was refused, explain why if needed
-    showInfo("You are being rate limited, the map will refresh soon...");
+    info.show("You are being rate limited, the map will refresh soon...");
 
     // don't start multiple timeouts at once
     if (!startedNoHelpTimeout) {

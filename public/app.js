@@ -32,6 +32,7 @@ let chunkSystem;
 let movement;
 let minimap;
 let clouds;
+let info;
 
 let fps = 60;
 
@@ -48,8 +49,8 @@ class Movement {
         dom.canvas.addEventListener("wheel", evt => this.zoom(evt));
         dom.canvas.addEventListener("mousedown", evt => this.press(evt));
         dom.canvas.addEventListener("mouseup", evt => this.release(evt, false));
-        dom.canvas.addEventListener("mouseout", evt => this.release(evt, true));
-        dom.canvas.addEventListener("mousemove", evt => this.move(evt));
+        document.body.addEventListener("mouseout", evt => this.release(evt, true));
+        document.body.addEventListener("mousemove", evt => this.move(evt));
 
         this.pressed = false;
         this.mouse = [0, 0];
@@ -249,6 +250,46 @@ class Clouds {
     }
 }
 
+class Info {
+    constructor() {
+        this.lastTime = 0;
+        this.msg = null;
+
+        this.prevState = -1;
+    }
+
+    show(message) {
+        this.lastTime = message ? Date.now() : 0;
+        this.msg = message;
+
+        this.update(true);
+    }
+
+    update(force = false) {
+        const t = (Date.now()-this.lastTime)/5000;
+        const delay = user ? user.pixelCooldown-Date.now()+user.lastPixel : 0;
+        const state = t <= 1 ? t <= 0.8 ? 0 : t*5-4 : delay <= 0 ? 2 : 2+delay;
+
+        if (state != this.prevState || force) {
+            dom.info.style = "";
+
+            if (state < 2) {
+                // show custom message
+                dom.info.innerHTML = this.msg;
+                if (state) dom.info.style = "--a: "+(1-state);
+            }
+            else if (user) {
+                // show cooldown info
+                if (state == 2) dom.info.innerHTML = "You can place your "+(user.nPlaced ? "next" : "first")+" pixel!";
+                else dom.info.innerHTML = "You can place your next pixel in "+Math.ceil(delay/1000)+"s";
+            }
+            else dom.info.innerHTML = "Loading cooldown...";
+        }
+
+        this.prevState = state;
+    }
+}
+
 function startup() {
     showPopup(dom.startup, dom.settings, acceptedTerms);
 
@@ -337,10 +378,6 @@ function drawPixel(x, y, col) {
     chunkSystem.editPixel(x, y);
 }
 
-function showInfo(message) {
-    dom.info.innerHTML = message;
-}
-
 function update() {
     appUpdate();
     clientScriptUpdate();
@@ -352,6 +389,7 @@ function appUpdate() {
         chunkSystem.update();
     }
     clouds.update();
+    info.update();
 }
 
 function setcol(i) {
@@ -449,7 +487,8 @@ function tDebug() {
 window.onload = () => {
     Object.keys(dom).forEach(id => dom[id] = document.getElementById(id));
 
-    showInfo("Loading...");
+    info = new Info();
+    info.show("Loading...");
 
     populateColors();
 
@@ -478,6 +517,7 @@ window.onload = () => {
 
     colorsInterval = window.setInterval(() => {
         if (stateOk()) {
+            info.show(null);
             populateColors();
             window.clearInterval(colorsInterval);
         }
