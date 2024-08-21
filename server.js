@@ -117,19 +117,22 @@ fs.writeFileSync(dirs.logs+"foo.txt", "bar");
 
 checkMaintenance();
 
+function addDataToStatusFile(file, add) {
+    let data = [];
+    String(fs.readFileSync(file)).split("\n").forEach(line => {
+        const timestamp = parseInt(line.split(" ")[0]) || 0;
+        if (Date.now()-timestamp <= 127800000) data.push(line);
+    });
+    data.push(add);
+    fs.writeFileSync(file, data.join("\n"));
+}
+
 // check for server stops
 const hours48 = 48*3600*1000;
 const pingData = String(fs.readFileSync(files.ping)).split(" ");
 let prevPing = parseInt(pingData[0]) || Date.now()-hours48;
 let maintenanceThen = parseInt(pingData[1]) || 0;
-
-let data = [];
-String(fs.readFileSync(files.down)).split("\n").forEach(line => {
-    const timestamp = parseInt(line.split(" ")[0]) || 0;
-    if (Date.now()-timestamp <= hours48) data.push(line);
-});
-data.push(Date.now()+" "+(Date.now()-prevPing)+" "+(maintenance + maintenanceThen ? 1 : 0));
-fs.writeFileSync(files.down, data.join("\n"));
+addDataToStatusFile(files.down, Date.now()+" "+(Date.now()-prevPing)+" "+(maintenance + maintenanceThen ? 1 : 0));
 
 // read options
 let logsVersion = 0; // increases by 1 every map edit, to apply changes to clients
@@ -322,8 +325,16 @@ updateOp(true);
 
 // error handling
 process.on("uncaughtException", function (err) {
-    console.log("PREVENTED SERVER CRASH, logging...");
-    console.error(err);
+    console.error("PREVENTED SERVER CRASH, logging...");
+    console.error(err.stack);
+
+    // log error in log files
+    try {
+        addDataToStatusFile(files.errors, err.stack.replaceAll("\t", "    ").replaceAll("\n", "\t"));
+    }
+    catch {
+        // make sure to not trigger errors here as this would loop
+    }
 });
 
 // for play time updates, in case the server crashes

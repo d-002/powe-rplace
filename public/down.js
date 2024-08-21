@@ -15,6 +15,7 @@ const options = {
     "maintenance": ["503", "Service Unavailable", "The server is momentarily down for maintenance. Our apologies for the inconvenience.", 30000],
     "404": ["404", "Not Found", "The requested resource has not been found.", 0],
     "403": ["403", "Forbidden", "You are not authorized to view this resource.", 0],
+    "500": ["500", "Internal server error", "Internal server error. This is very bad, please contact us."],
     "blacklist": ["403", "Forbidden", "You are blacklisted on this server."]
 }
 
