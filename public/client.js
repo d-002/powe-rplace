@@ -150,6 +150,10 @@ socket.on("userUpdate", data => {
     state.userOk = true;
 });
 
+socket.on("nClients", n => {
+    updateNClients(n);
+});
+
 function updateLocalStorage() {;
     if (changedMap) {
         localStorage.setItem("map", encodeMap(localGrid));

@@ -5,13 +5,18 @@ const { colors, W, H, initMap, decodeMap, encodeMap, logPixelChange, makeClientU
 const files = {
     "options": "/files/options.txt",
     "grid": "/files/grid.csv",
-    "maintenance": "/files/maintenance.txt",
+
     "blacklist": "/files/blacklist.txt",
-    "op": "/files/op.txt"
+    "op": "/files/op.txt",
+
+    "maintenance": "/files/maintenance.txt", // contains either 0 or 1
+    "lastPing": "/files/status/ping",
+    "errors": "/files/status/errors"
 }
 const dirs = {
     "logs": "/files/logs/",
-    "accounts": "/files/accounts/"
+    "accounts": "/files/accounts/",
+    "status": "/files/status"
 }
 
 
@@ -29,6 +34,7 @@ const io = new Server(server);
 const port = process.env.PORT || 3000;
 
 let clients = {}; // ip: User object
+let prevClientsLength;
 
 let blacklisted = [];
 let op = [];
@@ -208,7 +214,6 @@ io.on("connection", socket => {
         // execute code at certain time intervals, triggered here
         const now = Date.now();
         if (now - prevBroadcast > broadcastDelay) {
-            console.log("Broadcast")
             prevBroadcast = now;
             broadcast(user);
         }
@@ -219,10 +224,11 @@ io.on("connection", socket => {
         // forces a "normal" update of the map
         updateClientIp(ip, user.version, false);
         socket.emit("userUpdate", user.encode());
+        socket.emit("nClients", Object.keys(clients).length);
     });
 
     socket.on("help", _ => {
-        // triggered when the map in the user's local storage doesn't exist
+        // triggered when the map in the user's local storage is corrupted
         if (Date.now()-user.lastHelp > privileges.helpCooldown) {
             user.lastHelp = Date.now();
             updateClientIp(ip, null, false);
@@ -257,10 +263,19 @@ function updateClientIp(ip, clientVersion, save=true) {
 }
 
 function broadcast(ignore) {
-    Object.values(clients).forEach(user => {
+    console.log("Broadcast");
+
+    const values = Object.values(clients);
+    values.forEach(user => {
         if (user == ignore) return;
         updateClientIp(user.ip, user.version);
     });
+    const l = values.length;
+    if (l != prevClientsLength) {
+        prevClientsLength = l;
+
+        values.forEach(user => user.socket.emit("nClients", l));
+    }
 
     checkMaintenance();
 }

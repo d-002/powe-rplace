@@ -49,8 +49,23 @@ remove from the queue the chunks that are no longer needed: different zoom or no
 once every second: delete the chunks that are not visible but are still cached
 on update: blit the chunks when out of the queue
 
+status data:
+Need to trace server crashes, maintenance timestamps and durations, number of active users for last 48 hours
+
+every 60s, broadcast the number of active users
+
+files:
+- file with last ping ("ping maintenance"), updated every 60s
+
+updated every 60s, remove old lines, 48 lines:
+- file with "(int)timestamp/3600000) nplayers"
+- file with "timestamp duration maintenance", startups (= crashes), timestamp is the last ping from the pings file, maintenance is an or gate between maintenance at last ping or now
+- file with "timestamp error", replace in error: \t, \n=>" "
+
 TODO:
+- write status data
 - status page
+- debug screen
 - colors div scroll
 - mobile version (when width < height, updated on screen resize (with timeout))
 - changelog popup

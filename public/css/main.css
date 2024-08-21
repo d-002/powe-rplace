@@ -54,8 +54,6 @@ body {
     top: 0;
     right: 0;
 
-    height: 100%;
-
     display: flex;
     flex-direction: column;
     align-items: end;
@@ -100,6 +98,14 @@ body {
 #settings-button a img {
     width: 70px;
     height: 70px;
+}
+
+#sidebar p {
+    margin: 0;
+
+    filter: drop-shadow(0 0 3px white);
+
+    font-size: 20px;
 }
 
 #colors {

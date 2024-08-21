@@ -10,6 +10,7 @@ let dom = {
 
     // sidebar
     minimap: null,
+    nClients: null,
     colors: null,
 
     // popup
@@ -21,8 +22,8 @@ let dom = {
     userstats: null,
 
     // options
-    Tborders: null,
-    Tdebug: null
+    tBorders: null,
+    tDebug: null
 }
 
 let interval;
@@ -294,8 +295,8 @@ function startup() {
     showPopup(dom.startup, dom.settings, acceptedTerms);
 
     dom.debug.style.display = options.debug ? null : "none";
-    if (options.borders) toggleElt(dom.Tborders);
-    if (options.debug) toggleElt(dom.Tdebug);
+    if (options.borders) toggleElt(dom.tBorders);
+    if (options.debug) toggleElt(dom.tDebug);
 
     if (acceptedTerms) dom.noterms.style.display = "none";
     else dom.termsok.style.display = "none";
@@ -435,6 +436,10 @@ function toggleElt(elt) {
     else elt.classList.add("active");
 }
 
+function updateNClients(n) {
+    dom.nClients.innerHTML = n+" online right now";
+}
+
 // options
 function tResetPos() {
     // smoothly translate
@@ -465,7 +470,7 @@ function tResetPos() {
 }
 
 function tBorders() {
-    toggleElt(dom.Tborders);
+    toggleElt(dom.tBorders);
     options.borders = 1-options.borders;
     updateLocalStorage();
     chunkSystem.reset();
@@ -477,7 +482,7 @@ function tRefreshMap() {
 }
 
 function tDebug() {
-    toggleElt(dom.Tdebug);
+    toggleElt(dom.tDebug);
     options.debug = 1-options.debug;
     updateLocalStorage();
 
