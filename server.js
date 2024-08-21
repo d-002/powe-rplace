@@ -37,7 +37,7 @@ const port = process.env.PORT || 3000;
 let clients = {}; // ip: User object
 let prevClientsLength;
 
-let blacklisted = [];
+let blacklist = [];
 let op = [];
 
 // execute certain actions once in a while, triggered when someone places a pixel
@@ -308,13 +308,19 @@ function checkMaintenance() {
     return false;
 }
 
-function updateOp() {
+function updateOp(forceLog = false) {
+    const _blacklist = blacklist.length;
+    const _op = op.length;
+
+    let eq = (a,b) => a.length == b.length;
+
     blacklist = String(fs.readFileSync(files.blacklist)).split("\n");
     op = String(fs.readFileSync(files.op)).split("\n");
 
-    console.log("Blacklisted:\n"+blacklist+"\nOp:\n"+op);
+    if (_blacklist != blacklist || forceLog) console.log("BLacklisted:\n"+blacklist);
+    if (_op != op.length || forceLog) console.log("Op:\n"+op);
 }
-updateOp();
+updateOp(true);
 
 // error handling
 process.on("uncaughtException", function (err) {
