@@ -312,13 +312,11 @@ function updateOp(forceLog = false) {
     const _blacklist = blacklist.length;
     const _op = op.length;
 
-    let eq = (a,b) => a.length == b.length;
-
     blacklist = String(fs.readFileSync(files.blacklist)).split("\n");
     op = String(fs.readFileSync(files.op)).split("\n");
 
-    if (_blacklist != blacklist || forceLog) console.log("BLacklisted:\n"+blacklist);
-    if (_op != op.length || forceLog) console.log("Op:\n"+op);
+    if (_blacklist != blacklist.length && blacklist.length || forceLog) console.log("BLacklisted:\n"+blacklist);
+    if (_op != op.length && op.length || forceLog) console.log("Op:\n"+op);
 }
 updateOp(true);
 
