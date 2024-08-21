@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const http = require("http");
+const fs = require("fs");
 const server = http.createServer(app);
 
 const port = process.env.PORT || 3000;
@@ -27,8 +28,8 @@ app.get("/status", (req, res) => {
 
 // error handling
 process.on("uncaughtException", function (err) {
-    console.log("PREVENTED SERVER CRASH, logging...");
-    console.error(err);
+    console.error("PREVENTED SERVER CRASH, logging...");
+    console.error(err.stack);
 });
 
 server.listen(port, () => console.log("Listening on port "+port));

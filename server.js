@@ -324,16 +324,40 @@ function updateOp(forceLog = false) {
 updateOp(true);
 
 // error handling
+function logErrorToFile(err) {
+    addDataToStatusFile(files.errors, err.stack.replaceAll("\t", "    ").replaceAll("\n", "\t"));
+}
+
 process.on("uncaughtException", function (err) {
     console.error("PREVENTED SERVER CRASH, logging...");
     console.error(err.stack);
 
     // log error in log files
     try {
-        addDataToStatusFile(files.errors, err.stack.replaceAll("\t", "    ").replaceAll("\n", "\t"));
+        logErrorToFile(err);
     }
     catch {
         // make sure to not trigger errors here as this would loop
+    }
+});
+
+app.use((err, req, res, next) => {
+    try {
+        console.error("Non-critical error:");
+        console.error(err.stack);
+
+        logErrorToFile(err);
+
+        res.redirect("/down?reason=500");
+    }
+    catch(err) {
+        console.error("VERY BAD ERROR, using default error handler");
+        console.error(err.stack);
+
+        if (res.headersSent) return next();
+
+        res.status(500);
+        res.send("<h1>Error</h1><p>"+err.stack.split("\n").join("<br />")+"</p>");
     }
 });
 
