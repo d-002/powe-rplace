@@ -272,19 +272,23 @@ class Info {
         const state = t <= 1 ? t <= 0.8 ? 0 : t*5-4 : delay <= 0 ? 2 : 2+delay;
 
         if (state != this.prevState || force) {
+            const prevhtml = dom.info.innerHTML;
+            let newhtml = prevhtml;
             dom.info.style = "";
 
             if (state < 2) {
                 // show custom message
-                dom.info.innerHTML = this.msg;
+                newhtml = this.msg;
                 if (state) dom.info.style = "--a: "+(1-state);
             }
             else if (user) {
                 // show cooldown info
-                if (state == 2) dom.info.innerHTML = "You can place your "+(user.nPlaced ? "next" : "first")+" pixel!";
-                else dom.info.innerHTML = "You can place your next pixel in "+Math.ceil(delay/1000)+"s";
+                if (state == 2) newhtml = "You can place your "+(user.nPlaced ? "next" : "first")+" pixel!";
+                else newhtml = "You can place your next pixel in "+Math.ceil(delay/1000)+"s";
             }
-            else dom.info.innerHTML = "Loading cooldown...";
+            else newhtml = "Loading cooldown...";
+
+            if (newhtml != prevhtml) dom.info.innerHTML = newhtml;
         }
 
         this.prevState = state;
