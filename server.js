@@ -10,8 +10,9 @@ const files = {
     "op": "/files/op.txt",
 
     "maintenance": "/files/maintenance.txt", // contains either 0 or 1
-    "lastPing": "/files/status/ping",
-    "errors": "/files/status/errors"
+    "ping": "/files/status/ping.txt",
+    "down": "/files/status/down.txt",
+    "errors": "/files/status/errors.txt"
 }
 const dirs = {
     "logs": "/files/logs/",
@@ -115,6 +116,20 @@ Array.from(Object.keys(files)).forEach(name => {
 fs.writeFileSync(dirs.logs+"foo.txt", "bar");
 
 checkMaintenance();
+
+// check for server stops
+const hours48 = 48*3600*1000;
+const pingData = String(fs.readFileSync(files.ping)).split(" ");
+let prevPing = parseInt(pingData[0]) || Date.now()-hours48;
+let maintenanceThen = parseInt(pingData[1]) || 0;
+
+let data = [];
+String(fs.readFileSync(files.down)).split("\n").forEach(line => {
+    const timestamp = parseInt(line.split(" ")[0]) || 0;
+    if (Date.now()-timestamp <= hours48) data.push(line);
+});
+data.push(Date.now()+" "+(Date.now()-prevPing)+" "+(maintenance + maintenanceThen ? 1 : 0));
+fs.writeFileSync(files.down, data.join("\n"));
 
 // read options
 let logsVersion = 0; // increases by 1 every map edit, to apply changes to clients
@@ -276,8 +291,6 @@ function broadcast(ignore) {
 
         values.forEach(user => user.socket.emit("nClients", l));
     }
-
-    checkMaintenance();
 }
 
 function checkMaintenance() {
@@ -310,8 +323,14 @@ process.on("uncaughtException", function (err) {
 });
 
 // for play time updates, in case the server crashes
-const interval = setInterval(() => {
+const slowInterval = setInterval(() => {
     Object.values(clients).forEach(user => user.encodeToFile());
+
+    updateOp();
+    checkMaintenance();
+
+    // ping
+    fs.writeFileSync(files.ping, Date.now()+" "+maintenance);
 }, broadcastDelay);
 
 server.listen(port, () => console.log("Listening on port "+port));

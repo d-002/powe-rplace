@@ -48,8 +48,8 @@ let hashPixel = (x, y, col) => hash(x)+hash(y)+hash(col);
 let user;
 
 let options = {
-    x: 0,
-    y: 0,
+    x: W/2,
+    y: H/2,
     zoom: 1,
     color: 1,
     borders: 1,
