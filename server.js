@@ -10,14 +10,16 @@ const files = {
     "op": "/files/op.txt",
 
     "maintenance": "/files/maintenance.txt", // contains either 0 or 1
-    "ping": "/files/status/ping.txt",
-    "down": "/files/status/down.txt",
-    "errors": "/files/status/errors.txt"
+    "ping": "/files/ping.txt",
+
+    "nPlayers": "/public/status/players.txt",
+    "down": "/public/status/down.txt",
+    "errors": "/public/status/errors.txt"
 }
 const dirs = {
     "logs": "/files/logs/",
     "accounts": "/files/accounts/",
-    "status": "/files/status"
+    "status": "/public/status"
 }
 
 
@@ -43,6 +45,8 @@ let op = [];
 // execute certain actions once in a while, triggered when someone places a pixel
 let prevBroadcast = Date.now();
 const broadcastDelay = 60000;
+
+let maintenance;
 
 // init modules
 initAccounts(fs, files, dirs);
@@ -81,8 +85,6 @@ app.use(function(req, res, next) {
         res.redirect("/down?reason=404")
     }
 });
-
-let maintenance;
 
 // create directories and files if non-existant
 console.log("Checking files...");
@@ -128,9 +130,8 @@ function addDataToStatusFile(file, add) {
 }
 
 // check for server stops
-const hours48 = 48*3600*1000;
 const pingData = String(fs.readFileSync(files.ping)).split(" ");
-let prevPing = parseInt(pingData[0]) || Date.now()-hours48;
+let prevPing = parseInt(pingData[0]) || Date.now()-127800000;
 let maintenanceThen = parseInt(pingData[1]) || 0;
 addDataToStatusFile(files.down, Date.now()+" "+(Date.now()-prevPing)+" "+(maintenance + maintenanceThen ? 1 : 0));
 
@@ -370,6 +371,29 @@ const slowInterval = setInterval(() => {
 
     // ping
     fs.writeFileSync(files.ping, Date.now()+" "+maintenance);
+
+    // update players file
+    let toHour = time => parseInt(time/3600000)*3600000;
+    const hour = toHour(Date.now());
+    const count = Object.keys(clients).length;
+    let add = true;
+    let data = [];
+    String(fs.readFileSync(files.nPlayers)).split("\n").forEach(line => {
+        line = line.split(" ");
+        const timestamp = parseInt(line[0]) || 0;
+        if (Date.now()-timestamp <= 127800000) {
+            if (toHour(timestamp) == hour) {
+                // store the peak number of players every hour...
+                if (parseInt(line[1]) < count) line[1] = count;
+                add = false;
+            }
+            data.push(line[0]+" "+line[1]);
+        }
+    });
+
+    // ...or add a new data point on new hours
+    if (add) data.push(hour+" "+count);
+    fs.writeFileSync(files.nPlayers, data.join("\n"));
 }, broadcastDelay);
 
 server.listen(port, () => console.log("Listening on port "+port));

@@ -1,4 +1,5 @@
 node_modules
 files
+public/status
 package-lock.json
 lines.py

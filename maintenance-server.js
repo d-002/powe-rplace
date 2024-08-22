@@ -32,4 +32,11 @@ process.on("uncaughtException", function (err) {
     console.error(err.stack);
 });
 
+app.use((err, req, res, next) => {
+    console.error("Non-critical error:");
+    console.error(err.stack);
+
+    res.redirect("/");
+});
+
 server.listen(port, () => console.log("Listening on port "+port));
