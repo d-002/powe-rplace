@@ -8,6 +8,10 @@ let dom = {
     players: null,
     down: null,
     errors: null,
+
+    peak: null,
+    average: null,
+    totalErrors: null,
     lastError: null
 };
 
@@ -18,13 +22,15 @@ let cW, cH;
 let clouds;
 
 class CanvasHandler {
-    constructor(canvas, w, h, data) {
+    constructor(canvas, w, h, data, stringFunc) {
         if (this.constructor == CanvasHandler) throw new Error("This is an abstract class");
 
         this.data = data;
 
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
+
+        this.stringFunc = i => new Date(toHour(Date.now()+i-47)*hour).toGMTString()+" - "+stringFunc(this.data[i]);
 
         // resize canvas
         canvas.setAttribute("width", w);
@@ -42,8 +48,8 @@ class CanvasHandler {
 }
 
 class Graph extends CanvasHandler {
-    constructor(canvas, data) {
-        super(canvas, 40+47*16, 90+10, data);
+    constructor(canvas, data, stringFunc) {
+        super(canvas, 40+47*16, 100+10, data, stringFunc);
 
         this.redraw();
     }
@@ -87,39 +93,60 @@ class Graph extends CanvasHandler {
         }
 
         // fill in graph from data points
-        this.ctx.lineWidth = 3;
-        this.ctx.strokeStyle = "#3eb65c";
-
         for (let i = 0; i < 47; i++) {
-            const x1 = 35 + 16*i, x2 = 51 + 16*i;
             const d1 = this.data[i] == -1 ? -1 : this.data[i]/max;
             const d2 = this.data[i+1] == -1 ? -1 : this.data[i+1]/max;
-            const y1 = 85 - 70*d1, y2 = 85 - 70*d2;
 
+            let x1 = 35 + 16*i, x2 = 51 + 16*i;
+            let y1 = 85 - 70*d1, y2 = 85 - 70*d2;
+
+            this.ctx.fillStyle = "#14d24350";
             if (d1 != -1 && d2 != -1) {
-                this.ctx.fillStyle = "#14d24350";
-                this.ctx.beginPath();
-                this.ctx.moveTo(x2, y2);
-                this.ctx.lineTo(x1, y1);
-                this.ctx.stroke();
-                this.ctx.lineTo(x1, 85);
-                this.ctx.lineTo(x2, 85);
-                this.ctx.fill();
+                this.ctx.lineWidth = 3;
+                this.ctx.strokeStyle = "#3eb65c";
+            }
+            else {
+                if (d1 == -1) y1 = 85;
+                if (d2 == -1) y2 = 85;
+                this.ctx.lineWidth = 1;
+                this.ctx.strokeStyle = "#7d7";
+                this.ctx.setLineDash([5, 10]);
             }
 
-            if (y1 != -1) this.point(x1, y1);
-            if (i == 47 && y2 != -1) this.point(x2, y2);
+            this.ctx.beginPath();
+            this.ctx.moveTo(x1, y1);
+            this.ctx.lineTo(x2, y2);
+            this.ctx.stroke();
+            this.ctx.lineTo(x2, 85);
+            this.ctx.lineTo(x1, 85);
+            this.ctx.fill();
+            this.ctx.setLineDash([]);
+
+            if (d1 != -1) this.point(x1, y1);
+            if (i == 47 && d2 != -1) this.point(x2, y2);
         }
     }
 
     onmove(evt) {
         this.redraw();
+
+        let i = Math.floor((evt.x-this.canvas.getBoundingClientRect().left-50)/16);
+        if (i < 0) i = 0;
+        if (i > 47) i = 47;
+        const x = 35 + 16*i;
+
+        this.ctx.fillStyle = "#fffa";
+        this.ctx.fillRect(0, 0, x, this.canvas.height);
+        this.ctx.fillRect(x+16, 0, this.canvas.width-x-16, this.canvas.height);
+
+        this.ctx.fillStyle = "#000";
+        this.ctx.fillText(this.stringFunc(i), 33, 107);
     }
 }
 
 class SquareGrid extends CanvasHandler {
     constructor(canvas, data, badness, key, stringFunc) {
-        super(canvas, 10+48*16, 15+45, data);
+        super(canvas, 10+48*16, 15+45, data, stringFunc);
 
         // converts a value into its badness (0->1)
         this.badness = badness;
@@ -127,7 +154,6 @@ class SquareGrid extends CanvasHandler {
         // array of either [[badness, alternate], "text"] (point) or [[[badness 1, alternate 1], [badness 2, alternate 2]], "text"] (gradient)
         this.key = key;
 
-        this.stringFunc = stringFunc;
         this.redraw();
     }
 
@@ -202,7 +228,7 @@ class SquareGrid extends CanvasHandler {
         this.ctx.fillRect(0, 16, this.canvas.width, this.canvas.height-16);
 
         this.ctx.fillStyle = "#000";
-        this.ctx.fillText(new Date(Date.now() + (i-47)*hour).toGMTString()+" - "+this.stringFunc(this.data[i]), 5, 53);
+        this.ctx.fillText(this.stringFunc(i), 5, 53);
     }
 }
 
@@ -283,9 +309,21 @@ function setScale(canvas, w, h) {
 }
 
 function init() {
-    handlers.players = new Graph(dom.players, parsePlayers());
+    // init handlers
+    handlers.players = new Graph(dom.players, parsePlayers(), data => (data > 0 ? data : "no")+" player"+(data == 1 ? "" : "s")+" online");
     handlers.down = new SquareGrid(dom.down, parseDown(), x => x, [[[-1, 0], "No data"], [[0, 0], "Running"], [[[0.001, 0], [1, 0]], "Down"], [[[0.001, 1], [1, 1]], "Maintenance"]], data => data[0] == 0 ? "Running" : (data[1] ? "Maintenance for " : "Down for ")+Math.round(data[0]*60)+"m");
-    handlers.errors = new SquareGrid(dom.errors, parseErrors(), x => x ? 1 : 0, [[[-1, 0], "No data"], [[0, 0], "No errors"], [[1, 0], "Error"]], data => data[0] ? data[0]+" error"+(data[0] == 1 ? "" : "s") : "no errors");
+    handlers.errors = new SquareGrid(dom.errors, parseErrors(), x => x >= 1 ? Math.min((x-0.999)/10, 1) : x, [[[-1, 0], "No data"], [[0, 0], "No errors"], [[[1, 0], [10, 0]], "Errors"]], data => data[0] ? data[0]+" error"+(data[0] == 1 ? "" : "s") : "no errors");
+
+    // fill info p
+    dom.peak.innerHTML = "Peak: "+Math.max(...handlers.players.data)+" online";
+
+    let sum = 0;
+    handlers.down.data.forEach(point => sum += 1-point[0]);
+    dom.average.innerHTML = "Average uptime: "+Math.round(sum/0.48)+"%";
+
+    sum = 0;
+    handlers.errors.data.forEach(point => sum += point[0]);
+    dom.totalErrors.innerHTML = "Total errors: "+sum;
 
     let error = Data.errors ? Data.errors[Data.errors.length-1].trim() : "";
     if (error == "") error = " [no error]";

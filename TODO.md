@@ -63,7 +63,6 @@ updated every 60s, remove old lines, 48 lines:
 - file with "timestamp error", replace in error: \t, \n=>" "
 
 TODO:
-- optimize status screen
 - debug screen
 - colors div scroll
 - mobile version (when width < height, updated on screen resize (with timeout))
