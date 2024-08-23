@@ -62,13 +62,19 @@ body {
     gap: 20px;
 }
 
+#sidebar>.flex {
+    display: flex;
+    gap: 20px;
+}
+
 #minimap {
     border: 2px solid white;
 
     border-radius: 12px;
 }
 
-#settings-button, #colors {
+/* separate things for priorities */
+#sidebar>.flex>div:not(:is(#discord, #colors)), #discord, #colors {
     box-sizing: border-box;
 
     width: 80px;
@@ -80,24 +86,42 @@ body {
     box-shadow: 0 0 10px #0003;
 }
 
-#settings-button a {
-    transition: 0.3s transform ease-out;
+#sidebar>.flex>div:not(#colors) {
+    cursor: pointer;
 
     display: flex;
     justify-content: center;
     align-items: center;
-
-    width: 100%;
-    height: 100%;
 }
 
-#settings-button a:hover {
+#sidebar>.flex>div img {
+    width: 60px;
+    height: 60px;
+}
+
+#discord img {
+    transition: 0.5s transform cubic-bezier(0.42, 0, 0.15, 1);
+}
+
+:is(#settings-button, #powerups) img {
+    transition: 0.3s transform ease-out;
+}
+
+#discord {
+    background-color: #7289da;
+    backdrop-filter: none;
+}
+
+#discord:hover img {
+    transform: rotate(360deg);
+}
+
+#settings-button:hover img {
     transform: rotate(60deg);
 }
 
-#settings-button a img {
-    width: 70px;
-    height: 70px;
+#powerups:hover img {
+    transform: scale(1.1);
 }
 
 #sidebar p {
@@ -229,9 +253,11 @@ body {
 br.line {
     content: "";
 
-    display: block;
-    width: calc(100% + 60px);
     transform: translateX(-30px);
+    display: block;
+
+    width: calc(100% + 60px);
+    margin-top: 10px;
 
     border-bottom: 1px solid #0003;
 }
@@ -276,6 +302,7 @@ br.line {
     display: flex;
     justify-content: center;
     align-items: center;
+    gap: 5px;
 
     font-size: 16px;
     color: var(--fg2);
