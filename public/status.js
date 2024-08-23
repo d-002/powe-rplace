@@ -263,7 +263,8 @@ function init() {
     handlers.down = new SquareGrid(dom.down, parseDown(), x => x, [[[0, 0], "Running"], [[[0.001, 0], [1, 0]], "Down"], [[[0.001, 1], [1, 1]], "Maintenance"]]);
     handlers.errors = new SquareGrid(dom.errors, parseErrors(), x => x ? 1 : 0, [[[0, 0], "No errors"], [[1, 0], "Error"]]);
 
-    const error = Data.errors ? Data.errors[Data.errors.length-1] : ""
+    let error = Data.errors ? Data.errors[Data.errors.length-1].trim() : "";
+    if (error == "") error = " [no error]";
     dom.lastError.innerHTML = error.substring(error.indexOf(" ")+1).replaceAll("\t", "<br />");
 }
 
