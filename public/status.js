@@ -1,4 +1,10 @@
+let interval;
+let fps = 10;
+let scale = 20;
+
 let dom = {
+    clouds: null,
+
     players: null,
     down: null,
     errors: null,
@@ -7,6 +13,9 @@ let dom = {
 
 let Data = {};
 let handlers = {};
+
+let cW, cH;
+let clouds;
 
 class CanvasHandler {
     constructor(canvas, w, h, data) {
@@ -173,11 +182,11 @@ class SquareGrid extends CanvasHandler {
     }
 }
 
-function setScale(canvas, w, h) {
-    canvas.setAttribute("width", w);
-    canvas.setAttribute("height", h);
-    canvas.width = w;
-    canvas.height = h;
+function resizeCanvas(evt) {
+    cW = window.innerWidth;
+    cH = window.innerHeight;
+    dom.clouds.width = cW;
+    dom.clouds.height = cH;
 }
 
 const hour = 3600000;
@@ -242,6 +251,13 @@ function parseErrors() {
     return data;
 }
 
+function setScale(canvas, w, h) {
+    canvas.setAttribute("width", w);
+    canvas.setAttribute("height", h);
+    canvas.width = w;
+    canvas.height = h;
+}
+
 function init() {
     handlers.players = new Graph(dom.players, parsePlayers());
     handlers.down = new SquareGrid(dom.down, parseDown(), x => x, [[[0, 0], "Running"], [[[0.001, 0], [1, 0]], "Down"], [[[0.001, 1], [1, 1]], "Maintenance"]]);
@@ -266,4 +282,10 @@ window.onload = () => {
             init();
         }
     }, 100);
+
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+
+    clouds = new Clouds();
+    interval = window.setInterval(() => clouds.update(false), 1000/fps);
 };
