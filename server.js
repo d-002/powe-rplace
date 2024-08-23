@@ -330,7 +330,8 @@ updateOp(true);
 
 // error handling
 function logErrorToFile(err) {
-    addDataToStatusFile(files.errors, Date.now()+" "+err.stack.replaceAll("\t", "    ").replaceAll("\n", "\t"));
+    // not using replaceAll because of glitch.com
+    addDataToStatusFile(files.errors, Date.now()+" "+err.stack.replace(/\t/g, "    ").replace(/\n/g, "\t"));
 }
 
 process.on("uncaughtException", err => {

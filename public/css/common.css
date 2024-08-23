@@ -46,6 +46,7 @@ a:not(.nohref):hover {
     display: flex;
     justify-content: center;
     align-items: center;
+    gap: 5px;
 
     box-shadow: 0 0 10px #0003;
     backdrop-filter: blur(5px);
@@ -54,6 +55,22 @@ a:not(.nohref):hover {
     color: var(--fg2);
 }
 
-#footer a {
+:is(#footer, #small-footer) a {
     color: var(--fg3);
+}
+
+:is(#footer, #small-footer) a:first-child {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+:is(#footer, #small-footer) a:first-child::before {
+    content: "";
+    width: 40px;
+    height: 40px;
+
+    background-image: url("/icon-512.png");
+    background-size: cover;
+    filter: drop-shadow(0 0 3px #000a);
 }

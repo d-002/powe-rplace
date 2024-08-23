@@ -281,10 +281,6 @@ br.line {
     color: var(--fg2);
 }
 
-#small-footer a {
-    color: var(--fg3);
-}
-
 #popup.show>div {
     animation: slide 1s normal forwards ease-out;
 }
@@ -294,9 +290,24 @@ br.line {
 }
 
 h1 {
+    display: flex;
+    align-items: center;
+    margin: 0 0 50px 0;
+
     font-family: "stifly", sans-serif;
     font-size: 80px;
-    margin: 0 0 50px 0;
+}
+
+h1::after {
+    content: "";
+    display: block;
+    width: 160px;
+    min-width: 160px;
+    height: 160px;
+
+    background-image: url("/icon-512.png");
+    background-size: cover;
+    filter: drop-shadow(0 0 3px #000a);
 }
 
 h2 {

@@ -132,7 +132,7 @@ class Graph extends CanvasHandler {
 
         let i = Math.floor((evt.x-this.canvas.getBoundingClientRect().left-50)/16);
         if (i < 0) i = 0;
-        if (i > 47) i = 47;
+        if (i > 46) i = 46;
         const x = 35 + 16*i;
 
         this.ctx.fillStyle = "#fffa";
@@ -311,7 +311,7 @@ function setScale(canvas, w, h) {
 function init() {
     // init handlers
     handlers.players = new Graph(dom.players, parsePlayers(), data => (data > 0 ? data : "no")+" player"+(data == 1 ? "" : "s")+" online");
-    handlers.down = new SquareGrid(dom.down, parseDown(), x => x, [[[-1, 0], "No data"], [[0, 0], "Running"], [[[0.001, 0], [1, 0]], "Down"], [[[0.001, 1], [1, 1]], "Maintenance"]], data => data[0] == 0 ? "Running" : (data[1] ? "Maintenance for " : "Down for ")+Math.round(data[0]*60)+"m");
+    handlers.down = new SquareGrid(dom.down, parseDown(), x => x, [[[-1, 0], "No data"], [[0, 0], "Running"], [[[0.001, 0], [1, 0]], "Down"], [[[0.001, 1], [1, 1]], "Maintenance"]], data => data[0] == 0 ? "Running" : (data[1] ? "Maintenance for " : "Down for ")+(data[0] >= 0.999 ? "1h" : Math.round(data[0]*60)+"m"));
     handlers.errors = new SquareGrid(dom.errors, parseErrors(), x => x >= 1 ? Math.min((x-0.999)/10, 1) : x, [[[-1, 0], "No data"], [[0, 0], "No errors"], [[[1, 0], [10, 0]], "Errors"]], data => data[0] ? data[0]+" error"+(data[0] == 1 ? "" : "s") : "no errors");
 
     // fill info p
@@ -319,7 +319,7 @@ function init() {
 
     let sum = 0;
     handlers.down.data.forEach(point => sum += 1-point[0]);
-    dom.average.innerHTML = "Average uptime: "+Math.round(sum/0.48)+"%";
+    dom.average.innerHTML = "Average uptime: "+Math.round(sum/0.0048)/100+"%";
 
     sum = 0;
     handlers.errors.data.forEach(point => sum += point[0]);
