@@ -63,8 +63,7 @@ updated every 60s, remove old lines, 48 lines:
 - file with "timestamp error", replace in error: \t, \n=>" "
 
 TODO:
-- write status data
-- status page
+- optimize status screen
 - debug screen
 - colors div scroll
 - mobile version (when width < height, updated on screen resize (with timeout))
@@ -79,6 +78,6 @@ TODO:
 - show and record graph of downtime
 - possible to stop server in admin panel
 - user data system: create account, or checksum in localstorage for connection by ip
-- better zoom and pos management
+- better zoom and pos management (perfectly linear movement)
 - dark theme
 - send email / admin logs on error

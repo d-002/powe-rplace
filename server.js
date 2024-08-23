@@ -333,7 +333,7 @@ function logErrorToFile(err) {
     addDataToStatusFile(files.errors, Date.now()+" "+err.stack.replaceAll("\t", "    ").replaceAll("\n", "\t"));
 }
 
-process.on("uncaughtException", function (err) {
+process.on("uncaughtException", err => {
     console.error("PREVENTED SERVER CRASH, logging...");
     console.error(err.stack);
 

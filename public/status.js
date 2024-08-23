@@ -118,16 +118,21 @@ class Graph extends CanvasHandler {
 }
 
 class SquareGrid extends CanvasHandler {
-    constructor(canvas, data, badness, key) {
+    constructor(canvas, data, badness, key, stringFunc) {
         super(canvas, 10+48*16, 15+45, data);
 
-        this.badness = badness; // converts a value into its badness (0->1)
-        this.key = key; // array of either [[badness, alternate], "text"] (point) or [[[badness 1, alternate 1], [badness 2, alternate 2]], "text"] (gradient)
+        // converts a value into its badness (0->1)
+        this.badness = badness;
+
+        // array of either [[badness, alternate], "text"] (point) or [[[badness 1, alternate 1], [badness 2, alternate 2]], "text"] (gradient)
+        this.key = key;
+
+        this.stringFunc = stringFunc;
         this.redraw();
     }
 
     square(x, y, value, alternate) {
-        if (value == -1) this.ctx.fillStyle = "#121211";
+        if (value == -1) this.ctx.fillStyle = "#ddd";
         else {
             value = this.badness(value);
             this.ctx.fillStyle = value ? alternate ? "rgb("+255*value+", 0, 255)" : "rgb(255, "+(255 - 255*value)+", 0)" : "#14d243";
@@ -179,6 +184,25 @@ class SquareGrid extends CanvasHandler {
 
     onmove(evt) {
         this.redraw();
+
+        let i = Math.floor((evt.x-this.canvas.getBoundingClientRect().left-20)/16);
+        if (i < 0) i = 0;
+        if (i > 47) i = 47;
+        const x = 5 + 16*i;
+
+        // make the other squares semi-transparent
+        this.ctx.fillStyle = "#fffa";
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+        // highlight hovered square
+        this.square(x, 0, ...this.data[i]);
+
+        // hide the key to make space for the text
+        this.ctx.fillStyle = "#fff";
+        this.ctx.fillRect(0, 16, this.canvas.width, this.canvas.height-16);
+
+        this.ctx.fillStyle = "#000";
+        this.ctx.fillText(new Date(Date.now() + (i-47)*hour).toGMTString()+" - "+this.stringFunc(this.data[i]), 5, 53);
     }
 }
 
@@ -260,8 +284,8 @@ function setScale(canvas, w, h) {
 
 function init() {
     handlers.players = new Graph(dom.players, parsePlayers());
-    handlers.down = new SquareGrid(dom.down, parseDown(), x => x, [[[0, 0], "Running"], [[[0.001, 0], [1, 0]], "Down"], [[[0.001, 1], [1, 1]], "Maintenance"]]);
-    handlers.errors = new SquareGrid(dom.errors, parseErrors(), x => x ? 1 : 0, [[[0, 0], "No errors"], [[1, 0], "Error"]]);
+    handlers.down = new SquareGrid(dom.down, parseDown(), x => x, [[[-1, 0], "No data"], [[0, 0], "Running"], [[[0.001, 0], [1, 0]], "Down"], [[[0.001, 1], [1, 1]], "Maintenance"]], data => data[0] == 0 ? "Running" : (data[1] ? "Maintenance for " : "Down for ")+Math.round(data[0]*60)+"m");
+    handlers.errors = new SquareGrid(dom.errors, parseErrors(), x => x ? 1 : 0, [[[-1, 0], "No data"], [[0, 0], "No errors"], [[1, 0], "Error"]], data => data[0] ? data[0]+" error"+(data[0] == 1 ? "" : "s") : "no errors");
 
     let error = Data.errors ? Data.errors[Data.errors.length-1].trim() : "";
     if (error == "") error = " [no error]";
