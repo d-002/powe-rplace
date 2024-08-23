@@ -70,6 +70,8 @@ TODO:
 - mobile version (when width < height, updated on screen resize (with timeout))
 - changelog popup
 - click on minimap
+- discord integration, discord link
+- better user files storage
 - login support to sync data from ip, implement passkey system in local storage
 - ddos protection / ip ban in admin
 - display currently active users

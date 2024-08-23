@@ -131,7 +131,11 @@ function addDataToStatusFile(file, add) {
 
 // check for server stops
 const pingData = String(fs.readFileSync(files.ping)).split(" ");
-let prevPing = parseInt(pingData[0]) || Date.now()-127800000;
+let prevPing = parseInt(pingData[0]);
+if (!prevPing) {
+    console.log("Empty prev ping: "+prevPing);
+    prevPing = Date.now();
+}
 let maintenanceThen = parseInt(pingData[1]) || 0;
 addDataToStatusFile(files.down, Date.now()+" "+(Date.now()-prevPing)+" "+(maintenance + maintenanceThen ? 1 : 0));
 
@@ -326,7 +330,7 @@ updateOp(true);
 
 // error handling
 function logErrorToFile(err) {
-    addDataToStatusFile(files.errors, err.stack.replaceAll("\t", "    ").replaceAll("\n", "\t"));
+    addDataToStatusFile(files.errors, Date.now()+" "+err.stack.replaceAll("\t", "    ").replaceAll("\n", "\t"));
 }
 
 process.on("uncaughtException", function (err) {
@@ -373,7 +377,7 @@ const slowInterval = setInterval(() => {
     fs.writeFileSync(files.ping, Date.now()+" "+maintenance);
 
     // update players file
-    let toHour = time => parseInt(time/3600000)*3600000;
+    let toHour = time => Math.floor(time/3600000)*3600000;
     const hour = toHour(Date.now());
     const count = Object.keys(clients).length;
     let add = true;
