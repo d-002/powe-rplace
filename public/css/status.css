@@ -51,6 +51,24 @@ p {
     margin-bottom: 5px;
 }
 
+a.big {
+    transition: 0.1s background-color linear;
+
+    margin-top: 50px;
+    width: 808px;
+    box-sizing: border-box;
+
+    text-align: center;
+    font-size: 32px;
+    color: var(--fg1);
+}
+
+a.big:hover {
+    background-color: #e7e7e7;
+
+    text-decoration: none;
+}
+
 #clouds {
     position: fixed;
     z-index: -1;
@@ -63,7 +81,7 @@ p {
     filter: blur(10px);
 }
 
-canvas:not(#clouds) {
+canvas:not(#clouds), a.big {
     padding: 15px;
 
     border: 1px solid #0003;
@@ -76,8 +94,9 @@ code {
     display: flex;
     justify-content: center;
 
-    width: 808px;
+    width: 810px;
     padding: 5px;
+    box-sizing: border-box;
 
     background-color: black;
     border: 2px solid #f77;

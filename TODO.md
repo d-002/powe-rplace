@@ -64,7 +64,6 @@ updated every 60s, remove old lines, 48 lines:
 
 TODO:
 - debug screen
-- back to homepage
 - colors div scroll
 - mobile version (when width < height, updated on screen resize (with timeout))
 - changelog popup
@@ -81,3 +80,5 @@ TODO:
 - better zoom and pos management (perfectly linear movement)
 - dark theme
 - send email / admin logs on error
+
+- discord bot: post updates, make schematics
