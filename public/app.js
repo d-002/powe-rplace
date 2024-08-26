@@ -210,7 +210,14 @@ class Info {
             }
             else if (user) {
                 // show cooldown info
-                if (state == 2) newhtml = "You can place your "+(user.nPlaced ? "next" : "first")+" pixel!";
+                if (state == 2) {
+                    newhtml = "You can place your "+(user.nPlaced ? "next" : "first")+" pixel!";
+
+                    // try to send a notification
+                    if (Notification.permission == "default" && user.nPlaced != 0)
+                        Notification.requestPermission();
+                    else this.notification();
+                }
                 else newhtml = "You can place your next pixel in "+Math.ceil(delay/1000)+"s";
             }
             else newhtml = "Loading cooldown...";
@@ -219,6 +226,11 @@ class Info {
         }
 
         this.prevState = state;
+    }
+
+    notification() {
+        if (document.hasFocus()) return;
+        if (Notification.permission == "granted") new Notification("You can place your next pixel!");
     }
 }
 

@@ -64,7 +64,6 @@ updated every 60s, remove old lines, 48 lines:
 
 TODO:
 - debug screen
-- send notifications
 - back to homepage
 - colors div scroll
 - mobile version (when width < height, updated on screen resize (with timeout))
