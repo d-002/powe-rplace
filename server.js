@@ -63,6 +63,10 @@ app.get("/", (req, res) => {
     else res.sendFile(__dirname+"/index.html");
 });
 
+app.get("/favicon.ico", (req, res) => {
+    res.sendFile(__dirname+"/public/img/icon/icon-16.ico");
+});
+
 app.get("/down", (req, res) => {
     // if maintenance just stopped, maybe that was the cause of the issue, try to fix
     if (checkMaintenance() && !maintenance) res.redirect("/");

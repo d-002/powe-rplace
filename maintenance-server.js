@@ -14,6 +14,10 @@ app.get("/", (req, res) => {
     res.redirect("/down?reason=maintenance");
 });
 
+app.get("/favicon.ico", (req, res) => {
+    res.sendFile(__dirname+"/public/img/icon/icon-16.ico");
+});
+
 app.get("/down", (req, res) => {
     res.sendFile(__dirname+"/down.html");
 });

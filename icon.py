@@ -30,29 +30,34 @@ def dark(col, m=0.8):
     r, g, b = col
     return (r*m, g*m, b*m)
 
-s = 80
-s1 = 20
+s = 75
+s1 = 0
 s2 = 0
-s3 = -20
-sqr(surf, dark(blue), (256-0.5*s+s1, 100+0.5*s-s1), 90)
-sqr(surf, dark(dblue), (256-0.5*s+(s1+s2)/2, 100+1.5*s-(s1+s2)/2), 65)
-sqr(surf, dark(cyan), (256+0.5*s+(s1+s2)/2, 100+0.5*s-(s1+s2)/2), 65)
-sqr(surf, dark(green), (256+0.5*s+s2, 100+1.5*s-s2), 90)
-sqr(surf, dark(lime), (256+0.5*s+(s2+s3)/2, 100+2.5*s-(s2+s3)/2), 65)
+s3 = -0
+sqr(surf, dark(blue), (256-0.5*s+s1, 256-1.5*s-s1), 90)
+sqr(surf, dark(dblue), (256-0.5*s+(s1+s2)/2, 256-0.5*s-(s1+s2)/2), 65)
+sqr(surf, dark(cyan), (256+0.5*s+(s1+s2)/2, 256-1.5*s-(s1+s2)/2), 65)
+sqr(surf, dark(green), (256+0.5*s+s2, 256-0.5*s-s2), 90)
+sqr(surf, dark(lime), (256+0.5*s+(s2+s3)/2, 256+0.5*s-(s2+s3)/2), 65)
 
-sqr(surf, gray1, (256-2*s+s1, 100+2*s-s1), 100)
-sqr(surf, dblue, (256-s+s1, 100+s-s1), 100)
-sqr(surf, blue, (256+s1, 100-s1), 100)
-sqr(surf, gray2, (256-s+s2, 100+3*s-s2), 100)
-sqr(surf, green, (256+s2, 100+2*s-s2), 100)
-sqr(surf, cyan, (256+s+s2, 100+s-s2), 100)
-sqr(surf, gray3, (256+s3, 100+4*s-s3), 100)
-sqr(surf, lime, (256+s+s3, 100+3*s-s3), 100)
-sqr(surf, gray4, (256+2*s+s3, 100+2*s-s3), 100)
+sqr(surf, gray1, (256-2*s+s1, 256-s1), 100)
+sqr(surf, dblue, (256-s+s1, 256-s-s1), 100)
+sqr(surf, blue, (256+s1, 256-2*s-s1), 100)
+sqr(surf, gray2, (256-s+s2, 256+s-s2), 100)
+sqr(surf, green, (256+s2, 256-s2), 100)
+sqr(surf, cyan, (256+s+s2, 256-s-s2), 100)
+sqr(surf, gray3, (256+s3, 256+2*s-s3), 100)
+sqr(surf, lime, (256+s+s3, 256+s-s3), 100)
+sqr(surf, gray4, (256+2*s+s3, 256-s3), 100)
 
 s = 512
 for i in range(6):
-    pygame.image.save(pygame.transform.smoothscale(surf, (s, s)), 'icon-%d.png' %s)
+    surf_ = pygame.transform.smoothscale(surf, (s, s))
+    pygame.image.save(surf_, '../public/img/icon/icon-%d.png' %s)
+
+    if s == 16:
+        pygame.image.save(surf_, 'c:/users/pc/downloads/icon-16.png')
+
     s >>= 1
 
 while True:

@@ -6,7 +6,7 @@ class Clouds {
         this.pos = [];
         for (let i = 1; i <= 17; i++) {
             const image = new Image();
-            image.src = "/img/"+i+".png";
+            image.src = "/img/clouds/"+i+".png";
             this.images.push(image);
 
             if (i <= Clouds.n)
