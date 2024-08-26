@@ -31,32 +31,41 @@ def dark(col, m=0.8):
     return (r*m, g*m, b*m)
 
 s = 75
+r1 = 90
+r2 = 60
 s1 = 0
 s2 = 0
 s3 = -0
-sqr(surf, dark(blue), (256-0.5*s+s1, 256-1.5*s-s1), 90)
-sqr(surf, dark(dblue), (256-0.5*s+(s1+s2)/2, 256-0.5*s-(s1+s2)/2), 65)
-sqr(surf, dark(cyan), (256+0.5*s+(s1+s2)/2, 256-1.5*s-(s1+s2)/2), 65)
-sqr(surf, dark(green), (256+0.5*s+s2, 256-0.5*s-s2), 90)
-sqr(surf, dark(lime), (256+0.5*s+(s2+s3)/2, 256+0.5*s-(s2+s3)/2), 65)
+sqr(surf, dark(blue), (256-0.5*s+s1, 256-1.5*s-s1), r2)
+sqr(surf, dark(dblue), (256-0.5*s+(s1+s2)/2, 256-0.5*s-(s1+s2)/2), r2)
+sqr(surf, dark(cyan), (256+0.5*s+(s1+s2)/2, 256-1.5*s-(s1+s2)/2), r2)
+sqr(surf, dark(green), (256+0.5*s+s2, 256-0.5*s-s2), r2)
+sqr(surf, dark(lime), (256+0.5*s+(s2+s3)/2, 256+0.5*s-(s2+s3)/2), r2)
 
-sqr(surf, gray1, (256-2*s+s1, 256-s1), 100)
-sqr(surf, dblue, (256-s+s1, 256-s-s1), 100)
-sqr(surf, blue, (256+s1, 256-2*s-s1), 100)
-sqr(surf, gray2, (256-s+s2, 256+s-s2), 100)
-sqr(surf, green, (256+s2, 256-s2), 100)
-sqr(surf, cyan, (256+s+s2, 256-s-s2), 100)
-sqr(surf, gray3, (256+s3, 256+2*s-s3), 100)
-sqr(surf, lime, (256+s+s3, 256+s-s3), 100)
-sqr(surf, gray4, (256+2*s+s3, 256-s3), 100)
+sqr(surf, gray1, (256-2*s+s1, 256-s1), r1)
+sqr(surf, dblue, (256-s+s1, 256-s-s1), r1)
+sqr(surf, blue, (256+s1, 256-2*s-s1), r1)
+sqr(surf, gray2, (256-s+s2, 256+s-s2), r1)
+sqr(surf, green, (256+s2, 256-s2), r1)
+sqr(surf, cyan, (256+s+s2, 256-s-s2), r1)
+sqr(surf, gray3, (256+s3, 256+2*s-s3), r1)
+sqr(surf, lime, (256+s+s3, 256+s-s3), r1)
+sqr(surf, gray4, (256+2*s+s3, 256-s3), r1)
+
+# make monochrome version
+surf2 = pygame.Surface((W, H), SRCALPHA)
+for x in range(W):
+    for y in range(H):
+        r, g, b, a = surf.get_at((x, y))
+        if (a and (r, g, b) not in colors): a = 127
+        surf2.set_at((x, y), (255, 255, 255, a))
 
 s = 512
 for i in range(6):
     surf_ = pygame.transform.smoothscale(surf, (s, s))
-    pygame.image.save(surf_, '../public/img/icon/icon-%d.png' %s)
-
-    if s == 16:
-        pygame.image.save(surf_, 'c:/users/pc/downloads/icon-16.png')
+    surf2_ = pygame.transform.smoothscale(surf2, (s, s))
+    pygame.image.save(surf_, 'public/img/icon/icon-%d.png' %s)
+    pygame.image.save(surf2_, 'public/img/icon/icon-mono-%d.png' %s)
 
     s >>= 1
 

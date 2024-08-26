@@ -130,7 +130,6 @@ body {
 
 #powerups:hover img {
     transform: scale(1.1);
-    filter: invert(1);
 }
 
 #sidebar p {
