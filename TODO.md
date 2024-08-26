@@ -34,6 +34,13 @@ powerups:
 - place pixels faster
 - pre-place (must have window open)
 - colors pickup
+- place multiple pixels at once
+- community decisions: vote to fill area of increasing size
+- undo
+- import schematics, of increasing sizes
+- schematics editor
+- nuke
+- black hole (drags pixels?)
 
 Only store relevant information in users files (pixels placed...) and parse privileges with powerups file
 
@@ -63,12 +70,14 @@ updated every 60s, remove old lines, 48 lines:
 - file with "timestamp error", replace in error: \t, \n=>" "
 
 TODO:
+- noscript
 - debug screen
-- colors div scroll
+- change colors div handling: grid (leave space for an extra row for when opening), open submenus below hovered pixel
 - mobile version (when width < height, updated on screen resize (with timeout))
 - changelog popup
 - click on minimap
-- discord integration, discord link
+- discord integration, discord link, for all pages, also add banner
+- collapse menu? better opening animation for both menu and colors?
 - better user files storage
 - login support to sync data from ip, implement passkey system in local storage
 - ddos protection / ip ban in admin

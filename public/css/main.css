@@ -49,6 +49,16 @@ body {
     filter: drop-shadow(0 0 3px white) opacity(var(--a));
 }
 
+#logo {
+    cursor: pointer;
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+
+    width: 64px;
+    filter: drop-shadow(0 0 3px #0005);
+}
+
 #sidebar {
     position: fixed;
     top: 0;

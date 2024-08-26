@@ -278,7 +278,7 @@ function showPopup(show, hide, listener) {
 
 function closeMenu(evt) {
     // if triggered by a click event, don't close when clicked on the left
-    if (evt && evt.x+window.scrollY < cW*0.4) return;
+    if (evt && evt.x+window.scrollY < Math.min(cW*0.4, 600)) return;
 
     dom.popup.className = "";
     dom.popup.offsetWidth;
