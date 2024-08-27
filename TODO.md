@@ -70,8 +70,6 @@ updated every 60s, remove old lines, 48 lines:
 - file with "timestamp error", replace in error: \t, \n=>" "
 
 TODO:
-- fix 1px gap on log zoom
-- change colors div handling: grid (leave space for an extra row for when opening), open submenus below hovered pixel
 - mobile version (when width < height, updated on screen resize (with timeout))
 - changelog popup
 - click on minimap

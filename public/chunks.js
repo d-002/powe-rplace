@@ -66,7 +66,7 @@ class Chunk {
         const pixSize = scale*this.zoom;
         const number = Math.ceil(Chunk.size/this.zoom);
 
-        const add = options.borders ? 1 : 0;
+        const add = options.borders && options.zoom > 0.5 ? 1 : 0;
 
         // display the image on a canvas and edit it
         _ctx.drawImage(this.image, 0, 0);
