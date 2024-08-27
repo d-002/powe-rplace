@@ -32,6 +32,7 @@ let dom = {
 
 let interval;
 let colorsInterval;
+let lastDebug;
 
 let chunkSystem;
 let movement;
@@ -199,7 +200,7 @@ class Info {
         this.update(true);
     }
 
-    update(force = false) {
+    update(force=false) {
         const t = (Date.now()-this.lastTime)/5000;
         const delay = user ? user.pixelCooldown-Date.now()+user.lastPixel : 0;
         const state = t <= 1 ? t <= 0.8 ? 0 : t*5-4 : delay <= 0 ? 2 : 2+delay;
@@ -366,6 +367,25 @@ function appUpdate() {
     }
     clouds.update(true);
     info.update();
+    updateDebug();
+}
+
+function updateDebug() {
+    if (!options.debug || Date.now()-lastDebug < 200) return;
+    lastDebug = Date.now();
+
+    let s = document.title;
+    s += "<br />Used memory: "+window.performance.memory.usedJSHeapSize;
+    s += "<br />Chunks loaded: "+Object.keys(chunkSystem.chunks).length+", queued: "+Object.keys(chunkSystem.queue).length;
+    s += "<br />Loaded: map "+state.mapOk+", user "+state.userOk+", options "+state.optionsOk;
+    s += "<br />Target FPS: "+fps;
+    if (user) {
+        s += "<br />User: v "+user.version+", last "+user.lastPixel;
+        s += "<br />colors "+user.nColors+", cooldown "+user.pixelCooldown;
+    }
+    else s += "<br />User: "+user;
+
+    dom.debug.innerHTML = s;
 }
 
 function setcol(i) {

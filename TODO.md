@@ -71,7 +71,6 @@ updated every 60s, remove old lines, 48 lines:
 
 TODO:
 - noscript
-- debug screen
 - change colors div handling: grid (leave space for an extra row for when opening), open submenus below hovered pixel
 - mobile version (when width < height, updated on screen resize (with timeout))
 - changelog popup

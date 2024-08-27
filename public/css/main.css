@@ -69,6 +69,19 @@ body {
     filter: drop-shadow(0 0 3px white) opacity(var(--a));
 }
 
+#debug {
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    margin: 0;
+    width: 400px;
+
+    font-size: 16px;
+    font-family: consolas, courier new, monospace;
+    color: #f00;
+}
+
 #logo {
     cursor: pointer;
     position: fixed;
