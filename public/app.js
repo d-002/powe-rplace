@@ -9,6 +9,7 @@ let dom = {
     debug: null,
 
     // sidebar
+    sidebar: null,
     minimap: null,
     nClients: null,
     colors: null,
@@ -23,7 +24,10 @@ let dom = {
 
     // options
     tBorders: null,
-    tDebug: null
+    tDebug: null,
+
+    // powerups
+    powerups: null
 }
 
 let interval;
@@ -184,6 +188,8 @@ class Info {
         this.msg = null;
 
         this.prevState = -1;
+
+        this.first = true;
     }
 
     show(message) {
@@ -230,12 +236,16 @@ class Info {
 
     notification() {
         if (document.hasFocus()) return;
+        if (this.first) {
+            this.first = false;
+            return;
+        }
         if (Notification.permission == "granted") new Notification("You can place your next pixel!");
     }
 }
 
 function startup() {
-    showPopup(dom.startup, dom.settings, acceptedTerms);
+    //showPopup(dom.startup, dom.settings, acceptedTerms);
 
     dom.debug.style.display = options.debug ? null : "none";
     if (options.borders) toggleElt(dom.tBorders);
@@ -293,6 +303,28 @@ function agree() {
     acceptedTerms = true;
     updateLocalStorage();
     closeMenu();
+}
+
+function discord() {
+    window.open('https://discord.gg/B3mwVDhf', '_blank').focus();
+}
+
+function openPowerups() {
+    dom.powerups.className = "";
+    dom.powerups.offsetWidth;
+    dom.powerups.className = "show";
+    dom.sidebar.className = "";
+    dom.sidebar.offsetWidth;
+    dom.sidebar.className = "hide";
+}
+
+function closePowerups() {
+    dom.powerups.className = "";
+    dom.powerups.offsetWidth;
+    dom.powerups.className = "hide";
+    dom.sidebar.className = "";
+    dom.sidebar.offsetWidth;
+    dom.sidebar.className = "show";
 }
 
 // used to convert ImageData into Image
@@ -364,7 +396,7 @@ function populateColors() {
             const col = document.createElement("a");
             col.href = "javascript:setcol("+(y+x*8)+")";
             col.className = "color";
-            col.style = "--col: #"+colors[y + x*8];
+            col.style = "--col: "+colors[y + x*8];
             col.setAttribute("index", y + x*8);
             div.appendChild(col);
         }

@@ -9,7 +9,7 @@
     100% { filter: opacity(1); }
 }
 
-@keyframes slide {
+@keyframes slidePopup {
     0%,50% {
         filter: opacity(0);
         transform: translateX(-100%);
@@ -17,6 +17,26 @@
     100% {
         filter: opacity(1);
         transform: translateX(0);
+    }
+}
+
+@keyframes slideSidebar {
+    0% {
+        transform: translateX(100%);
+    }
+    100% {
+        transform: translateX(0);
+    }
+}
+
+@keyframes slidePowerups {
+    0% {
+        transform: translateY(100%);
+        filter: opacity(0);
+    }
+    100% {
+        transform: translateY(0);
+        filter: opacity(1);
     }
 }
 
@@ -72,6 +92,14 @@ body {
     gap: 20px;
 }
 
+#sidebar.show {
+    animation: slideSidebar 0.3s forwards;
+}
+
+#sidebar.hide {
+    animation: slideSidebar 0.5s reverse forwards;
+}
+
 #sidebar>.flex {
     display: flex;
     gap: 20px;
@@ -83,7 +111,7 @@ body {
     border-radius: 12px;
 }
 
-#discord, #settings-button, #powerups, #colors {
+#discord, #settings-button, #powerups-button, #colors {
     box-sizing: border-box;
 
     width: 80px;
@@ -112,7 +140,7 @@ body {
     transition: 0.5s transform cubic-bezier(0.42, 0, 0.15, 1);
 }
 
-:is(#settings-button, #powerups) img {
+:is(#settings-button, #powerups-button) img {
     transition: 0.3s transform ease-out, 0.3s filter ease-out;
 }
 
@@ -121,7 +149,7 @@ body {
     backdrop-filter: none;
 }
 
-#powerups {
+#powerups-button {
     background-color: var(--bgp1);
     backdrop-filter: none;
 }
@@ -134,11 +162,11 @@ body {
     transform: rotate(60deg);
 }
 
-#powerups img {
+#powerups-button img {
     filter: drop-shadow(0 0 3px #0005);
 }
 
-#powerups:hover img {
+#powerups-button:hover img {
     transform: scale(1.1);
 }
 
@@ -327,11 +355,11 @@ br.line {
 }
 
 #popup.show>div {
-    animation: slide 1s normal forwards ease-out;
+    animation: slidePopup 1s normal forwards ease-out;
 }
 
 #popup.hide>div {
-    animation: slide 0.5s reverse forwards ease-out;
+    animation: slidePopup 0.5s reverse forwards ease-out;
 }
 
 h1 {
@@ -437,4 +465,24 @@ a.toggle.active::after {
     --g: 182;
     --b: 37;
     --content: "yes";
+}
+
+#powerups {
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 100%;
+    background-color: var(--bgp1);
+
+    transform: translateY(100%);
+}
+
+#powerups.show {
+    animation: slidePowerups 0.5s forwards ease-out;
+}
+
+#powerups.hide {
+    animation: slidePowerups 0.3s reverse forwards;
 }

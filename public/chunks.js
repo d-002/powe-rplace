@@ -39,9 +39,9 @@ class Chunk {
             if (x+this.x < 0 || x+this.x >= W || y+this.y < 0 || y+this.y >= H) continue;
 
             const col = colors[localGrid[y+this.y][x+this.x]];
-            const r = parseInt(col[0], 16)*17;
-            const g = parseInt(col[1], 16)*17;
-            const b = parseInt(col[2], 16)*17;
+            const r = parseInt(col[1], 16)*17;
+            const g = parseInt(col[2], 16)*17;
+            const b = parseInt(col[3], 16)*17;
 
             for (let dx = 0; dx < pixSize; dx++) for (let dy = 0; dy < pixSize; dy++) {
                 let i = (Math.floor(x*pixSize)+dx + (Math.floor(y*pixSize)+dy)*width)*4;
@@ -70,7 +70,7 @@ class Chunk {
 
         // display the image on a canvas and edit it
         _ctx.drawImage(this.image, 0, 0);
-        _ctx.fillStyle = "#"+colors[localGrid[y][x]];
+        _ctx.fillStyle = colors[localGrid[y][x]];
         _ctx.fillRect(x%number*pixSize + add, y%number*pixSize + add, scale*this.zoom - add, scale*this.zoom - add);
 
         // get the image data back

@@ -37,7 +37,7 @@
             <canvas id="minimap"></canvas>
             <p id="nClients"></p>
             <div class="flex">
-                <div id="discord" onclick="alert('upcoming')">
+                <div id="discord" onclick="discord()">
                     <img src="img/discord.png" />
                 </div>
                 <div id="settings-button" onclick="settings()">
@@ -45,10 +45,11 @@
                 </div>
             </div>
             <div class="flex">
-                <div id="powerups" onclick="alert('upcoming')">
+                <div id="powerups-button" onclick="openPowerups()">
                     <img src="img/icon/icon-mono-64.png" />
                 </div>
                 <div id="colors"></div>
+            </div>
         </div>
 
         <div id="popup" class="show" style="display: none">
@@ -83,6 +84,10 @@
             <div id="small-footer">
                 <a href="/">powe-r/place</a> - D_00 2024 - <a href="/terms">Privacy policy</a> - <a href="/status">Status page</a>
             </div>
+        </div>
+
+        <div id="powerups">
+            <a onclick="closePowerups()">Close powerups</a>
         </div>
     </body>
 </html>
