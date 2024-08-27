@@ -70,7 +70,6 @@ updated every 60s, remove old lines, 48 lines:
 - file with "timestamp error", replace in error: \t, \n=>" "
 
 TODO:
-- noscript
 - change colors div handling: grid (leave space for an extra row for when opening), open submenus below hovered pixel
 - mobile version (when width < height, updated on screen resize (with timeout))
 - changelog popup
@@ -89,5 +88,6 @@ TODO:
 - dark theme
 - send email / admin logs on error
 
+- realtime clouds background
 - discord bot: post updates, make schematics
 - link bot to website and accounts, to show stats

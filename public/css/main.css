@@ -124,63 +124,71 @@ body {
     border-radius: 12px;
 }
 
-#discord, #settings-button, #powerups-button, #colors {
-    box-sizing: border-box;
-
-    width: 80px;
-    height: 80px;
-    border-radius: 25px;
-
-    background-color: rgba(255, 255, 255, 0.5);
-    backdrop-filter: blur(5px);
-    box-shadow: 0 0 10px #0003;
-}
-
-#sidebar>.flex>div:not(#colors) {
+#sidebar>.flex>div, #colors {
     cursor: pointer;
 
     display: flex;
     justify-content: center;
     align-items: center;
+
+    width: 80px;
+    height: 80px;
+    border-radius: 25px;
+    box-sizing: border-box;
+
+    box-shadow: 0 0 10px #0003;
 }
 
-#sidebar>.flex>div img {
+#settings-button, #colors {
+    background-color: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(5px);
+}
+
+:is(#discord, #settings-button) img {
     width: 60px;
     height: 60px;
+}
+
+:is(#powerups-button, #github) img {
+    width: 70px;
+    height: 70px;
+}
+
+:is(#powerups-button, #settings-button, #github) img {
+    transition: 0.3s transform ease-out, 0.3s filter ease-out;
+}
+
+#discord {
+    background-color: #7289da;
 }
 
 #discord img {
     transition: 0.5s transform cubic-bezier(0.42, 0, 0.15, 1);
 }
 
-:is(#settings-button, #powerups-button) img {
-    transition: 0.3s transform ease-out, 0.3s filter ease-out;
-}
-
-#discord {
-    background-color: #7289da;
-    backdrop-filter: none;
-}
-
-#powerups-button {
-    background-color: var(--bgp1);
-    backdrop-filter: none;
-}
-
 #discord:hover img {
     transform: rotate(360deg);
 }
 
-#settings-button:hover img {
-    transform: rotate(60deg);
+#powerups-button {
+    background-color: var(--bgp1);
 }
 
-#powerups-button img {
+:is(#powerups-button, #github) img {
     filter: drop-shadow(0 0 3px #0005);
 }
 
-#powerups-button:hover img {
+:is(#powerups-button, #github):hover img {
     transform: scale(1.1);
+}
+
+#github {
+    background-color: #24292e;
+    backdrop-filter: none;
+}
+
+#settings-button:hover img {
+    transform: rotate(60deg);
 }
 
 #sidebar p {
@@ -211,7 +219,6 @@ body {
 }
 
 #colors>div {
-    position: relative;
     display: flex;
 
     flex-direction: row-reverse;

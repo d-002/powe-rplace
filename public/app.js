@@ -55,8 +55,8 @@ class Movement {
         dom.canvas.addEventListener("wheel", evt => this.zoom(evt));
         dom.canvas.addEventListener("mousedown", evt => this.press(evt));
         dom.canvas.addEventListener("mouseup", evt => this.release(evt, false));
-        document.body.addEventListener("mouseout", evt => this.release(evt, true));
-        document.body.addEventListener("mousemove", evt => this.move(evt));
+        dom.canvas.addEventListener("mouseout", evt => this.release(evt, true));
+        dom.canvas.addEventListener("mousemove", evt => this.move(evt));
 
         this.pressed = false;
         this.mouse = [0, 0];
@@ -307,7 +307,11 @@ function agree() {
 }
 
 function discord() {
-    window.open('https://discord.gg/B3mwVDhf', '_blank').focus();
+    window.open("https://discord.gg/B3mwVDhf", "_blank").focus();
+}
+
+function github() {
+    window.open("https://github.com/d-002/powe-rplace", "_blank").focus();
 }
 
 function openPowerups() {
@@ -393,8 +397,8 @@ function setcol(i) {
 
     dom.colors.children[options.color&7].children[options.color>>3].classList.remove("selected");
     dom.colors.children[i&7].children[i>>3].classList.add("selected");
-    dom.colors.style = "pointer-events: none";
-    window.setTimeout(() => {dom.colors.style = ""}, 100);
+    dom.colors.style.pointerEvents = "none";
+    window.setTimeout(() => {dom.colors.style.pointerEvents = null}, 100);
 
     i = Math.floor(i) || 0;
     if (i < 0 || i >= user ? user.nColors : NaN) return;
@@ -407,11 +411,11 @@ function populateColors() {
     dom.colors.innerHTML = "";
 
     const count = user ? user.nColors>>3 : 1;
-    const xstyle = "; --x: "+count;
+    dom.colors.style = "--x: "+count;
 
     for (let y = 0; y < 8; y++) {
         const div = document.createElement("div");
-        div.style = "--index: "+y+xstyle;
+        div.style = "--index: "+y;
         for (let x = 0; x < count; x++) {
             const col = document.createElement("a");
             col.href = "javascript:setcol("+(y+x*8)+")";

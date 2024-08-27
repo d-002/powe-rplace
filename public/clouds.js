@@ -10,7 +10,7 @@ class Clouds {
             this.images.push(image);
 
             if (i <= Clouds.n)
-                this.pos.push([Math.floor(Math.random()*17), Math.random()*(cW+50)-50, Math.random()*cH, Math.random()*5+5, 0, 0]);
+                this.pos.push([Math.floor(Math.random()*17), Math.random()*(cW+50)-50, Math.random()*cH, Math.random()*10+1, 0, 0]);
         }
 
         this.pos = this.pos.sort((a,b) => a[3]-b[3]);
