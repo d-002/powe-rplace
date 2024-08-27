@@ -28,7 +28,9 @@ const express = require("express");
 const app = express();
 const http = require("http");
 const fs = require("fs");
+console.log("Creating server...");
 const server = http.createServer(app);
+console.log("Done.");
 const helmet = require('helmet');
 
 const { Server } = require("socket.io");
@@ -52,6 +54,7 @@ let maintenance;
 initAccounts(fs, files, dirs);
 initMap(fs, files, dirs);
 
+console.log("Setting up pages...");
 app.use(express.static(__dirname+"/public"));
 
 // landing page

@@ -4,9 +4,24 @@
 }
 
 @keyframes fadeHalf {
-    0% { filter: opacity(0); }
-    50% { filter: opacity(0); }
-    100% { filter: opacity(1); }
+    0% {
+        filter: opacity(0);
+        position: fixed;
+    }
+    49.999% { position: fixed; }
+    50% {
+        filter: opacity(0);
+        position: unset;
+    }
+    100% {
+        filter: opacity(1);
+        position: unset;
+    }
+}
+
+@keyframes scale {
+    0% { transform: scale(0.8); }
+    100% { transform: scale(1); }
 }
 
 @keyframes slidePopup {
@@ -203,7 +218,7 @@ body {
 }
 
 #colors {
-    transition: 0.25s height linear, 0.15s border-radius linear;
+    transition: 0.2s min-width, 0.2s height, 0.15s border-radius linear;
 
     display: flex;
     flex-direction: column;
@@ -211,6 +226,7 @@ body {
     align-items: end;
     justify-content: start;
 
+    min-width: 80px;
     padding: 5px;
 }
 
@@ -218,12 +234,11 @@ body {
     cursor: default;
 
     width: unset;
-    height: unset;
+    min-width: calc(80px * var(--colw));
+    height: calc(80px * var(--colh));
     min-height: 80px;
-    max-height: calc(80px * var(--colh));
 
     border-radius: 40px;
-    animation: 0.5s open linear;
 }
 
 #colors>div {
@@ -236,22 +251,29 @@ body {
 
     width: 70px;
     height: 70px;
-    max-height: 100%;
+
+    border-radius: 35px;
+}
+
+/* important: do not play animations for fake hover */
+#colors:hover>div {
+    animation: 0.4s fadeHalf forwards;
+}
+
+#colors:not(:is(:hover, .fakeHover))>div:not(:has(.selected)) {
+    display: none;
 }
 
 #colors>div>a {
+    transition: width, height, margin, transform;
+    transition-duration: 0.2s;
     margin-top: 10px;
-}
-
-#colors:not(:is(#colors:hover, #colors.fakeHover))>div:not(:has(.selected)) {
-    display: none;
 }
 
 #colors>div:hover {
     min-width: 140px;
     width: unset;
 
-    border-radius: 35px;
     background-color: #d6ebff;
     filter: drop-shadow(0 0 10px #0007);
 }
@@ -264,6 +286,14 @@ body {
 
 #colors>div:hover>div {
     display: block;
+}
+
+#colors>div:hover>a {
+    border: none;
+    width: 30px;
+    height: 30px;
+    margin: 10px;
+    transform: translateY(10px);
 }
 
 #colors .submenu {
@@ -283,6 +313,7 @@ body {
 }
 
 #colors .color {
+    position: relative;
     width: 50px;
     height: 50px;
 
@@ -294,19 +325,27 @@ body {
     box-sizing: border-box;
 }
 
+#colors .submenu .color {
+    transition: 0.1s transform;
+}
+
+#colors>div:hover .submenu .color {
+    animation: 0.25s scale;
+}
+
 #colors .submenu .color:hover {
     transform: scale(1.1);
 }
 
-#colors .color.selected::after {
+#colors .color.selected:not(#colors>div:hover>a)::after {
     content: "";
 
-    position: relative;
+    position: absolute;
     display: block;
     top: -10px;
     left: -10px;
-    width: 60px;
-    height: 60px;
+    width: 130%;
+    height: 130%;
 
     border-radius: 30px;
     border: 3px solid white;

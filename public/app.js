@@ -403,12 +403,17 @@ function updateDebug() {
 function setcol(i) {
     i = (parseInt(Math.abs(i)) || 0) % (user ? user.nColors : privileges.colors[0]);
 
-    dom.colors.children[options.color&7].children[0].style = "--col: "+colors[options.color&7];
+    const a0 = dom.colors.children[options.color&7].children[0];
+    const a1 = dom.colors.children[i&7].children[0];
+    a0.style = "--col: "+colors[options.color&7];
+    a0.classList.remove("selected");
+    a1.style = "--col: "+colors[i];
+    a1.classList.add("selected");
+
     dom.colors.children[options.color&7].children[1].children[0].children[options.color>>3].classList.remove("selected");
-    dom.colors.children[i&7].children[0].style = "--col: "+colors[i];
     dom.colors.children[i&7].children[1].children[0].children[i>>3].classList.add("selected");
     dom.colors.style.pointerEvents = "none";
-    window.setTimeout(() => {dom.colors.style.pointerEvents = null}, 100);
+    window.setTimeout(() => {dom.colors.style.pointerEvents = null}, 500);
 
     i = Math.floor(i) || 0;
     if (i < 0 || i >= user ? user.nColors : NaN) return;
@@ -452,7 +457,7 @@ function updateColorsLayout() {
     dom.colors.className = "";
 
     // prevent the height from being something like 1.5 element
-    dom.colors.style = "--size: "+(user ? user.nColors>>3 : 4)+"; --colh: "+heights.length;
+    dom.colors.style = "--size: "+(user ? user.nColors>>3 : 4)+"; --colw: "+Math.ceil(user ? 8/heights.length : 1)+"; --colh: "+heights.length;
 }
 
 function toggleElt(elt) {
