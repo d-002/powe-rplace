@@ -90,3 +90,4 @@ TODO:
 - send email / admin logs on error
 
 - discord bot: post updates, make schematics
+- link bot to website and accounts, to show stats

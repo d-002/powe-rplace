@@ -16,7 +16,8 @@ const options = {
     "404": ["404", "Not Found", "The requested resource has not been found.", 0],
     "403": ["403", "Forbidden", "You are not authorized to view this resource.", 0],
     "500": ["500", "Internal server error", "That's all we know. Please retry in a few moments.", 10000],
-    "blacklist": ["403", "Forbidden", "You are blacklisted on this server."]
+    "blacklist": ["403", "Forbidden", "You are blacklisted on this server."],
+    "noscript": ["Error", "", "You probably just re-enabled Javascript on this website. Please wait...", 1]
 }
 
 let type = new URLSearchParams(window.location.search).get("reason") || "unknown";
