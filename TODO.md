@@ -70,6 +70,7 @@ updated every 60s, remove old lines, 48 lines:
 - file with "timestamp error", replace in error: \t, \n=>" "
 
 TODO:
+- fix 1px gap on log zoom
 - change colors div handling: grid (leave space for an extra row for when opening), open submenus below hovered pixel
 - mobile version (when width < height, updated on screen resize (with timeout))
 - changelog popup
@@ -87,6 +88,7 @@ TODO:
 - better zoom and pos management (perfectly linear movement)
 - dark theme
 - send email / admin logs on error
+- FIX DESYNC MAP
 
 - realtime clouds background
 - discord bot: post updates, make schematics

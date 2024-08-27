@@ -271,7 +271,7 @@ io.on("connection", socket => {
 
         user.encodeToFile();
         // don't delete client from storage if it was an older clone ip
-        if (user.isDupe) clients[ip].isDupe = false;
+        if (clients[ip].isDupe) clients[ip].isDupe = false;
         else delete clients[ip];
     });
 
