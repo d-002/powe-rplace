@@ -53,7 +53,8 @@ let options = {
     zoom: 1,
     color: 1,
     borders: 1,
-    debug: 0
+    debug: 0,
+    aa: 0
 };
 
 function click(evt) {
@@ -147,6 +148,8 @@ socket.on("userUpdate", data => {
     user = User.decodeString(undefined, data);
     options.color = (options.color%user.nColors+user.nColors) % user.nColors;
 
+    populateColors();
+
     state.userOk = true;
 });
 
@@ -164,7 +167,7 @@ function updateLocalStorage() {;
 
     localStorage.setItem("terms", acceptedTerms ? 1 : 0);
 
-    localStorage.setItem("options", options.x+" "+options.y+" "+options.zoom+" "+options.color+" "+options.borders+" "+options.debug);
+    localStorage.setItem("options", options.x+" "+options.y+" "+options.zoom+" "+options.color+" "+options.borders+" "+options.debug+" "+options.aa);
 }
 
 function loadLocalStorage() {
@@ -209,6 +212,7 @@ function loadLocalStorage() {
         options.color = parseInt(data[3]) || 0;
         options.borders = parseInt(data[4]) || 0;
         options.debug = parseInt(data[5]) || 0;
+        options.aa = parseInt(data[6]) || 0;
     }
     catch(err) {
         info.show("Failed to parse options, settings may be reset: "+err);

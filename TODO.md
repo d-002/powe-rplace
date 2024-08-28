@@ -70,6 +70,10 @@ updated every 60s, remove old lines, 48 lines:
 - file with "timestamp error", replace in error: \t, \n=>" "
 
 TODO:
+- fix map not pixelated
+- powerups
+- sfx
+- music
 - mobile version (when width < height, updated on screen resize (with timeout))
 - changelog popup
 - click on minimap
@@ -78,13 +82,11 @@ TODO:
 - better user files storage
 - login support to sync data from ip, implement passkey system in local storage
 - ddos protection / ip ban in admin
-- display currently active users
 - gpu acceleration
-- show and record graph of downtime
 - possible to stop server in admin panel
 - user data system: create account, or checksum in localstorage for connection by ip
 - better zoom and pos management (perfectly linear movement)
-- dark theme
+- dark theme (night sky)
 - send email / admin logs on error
 - FIX DESYNC MAP
 
