@@ -105,8 +105,16 @@ body {
     bottom: 10px;
     left: 10px;
 
-    width: 64px;
     filter: drop-shadow(0 0 3px #0005);
+}
+
+#logo img {
+    width: 64px;
+    transition: 0.2s transform ease-out;
+}
+
+#logo:hover img {
+    transform: matrix(-1, 0, 0, 1, 0, 0);
 }
 
 #sidebar {
@@ -130,7 +138,7 @@ body {
 }
 
 #sidebar.hide {
-    animation: slideSidebar 0.5s reverse forwards;
+    animation: slideSidebar 0.5s reverse forwards ease-in-out;
 }
 
 #sidebar>.flex {
@@ -175,7 +183,8 @@ body {
 }
 
 :is(#powerups-button, #settings-button, #github) img {
-    transition: 0.3s transform ease-out, 0.3s filter ease-out;
+    transition: transform ease-out, filter ease-out;
+    transition-duration: 0.3s;
 }
 
 #discord {
@@ -194,11 +203,15 @@ body {
     background-color: var(--bgp1);
 }
 
-:is(#powerups-button, #github) img {
-    filter: drop-shadow(0 0 3px #0005);
+#powerups-button img {
+    transition-duration: 0.2s;
 }
 
-:is(#powerups-button, #github):hover img {
+#powerups-button:hover img {
+    transform: matrix(-1, 0, 0, 1, 0, 0);
+}
+
+#github:hover img {
     transform: scale(1.1);
 }
 
@@ -220,7 +233,8 @@ body {
 }
 
 #colors {
-    transition: 0.2s min-width, 0.2s height, 0.15s border-radius linear;
+    transition: min-width, height, border-radius linear;
+    transition-duration: 0.2s;
 
     display: flex;
     flex-direction: column;
@@ -487,12 +501,8 @@ h2 {
     font-weight: 500;
 }
 
-#popup strong {
-    font-weight: 1000;
-    color: #51cd76;
-}
-
 #popup strong.red {
+    font-weight: 1000;
     color: #f00;
 }
 

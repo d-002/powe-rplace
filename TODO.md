@@ -70,7 +70,6 @@ updated every 60s, remove old lines, 48 lines:
 - file with "timestamp error", replace in error: \t, \n=>" "
 
 TODO:
-- fix map not pixelated
 - powerups
 - sfx
 - music

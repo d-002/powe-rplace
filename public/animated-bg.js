@@ -178,6 +178,7 @@ function animResize() {
     canvas.height = H;
 
     canvMult = [];
+    ctx.imageSmoothingEnabled = false;
     ctx.fillStyle = "white";
 
     for (let y = 0; y <= H/size; y++) {

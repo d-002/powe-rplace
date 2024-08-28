@@ -20,8 +20,9 @@
         <script src="/animated-bg.js" type="module"></script>
 
         <meta property="og:title" content="POWE-R/Place">
-        <meta property="og:description" content="A fun and anarchy server! Place pixels anywhere, build giant pixel art, or destroy everything! But that's not all! powe-r/place introduces powerups! Get rewards by playing and unlock special perks...">
-        <meta property="og:image" content="https://powe-rplace.glitch.me/img/icon/icon-128.png">
+        <meta property="og:description" content="A fun and anarchy canvas. Place pixels and create art... But wait, there's more! Play to earn rewards, and unlock special powers!">
+        <meta property="og:image" content="https://powe-rplace.glitch.me/img/banner.png">
+        <meta name="twitter:card" content="summary_large_image">
         <meta name="twitter:image" content="https://powe-rplace.glitch.me/img/icon/icon-128.png">
         <meta property="og:url" content="https://powe-rplace.github.me">
     </head>
@@ -36,7 +37,9 @@
         <canvas id="canvas"></canvas>
         <p id="info"></p>
         <p id="debug"></p>
-        <img src="/img/icon/icon-128.png" id="logo" onclick="window.location.reload()"/>
+        <div id="logo" onclick="window.location.reload()">
+            <img src="/img/icon/icon-128.png" />
+        </div>
 
         <div id="sidebar">
             <canvas id="minimap"></canvas>
@@ -64,8 +67,9 @@
             <div id="startup">
                 <h2>Welcome to</h2>
                 <h1>POWE-R/Place</h1>
-                <p>A fun and anarchy server! Place pixels anywhere, build giant pixel art, or destroy everything!</p>
-                <p>But that's not all! POWE-R/Place introduces <strong>powerups</strong>! Get rewards by playing and unlock special perks...</p>
+                <p>A fun and anarchy canvas. Place pixels and create art...</p>
+                <p>But wait, there's more!</p>
+                <p>Play to earn rewards, and unlock special powers!</p>
                 <br class="line" />
                 <p><strong class="red">This game is in INDEV. Report bugs and suggest features on the <a href="https://github.com/d-002/powe-rplace" target="_blank">GitHub</a>!</strong></p>
                 <div id="termsok">

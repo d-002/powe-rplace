@@ -252,7 +252,7 @@ class Info {
 }
 
 function startup() {
-    //showPopup(dom.startup, dom.settings, acceptedTerms);
+    showPopup(dom.startup, dom.settings, acceptedTerms);
 
     dom.debug.style.display = options.debug ? null : "none";
     if (options.borders) toggleElt(dom.tBorders);

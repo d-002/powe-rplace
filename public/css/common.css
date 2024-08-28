@@ -88,7 +88,13 @@ a:not(.nohref):hover {
     width: 40px;
     height: 40px;
 
+    transition: 0.2s transform ease-out;
+
     background-image: url("/img/icon/icon-512.png");
     background-size: cover;
     filter: drop-shadow(0 0 3px #000a);
+}
+
+:is(#footer, #small-footer) a:first-child:hover::before {
+    transform: matrix(-1, 0, 0, 1, 0, 0);
 }
