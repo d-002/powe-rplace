@@ -33,6 +33,7 @@ function fillTree() {
     dom.tree.innerHTML = "";
 
     let fill = (list, parent, dirname) => {
+        if (parent != dom.tree) parent.className = "closed";
         list.forEach(file => {
             const isDir = typeof file == "object";
 
@@ -42,7 +43,7 @@ function fillTree() {
                 name = Object.keys(file)[0];
                 elt.innerHTML = "<p>"+name+"</p>";
             }
-            else elt.innerHTML = file;
+            else elt.innerHTML = "<span>"+file+"</span>";
             parent.appendChild(elt);
 
             if (isDir) {
@@ -55,9 +56,7 @@ function fillTree() {
         });
     };
 
-    let container = document.createElement("ul");
-    dom.tree.appendChild(container);
-    fill(filesList, container, "");
+    fill(filesList, dom.tree, "");
 }
 
 function treeClick(path) {
@@ -68,7 +67,9 @@ function treeClick(path) {
 }
 
 function treeExpand() {
-    this.className = this.className ? "" : "open";
+    // target ul, not clicked p element
+    let _this = this.nextSibling;
+    _this.className = _this.className ? "" : "closed";
 }
 
 function editFile() {

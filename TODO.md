@@ -70,11 +70,9 @@ updated every 60s, remove old lines, 48 lines:
 - file with "timestamp error", replace in error: \t, \n=>" "
 
 TODO:
-- admin page
-- admin style
+- download, upload file, handle binary files for this case
 - require admin password on first connection, store hashed
 - powerups
-- simple admin page disconnection detection
 - different tiers of admin privileges: don't allow editing server files?
 - sfx
 - music
