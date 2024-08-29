@@ -23,20 +23,14 @@ const dirs = {
 }
 
 
-console.log("Setting up server...");
-console.log(Date.now()/1000);
+console.log("Importing express...");
 const express = require("express");
-console.log(Date.now()/1000);
+console.log("Setting up server...");
 const app = express();
-console.log(Date.now()/1000);
 const http = require("http");
-console.log(Date.now()/1000);
 const fs = require("fs");
-console.log(Date.now()/1000);
 const server = http.createServer(app);
-console.log(Date.now()/1000);
 const helmet = require('helmet');
-console.log(Date.now()/1000);
 
 const { Server } = require("socket.io");
 const io = new Server(server);
@@ -294,9 +288,10 @@ io.on("connection", socket => {
     socket.on("listFiles", password => {
         const ignore = [".git", "node_modules"];
 
+        let fn = (a, b) => a == b ? 0 : a.toLowerCase() < b.toLowerCase() ? -1 : 1;
         let parse = (parent, dir) => {
             let list = [];
-            fs.readdirSync(parent+dir).forEach(file => {
+            fs.readdirSync(parent+dir).sort(fn).forEach(file => {
                 if (ignore.includes(file)) return;
 
                 if (fs.lstatSync(parent+dir+file).isDirectory()) {
@@ -315,17 +310,21 @@ io.on("connection", socket => {
     });
 
     socket.on("readFile", ([password, path]) => {
-        socket.emit("sendFileContents", String(fs.readFileSync(path)));
+        let data = fs.readFileSync(path);
+        socket.emit("sendFileContents", [String(data), data.length != String(data).length]);
     });
 
     // /!\ SENSITIVE FUNCTION
     socket.on("editFile", ([password, path, content]) => {
-        if (path.includes("..")) {
-            console.warn("Attempt to edit unauthorized file: "+path);
-            return;
+        const ok = !path.includes("..");
+        if (ok) {
+            fs.writeFileSync(path, content);
+            socket.emit("successFileEdit");
         }
-
-        fs.writeFileSync(path, content);
+        else {
+            socket.emit("deniedFileEdit");
+            console.warn("Blocked attempt to edit unauthorized file: "+path);
+        }
     });
 });
 

@@ -457,7 +457,7 @@ function updateColorsLayout() {
     let heights = [];
     dom.colors.style = "";
     dom.colors.className = "fakeHover";
-    dom.colors.innerWidth;
+    dom.colors.offsetWidth;
     const top = dom.colors.getBoundingClientRect().top;
     for (let i = 0; i < 8; i++) {
         const h = dom.colors.children[i].getBoundingClientRect().top-top-5;
