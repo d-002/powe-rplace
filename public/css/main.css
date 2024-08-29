@@ -133,6 +133,14 @@ body {
     gap: 20px;
 }
 
+#sidebar, #debug, #info {
+    pointer-events: none;
+}
+
+#sidebar>canvas, #sidebar>div {
+    pointer-events: auto;
+}
+
 #sidebar.show {
     animation: slideSidebar 0.3s forwards;
 }

@@ -11,7 +11,8 @@ clock = pygame.time.Clock()
 def sqr(surf, col, center, size):
     d = size/sqrt(2)
     x, y = center
-    pygame.draw.polygon(surf, col, [(x, y-d), (x+d, y), (x, y+d), (x-d, y)])
+    pos = [(x, y-d), (x+d, y), (x, y+d), (x-d, y)]
+    pygame.draw.polygon(surf, col, [(round(x), round(y)) for x, y in pos])
     flip()
 
 def flip():
