@@ -70,7 +70,12 @@ updated every 60s, remove old lines, 48 lines:
 - file with "timestamp error", replace in error: \t, \n=>" "
 
 TODO:
+- admin page
+- admin style
+- require admin password on first connection, store hashed
 - powerups
+- simple admin page disconnection detection
+- different tiers of admin privileges: don't allow editing server files?
 - sfx
 - music
 - mobile version (when width < height, updated on screen resize (with timeout))
@@ -88,6 +93,8 @@ TODO:
 - dark theme (night sky)
 - send email / admin logs on error
 - FIX DESYNC MAP
+- fix icon wrong pixel on squares
+- actually use correct html tags (footer, nav, section)
 
 - realtime clouds background
 - discord bot: post updates, make schematics

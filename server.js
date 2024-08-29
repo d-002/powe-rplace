@@ -24,14 +24,19 @@ const dirs = {
 
 
 console.log("Setting up server...");
+console.log(Date.now()/1000);
 const express = require("express");
+console.log(Date.now()/1000);
 const app = express();
+console.log(Date.now()/1000);
 const http = require("http");
+console.log(Date.now()/1000);
 const fs = require("fs");
-console.log("Creating server...");
+console.log(Date.now()/1000);
 const server = http.createServer(app);
-console.log("Done.");
+console.log(Date.now()/1000);
 const helmet = require('helmet');
+console.log(Date.now()/1000);
 
 const { Server } = require("socket.io");
 const io = new Server(server);
@@ -68,6 +73,10 @@ app.get("/", (req, res) => {
 
 app.get("/favicon.ico", (req, res) => {
     res.sendFile(__dirname+"/public/img/icon/icon-16.ico");
+});
+
+app.get("/admin", (req, res) => {
+    res.sendFile(__dirname+"/admin.html");
 });
 
 app.get("/down", (req, res) => {
@@ -173,8 +182,7 @@ if (logsVersion == 0) {
 }
 
 io.on("connection", socket => {
-    let ip = (socket.handshake.headers["x-forwarded-for"] || socket.conn.remoteAddress).split(",")[0].split(":").slice(-1)[0];
-    //ip += "-"+Date.now()%1000;
+    const ip = (socket.handshake.headers["x-forwarded-for"] || socket.conn.remoteAddress).split(",")[0].split(":").slice(-1)[0];
     
     if (blacklist.includes(ip)) {
         console.log("Blacklisted IP, disconencting");
@@ -249,7 +257,7 @@ io.on("connection", socket => {
         }
     });
 
-    socket.on("initial", _ => {
+    socket.on("initial", () => {
         // triggered on init, but should be fine to call it afterwards
         // forces a "normal" update of the map
         updateClientIp(ip, user.version, false);
@@ -257,7 +265,7 @@ io.on("connection", socket => {
         socket.emit("nClients", Object.keys(clients).length);
     });
 
-    socket.on("help", _ => {
+    socket.on("help", () => {
         // triggered when the map in the user's local storage is corrupted
         if (Date.now()-user.lastHelp > privileges.helpCooldown) {
             user.lastHelp = Date.now();
@@ -281,6 +289,43 @@ io.on("connection", socket => {
     // op options
     socket.on("updateOp", () => {
         if (op.includes(ip)) updateOp();
+    });
+
+    socket.on("listFiles", password => {
+        const ignore = [".git", "node_modules"];
+
+        let parse = (parent, dir) => {
+            let list = [];
+            fs.readdirSync(parent+dir).forEach(file => {
+                if (ignore.includes(file)) return;
+
+                if (fs.lstatSync(parent+dir+file).isDirectory()) {
+                    if ("..".includes(file)) return;
+                    list.push(parse(parent+dir, file+"/"));
+                }
+                else list.push(file);
+            });
+
+            let o = {};
+            o[dir] = list;
+            return o;
+        };
+
+        socket.emit("sendFileList", [parse("", __dirname+"/")]);
+    });
+
+    socket.on("readFile", ([password, path]) => {
+        socket.emit("sendFileContents", String(fs.readFileSync(path)));
+    });
+
+    // /!\ SENSITIVE FUNCTION
+    socket.on("editFile", ([password, path, content]) => {
+        if (path.includes("..")) {
+            console.warn("Attempt to edit unauthorized file: "+path);
+            return;
+        }
+
+        fs.writeFileSync(path, content);
     });
 });
 
