@@ -70,6 +70,11 @@ updated every 60s, remove old lines, 48 lines:
 - file with "timestamp error", replace in error: \t, \n=>" "
 
 TODO:
+- display file name, folder name
+- faster for loops
+- initial connection ping for admin page
+- move latest error for security reasons?
+- better binary whatever detection for admin page
 - download, upload file, handle binary files for this case
 - require admin password on first connection, store hashed
 - powerups

@@ -95,11 +95,22 @@ body {
 #tree span {
     cursor: pointer;
 
+    display: flex;
+    align-items: center;
+    gap: 5px;
+
     font-weight: 400;
 }
 
 #tree span:hover {
     color: var(--fg2);
+}
+
+#tree span::after {
+    content: "";
+    flex-grow: 1;
+
+    border-bottom: 1px solid #0003;
 }
 
 #right {
@@ -171,3 +182,13 @@ body {
 
 #popup:not(.reset-animation) {
     animation: 5s popup-animation forwards ease-out;
+}
+
+input[type=file] {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+
+    width: 0;
+    height: 0;
+}

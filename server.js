@@ -53,7 +53,6 @@ let maintenance;
 initAccounts(fs, files, dirs);
 initMap(fs, files, dirs);
 
-console.log("Setting up pages...");
 app.use(express.static(__dirname+"/public"));
 
 // landing page
@@ -66,7 +65,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/favicon.ico", (req, res) => {
-    res.sendFile(__dirname+"/public/img/icon/icon-16.ico");
+    res.sendFile(__dirname+"/public/img/icon/favicon.ico");
 });
 
 app.get("/admin", (req, res) => {
@@ -312,18 +311,35 @@ io.on("connection", socket => {
     socket.on("readFile", ([password, path]) => {
         let data = fs.readFileSync(path);
         socket.emit("sendFileContents", [String(data), data.length != String(data).length]);
+        try {
+            socket.emit("successFileRead", fs.readFileSync(path, { encoding: "binary" }));
+        }
+        catch(err) {
+            console.log("Non-critical error:");
+            console.error(err);
+            socket.emit("deniedFileRead", err);
+            logErrorToFile(err);
+        }
     });
 
     // /!\ SENSITIVE FUNCTION
     socket.on("editFile", ([password, path, content]) => {
-        const ok = !path.includes("..");
-        if (ok) {
-            fs.writeFileSync(path, content);
-            socket.emit("successFileEdit");
+        let err;
+        try {
+            err = String(path).includes("..") ? "Path cannot contain '..'" : path ? 0 : "Path cannot be null";
+            if (err == 0) {
+                fs.writeFileSync(path, content, { encoding: "binary" });
+                socket.emit("successFileWrite");
         }
-        else {
-            socket.emit("deniedFileEdit");
-            console.warn("Blocked attempt to edit unauthorized file: "+path);
+        catch(e) {
+            err = e;
+            console.log("Non-critical error:");
+            console.error(err);
+            logErrorToFile(err);
+        }
+        if (err) {
+            socket.emit("deniedFileWrite", err);
+            console.warn("Blocked attempt to edit file: "+path);
         }
     });
 });
