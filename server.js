@@ -280,11 +280,29 @@ io.on("connection", socket => {
     });
 
     // op options
-    socket.on("updateOp", () => {
-        if (op.includes(ip)) updateOp();
+    socket.on("updateOp", password => {
+        const ok = authorized(ip, password)
+
+        if (ok) {
+            updateOp();
+            socket.emit("acceptedOperation");
+        }
+        else socket.emit("deniedOperation");
+    });
+
+    socket.on("updateMaintenance", password => {
+        const ok = authorized(ip, password)
+
+        if (ok) {
+            checkMaintenance();
+            socket.emit("acceptedOperation");
+        }
+        else socket.emit("deniedOperation");
     });
 
     socket.on("listFiles", password => {
+        if (!authorized(ip, password)) return;
+
         const ignore = [".git", "node_modules"];
 
         let fn = (a, b) => a == b ? 0 : a.toLowerCase() < b.toLowerCase() ? -1 : 1;
@@ -305,44 +323,73 @@ io.on("connection", socket => {
             return o;
         };
 
-        socket.emit("sendFileList", [parse("", __dirname+"/")]);
+        let parsed = [parse("", __dirname+"/")];
+        // don't share information about __dirname for security reasons
+        parsed[0] = {"/": Object.values(parsed[0])[0]};
+        socket.emit("sendFileList", parsed);
     });
 
     socket.on("readFile", ([password, path]) => {
-        let data = fs.readFileSync(path);
-        socket.emit("sendFileContents", [String(data), data.length != String(data).length]);
+        if (!authorized(ip, password)) return;
+
         try {
-            socket.emit("successFileRead", fs.readFileSync(path, { encoding: "binary" }));
+            socket.emit("acceptedFileRead", fs.readFileSync(__dirname+path, { encoding: "binary" }));
         }
         catch(err) {
             console.log("Non-critical error:");
             console.error(err);
-            socket.emit("deniedFileRead", err);
+            socket.emit("deniedOperation", err);
             logErrorToFile(err);
         }
     });
 
     // /!\ SENSITIVE FUNCTION
     socket.on("editFile", ([password, path, content]) => {
-        let err;
-        try {
-            err = String(path).includes("..") ? "Path cannot contain '..'" : path ? 0 : "Path cannot be null";
-            if (err == 0) {
-                fs.writeFileSync(path, content, { encoding: "binary" });
-                socket.emit("successFileWrite");
-        }
-        catch(e) {
-            err = e;
-            console.log("Non-critical error:");
-            console.error(err);
-            logErrorToFile(err);
-        }
-        if (err) {
-            socket.emit("deniedFileWrite", err);
-            console.warn("Blocked attempt to edit file: "+path);
-        }
+        executeOperation(socket, ip, password, path, () => {
+            fs.writeFileSync(__dirname+path, content, { encoding: "binary" });
+        });
+    });
+
+    // /!\ SENSITIVE FUNCTION
+    socket.on("createPath", ([password, path]) => {
+        executeOperation(socket, ip, password, path, () => {
+        });
+    });
+
+    // /!\ SENSITIVE FUNCTION
+    socket.on("deletePath", (password, path) => {
+        executeOperation(socket, ip, password, path, () => {
+        });
     });
 });
+
+function executeOperation(socket, ip, password, path, operation) {
+    if (!authorized(ip, password)) return;
+
+    let err;
+    try {
+        err = String(path).includes("..") ? "Path cannot contain '..'" : path ? 0 : "Path cannot be null";
+        if (err == 0) {
+            operation();
+            socket.emit("acceptedOperation");
+        }
+    }
+    catch(e) {
+        err = e;
+        console.log("Non-critical error:");
+        console.error(err);
+        logErrorToFile(err);
+    }
+    if (err) socket.emit("deniedOperation", err);
+}
+
+function authorized(ip, password) {
+    let ok = false;
+    op.forEach(([_ip, hash]) => {
+        if (_ip == ip) ok = hash == null || passwordHash(password) == hash;
+    });
+    return ok;
+}
 
 function updateClientIp(ip, clientVersion, save=true) {
     const client = clients[ip];
@@ -383,12 +430,35 @@ function checkMaintenance() {
     return false;
 }
 
-function updateOp(forceLog = false) {
+function passwordHash(pwd) {
+    const mask = 0xffffff;
+    let salt = 394587;
+    for (let i = 0; i < pwd.length; i++)
+        salt = (salt + pwd.charCodeAt(i)) & mask;
+    for (let n = 0; n < 10000; n++) {
+        salt = (salt*13973 + 134237) & mask;
+        let newPwd = salt;
+        for (let i = 0; i < pwd.length; i++) {
+            newPwd *= (newPwd << 3)+salt ^ pwd.charCodeAt(i) ^ (newPwd >> 5);
+            newPwd &= mask;
+        }
+        pwd = ""+(newPwd & mask);
+    }
+
+    return pwd;
+}
+
+function updateOp(forceLog=false) {
     const _blacklist = blacklist.length;
     const _op = op.length;
 
     blacklist = String(fs.readFileSync(files.blacklist)).split("\n");
     op = String(fs.readFileSync(files.op)).split("\n");
+    for (let i = 0; i < op.length; i++) {
+        const j = op[i].indexOf(" ");
+        if (j == -1) op[i] = [op[i], null];
+        else op[i] = [op[i].slice(0, j), op[i].slice(j+1)];
+    }
 
     if (_blacklist != blacklist.length && blacklist.length || forceLog) console.log("BLacklisted:\n"+blacklist);
     if (_op != op.length && op.length || forceLog) console.log("Op:\n"+op);

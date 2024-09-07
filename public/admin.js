@@ -17,11 +17,11 @@ let dom = {
 let popupTimeout;
 let disconnected = false;
 
-function popup(text, badness) {
+function popup(text, badness, err=null) {
     dom.popup.style.display = null;
     dom.popup.className = "reset-animation";
     dom.popup.offsetWidth;
-    dom.popup.innerHTML = text;
+    dom.popup.innerHTML = text + (err == null ? "" : ", check logs");
     dom.popup.className = ["green", "orange", "red"][badness];
 
     let t = [() => { dom.popup.style.display = "none"; }, 5000];
@@ -30,6 +30,8 @@ function popup(text, badness) {
         window.clearTimeout(popupTimeout);
         popupTimeout = window.setTimeout(...t);
     }
+
+    if (err != null) console.error(text+"\n"+err);
 }
 
 function fillTree() {
@@ -177,7 +179,7 @@ socket.on("sendFileList", list => {
     popup("Received files list", 0);
 });
 
-socket.on("successFileRead", buf => {
+socket.on("acceptedFileRead", buf => {
     currentFile = loadingFile;
     loadingFile = null;
 
@@ -197,16 +199,8 @@ socket.on("disconnect", () => {
     disconnected = true;
 });
 
-socket.on("successFileWrite", () => popup("File edited.", 0));
-
-socket.on("deniedFileRead", err => {
-    popup("Could not read file, check logs", 2)
-    console.error("Denied file read: \n"+err);
-});
-socket.on("deniedFileWrite", err => {
-    popup("Could not edit file, check logs", 2);
-    console.error("Denied file write: \n"+err);
-});
+socket.on("acceptedOperation", () => popup("Operation successful.", 0))
+socket.on("deniedOperation", (err=null) => popup("Operation denied.", 2, err));
 
 window.onload = () => {
     Object.keys(dom).forEach(id => dom[id] = document.getElementById(id));

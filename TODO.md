@@ -99,6 +99,7 @@ TODO:
 - fix icon wrong pixel on squares
 - actually use correct html tags (footer, nav, section)
 
+- better error handling for malicious clients: e.g. editFile(null) crashes
 - realtime clouds background
 - discord bot: post updates, make schematics
 - link bot to website and accounts, to show stats
