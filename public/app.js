@@ -313,7 +313,7 @@ function agree() {
 }
 
 function discord() {
-    window.open("https://discord.gg/B3mwVDhf", "_blank").focus();
+    window.open("https://discord.gg/ybC2UYHh", "_blank").focus();
 }
 
 function github() {
