@@ -327,7 +327,7 @@ function init() {
 
     let error = Data.errors ? Data.errors[Data.errors.length-1].trim() : "";
     if (error == "") error = " [no error]";
-    dom.lastError.innerHTML = error.substring(error.indexOf(" ")+1).replaceAll("\t", "<br />");
+    dom.lastError.innerHTML = error.substring(error.indexOf(" ")+1).replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("\t", "<br />");
 }
 
 window.onload = () => {
