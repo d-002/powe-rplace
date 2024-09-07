@@ -72,7 +72,6 @@ updated every 60s, remove old lines, 48 lines:
 TODO:
 - require admin password on first connection, store hashed
 - powerups
-- set up op automatically if no op is set up (still ask for password)
 - make backup option: download zip of users, grid, options, op, blacklist
 - different tiers of admin privileges: don't allow editing server files?
 - sfx
@@ -91,7 +90,6 @@ TODO:
 - better zoom and pos management (perfectly linear movement)
 - dark theme (night sky)
 - send email / admin logs on error
-- FIX DESYNC MAP
 - fix icon wrong pixel on squares
 - actually use correct html tags (footer, nav, section)
 

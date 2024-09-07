@@ -63,6 +63,9 @@ function click(evt) {
         return;
     }
 
+    // client-side check to prevent flickering
+    if (Date.now()-user.lastPixel < user.pixelCooldown) return;
+
     let [x, y] = movement.evtToCoords(evt);
     x = Math.floor(x);
     y = Math.floor(y);
