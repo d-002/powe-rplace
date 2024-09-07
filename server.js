@@ -204,6 +204,8 @@ io.on("connection", socket => {
         dupe.emit("duplicateIp");
     }
 
+    socket.emit("connection"); // for admin page
+
     socket.on("error", err => console.error("Error in socket: "+err));
 
     socket.on("placePixel", message => {
@@ -281,7 +283,7 @@ io.on("connection", socket => {
 
     // op options
     socket.on("updateOp", password => {
-        const ok = authorized(ip, password)
+        const ok = authorized(ip, password);
 
         if (ok) {
             updateOp();
@@ -291,7 +293,7 @@ io.on("connection", socket => {
     });
 
     socket.on("updateMaintenance", password => {
-        const ok = authorized(ip, password)
+        const ok = authorized(ip, password);
 
         if (ok) {
             checkMaintenance();
@@ -301,7 +303,10 @@ io.on("connection", socket => {
     });
 
     socket.on("listFiles", password => {
-        if (!authorized(ip, password)) return;
+        if (!authorized(ip, password)) {
+            socket.emit("deniedOperation");
+            return;
+        }
 
         const ignore = [".git", "node_modules"];
 
@@ -453,12 +458,13 @@ function checkMaintenance() {
 function passwordHash(pwd) {
     const mask = 0xffffff;
     let salt = 394587;
-    for (let i = 0; i < pwd.length; i++)
+    for (let i = 0, len = pwd.length; i < len; i++)
         salt = (salt + pwd.charCodeAt(i)) & mask;
+
     for (let n = 0; n < 10000; n++) {
         salt = (salt*13973 + 134237) & mask;
         let newPwd = salt;
-        for (let i = 0; i < pwd.length; i++) {
+        for (let i = 0, len = pwd.length; i < len; i++) {
             newPwd *= (newPwd << 3)+salt ^ pwd.charCodeAt(i) ^ (newPwd >> 5);
             newPwd &= mask;
         }
@@ -474,7 +480,7 @@ function updateOp(forceLog=false) {
 
     blacklist = String(fs.readFileSync(files.blacklist)).split("\n");
     op = String(fs.readFileSync(files.op)).split("\n");
-    for (let i = 0; i < op.length; i++) {
+    for (let i = 0, len = op.length; i < len; i++) {
         const j = op[i].indexOf(" ");
         if (j == -1) op[i] = [op[i], null];
         else op[i] = [op[i].slice(0, j), op[i].slice(j+1)];

@@ -124,10 +124,10 @@ function _animate() {
     trails.forEach(trail => {
         trail.update((x, y) => ctx.fillRect(x*size, y*size, size-1, size-1));
 
-        for (let i = 0; i < trail.trail.length; i++) {
+        for (let i = 0, len = trail.trail.length; i < len; i++) {
             const [x, _y, col] = trail.trail[i];
             let j = 0;
-            for (let y = _y-trail.height; y <= _y+trail.height; y++) {
+            for (let y = _y-trail.height, stop = _y+trail.height; y <= stop; y++) {
                 ctx.fillRect((x+trail.offset[j++])*size, y*size, size-1, size-1);
             }
         }
@@ -138,7 +138,7 @@ function _animate() {
         const a1 = trail.getAlpha();
         if (a1 == 0) return;
 
-        for (let i = 0; i < trail.trail.length; i++) {
+        for (let i = 0, len = trail.trail.length; i < len; i++) {
             const a2 = alpha(1 - i/trail.length);
             const [x, _y, col] = trail.trail[i];
 

@@ -20,7 +20,7 @@ class Clouds {
     }
 
     isReady() {
-        for (let i = 0; i < this.images.length; i++) {
+        for (let i = 0, len = this.images.length; i < len; i++) {
             if (this.images[i].complete) {
                 if (i >= this.pos.length) continue;
                 const j = this.pos[i][0];
@@ -51,7 +51,7 @@ class Clouds {
 
         this.ctx.clearRect(0, 0, cW, cH);
 
-        for (let i = 0; i < this.pos.length; i++) {
+        for (let i = 0, len = this.pos.length; i < len; i++) {
             let [j, x, y, step, width, height] = this.pos[i];
             x += step;
 

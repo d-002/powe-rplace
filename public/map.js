@@ -55,9 +55,10 @@ function decodeMap(data, suppressErrors) {
 
 function encodeMap(pixels) {
     let data = "";
-    for (let y = 0; y < pixels.length; y++) {
+    const len1 = pixels.length, len2 = pixels[0].length;
+    for (let y = 0; y < len1; y++) {
         let line = "";
-        for (let x = 0; x < pixels[y].length; x++) line += String.fromCharCode(pixels[y][x]);
+        for (let x = 0; x < len2; x++) line += String.fromCharCode(pixels[y][x]);
         data += line;
     }
 
@@ -80,8 +81,9 @@ function getChecksum(grid) {
     if (grid.length == 0) return 0;
     let sum = grid.length+grid[0].length;
 
-    for (let y = 0; y < grid.length; y++)
-    for (let x = 0; x < grid[0].length; x++)
+    const len1 = grid.length, len2 = grid[0].length;
+    for (let y = 0; y < len1; y++)
+    for (let x = 0; x < len2; x++)
         sum += grid[y][x];
 
     return sum & 65535;
@@ -132,7 +134,7 @@ function applyUpdate(message, updateFunction, setGrid) {
     if (message[0].charCodeAt(0) == 0) {
         // individual changes to apply
         let n = 0;
-        for (let i = 1; i < message.length; i++) {
+        for (let i = 1, len = message.length; i < len; i++) {
             const x = (message.charCodeAt(i++)<<8) + message.charCodeAt(i++);
             const y = (message.charCodeAt(i++)<<8) + message.charCodeAt(i++);
             const col = message.charCodeAt(i);

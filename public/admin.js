@@ -68,7 +68,10 @@ function fillTree() {
 }
 
 function treeClick(path) {
-    if (loadingFile != null) return;
+    if (loadingFile != null) {
+        popup("You can't do this right now.", 2);
+        return;
+    }
 
     dom.path.value = path;
     loadingFile = path;
@@ -203,7 +206,6 @@ socket.on("acceptedFileRead", buf => {
     onFileLoad(buf);
 });
 
-// does not work right now
 socket.on("connection", () => {
     if (disconnected) {
         disconnected = false;
