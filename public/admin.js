@@ -56,7 +56,7 @@ function fillTree() {
 
             if (isDir) {
                 elt.appendChild(document.createElement("ul"));
-                elt.children[0].addEventListener("click", treeExpand);
+                elt.children[0].addEventListener("click", () => treeExpand(elt.children[1], dirname+name));
 
                 fill(Object.values(file)[0], elt.children[1], dirname+name);
             }
@@ -70,18 +70,20 @@ function fillTree() {
 function treeClick(path) {
     if (loadingFile != null) return;
 
+    dom.path.value = path;
     loadingFile = path;
     socket.emit("readFile", [password, path]);
 }
 
-function treeExpand() {
-    // target the ul element, not the actually clicked p element
-    let _this = this.nextSibling;
-    _this.className = _this.className ? "" : "closed";
+function treeExpand(elt, path) {
+    dom.path.value = path;
+    elt.className = elt.className ? "" : "closed";
 }
 
 function refresh() {
+    dom.path.value = "";
     dom.tree.innerHTML = "";
+    dom.contents.value = "";
     socket.emit("listFiles", password);
 }
 
