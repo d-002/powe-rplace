@@ -70,6 +70,7 @@ updated every 60s, remove old lines, 48 lines:
 - file with "timestamp error", replace in error: \t, \n=>" "
 
 TODO:
+- feedback when not correctly logged in
 - display file name, folder name
 - faster for loops
 - initial connection ping for admin page

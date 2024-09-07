@@ -12,12 +12,22 @@
     </head>
 
     <body>
-        <div id="tree">
+        <div id="left">
+            <div id="tree">
+            </div>
+            <div>
+                <label for="path">Path for creation/deletion</label>
+                <input type="text" id="path" />
+            </div>
         </div>
         <div id="right">
             <textarea id="contents"></textarea>
             <div id="buttons">
                 <a href="javascript:refresh()">Refresh</a>
+                <a href="javascript:updateOp()">Server op update</a>
+                <a href="javascript:updateMtn()">Server maintenance update</a>
+                <a href="javascript:createPath()">Create path</a>
+                <a href="javascript:deletePath()">Delete path</a> 
                 <a href="javascript:editFile()">Save</a>
                 <a href="javascript:uploadFile()">Upload and replace</a>
                 <a href="javascript:downloadFile()">Download</a>

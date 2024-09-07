@@ -336,10 +336,9 @@ io.on("connection", socket => {
             socket.emit("acceptedFileRead", fs.readFileSync(__dirname+path, { encoding: "binary" }));
         }
         catch(err) {
-            console.log("Non-critical error:");
+            console.log("Non-critical admin error:");
             console.error(err);
-            socket.emit("deniedOperation", err);
-            logErrorToFile(err);
+            socket.emit("deniedOperation", err.stack);
         }
     });
 
@@ -352,14 +351,36 @@ io.on("connection", socket => {
 
     // /!\ SENSITIVE FUNCTION
     socket.on("createPath", ([password, path]) => {
+        path = path.trim();
+        if (path != null && path[0] != "/") path = "/"+path;
         executeOperation(socket, ip, password, path, () => {
+            path = __dirname+path;
+
+            const isDir = path[path.length-1] == "/";
+            if (isDir) fs.mkdirSync(path);
+            else fs.writeFileSync(path, "");
+            
+            console.log("Created "+(isDir ? "dir" : "file")+": '"+path+"'");
         });
     });
 
     // /!\ SENSITIVE FUNCTION
-    socket.on("deletePath", (password, path) => {
-        executeOperation(socket, ip, password, path, () => {
-        });
+    socket.on("deletePath", ([password, path]) => {
+        path = path.trim();
+        if (path != null && path[0] != "/") path = "/"+path;
+
+        // don't allow to delete specific files
+        if (path == "/") socket.emit("deniedOperation", "Can't delete root directory");
+        else
+            executeOperation(socket, ip, password, path, () => {
+                path = __dirname+path;
+
+                const isDir = fs.lstatSync(path).isDirectory();
+                if (isDir) fs.rmdirSync(path);
+                else fs.unlinkSync(path);
+
+                console.log("Deleted "+(isDir ? "dir" : "file")+": '"+path+"'");
+            });
     });
 });
 
@@ -376,11 +397,10 @@ function executeOperation(socket, ip, password, path, operation) {
     }
     catch(e) {
         err = e;
-        console.log("Non-critical error:");
+        console.log("Non-critical admin error:");
         console.error(err);
-        logErrorToFile(err);
     }
-    if (err) socket.emit("deniedOperation", err);
+    if (err) socket.emit("deniedOperation", err.stack);
 }
 
 function authorized(ip, password) {

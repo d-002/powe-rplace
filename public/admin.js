@@ -4,11 +4,13 @@ let password;
 let filesList;
 let currentFile;
 let loadingFile;
+let wantTreeEdit = false;
 
 let uneditedData;
 let isBinary;
 
 let dom = {
+    path: null,
     tree: null,
     contents: null,
     popup: null
@@ -21,7 +23,7 @@ function popup(text, badness, err=null) {
     dom.popup.style.display = null;
     dom.popup.className = "reset-animation";
     dom.popup.offsetWidth;
-    dom.popup.innerHTML = text + (err == null ? "" : ", check logs");
+    dom.popup.innerHTML = err == null ? text : text.substring(0, text.length-1)+", check logs.";
     dom.popup.className = ["green", "orange", "red"][badness];
 
     let t = [() => { dom.popup.style.display = "none"; }, 5000];
@@ -81,6 +83,19 @@ function treeExpand() {
 function refresh() {
     dom.tree.innerHTML = "";
     socket.emit("listFiles", password);
+}
+
+let updateOp = () => socket.emit("updateOp", password);
+let updateMtn = () => socket.emit("updateMaintenance", password);
+
+function createPath() {
+    wantTreeEdit = true;
+    socket.emit("createPath", [password, dom.path.value]);
+}
+
+function deletePath() {
+    wantTreeEdit = true;
+    socket.emit("deletePath", [password, dom.path.value]);
 }
 
 function editFile() {
@@ -199,8 +214,20 @@ socket.on("disconnect", () => {
     disconnected = true;
 });
 
-socket.on("acceptedOperation", () => popup("Operation successful.", 0))
-socket.on("deniedOperation", (err=null) => popup("Operation denied.", 2, err));
+socket.on("acceptedOperation", () => {
+    popup("Operation successful.", 0);
+
+    if (wantTreeEdit) {
+        wantTreeEdit = false;
+        dom.path.value = "";
+        refresh();
+    }
+});
+
+socket.on("deniedOperation", (err) => {
+    popup("Operation denied.", 2, err);
+    if (wantTreeEdit) wantTreeEdit = false;
+});
 
 window.onload = () => {
     Object.keys(dom).forEach(id => dom[id] = document.getElementById(id));
