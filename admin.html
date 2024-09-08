@@ -19,34 +19,44 @@
     </head>
 
     <body>
-        <div id="left">
-            <div id="tree">
-            </div>
-            <div>
-                <label for="path">Path for creation/deletion</label>
-                <input type="text" id="path" />
-            </div>
-        </div>
-        <div id="right">
-            <textarea id="contents"></textarea>
-            <div id="buttons">
-                <a href="javascript:refresh()">Refresh</a>
-                <a href="javascript:updateOp()">Server op update</a>
-                <a href="javascript:updateMtn()">Server maintenance update</a>
-                <a href="javascript:createPath()">Create path</a>
-                <a href="javascript:deletePath()">Delete path</a> 
-                <a href="javascript:editFile()">Save</a>
-                <a href="javascript:uploadFile()">Upload and replace</a>
-                <a href="javascript:downloadFile()">Download</a>
-            </div>
+        <div id="login">
+            <h1>Admin access</h1>
+            <input type="text" id="username" />
+            <input type="password" id="password" />
+            <a href="javascript:login()">Log in</a>
+            <span id="loginComment"></span>
         </div>
 
-        <div id="loginscreen">
-            <h1></h1>
-            <p></p>
-        </div>
+        <div id="main" style="display: none">
+            <div id="left">
+                <div id="tree">
+                </div>
+                <div>
+                    <label for="path">Path for creation/deletion</label>
+                    <input type="text" id="path" />
+                </div>
+            </div>
+            <div id="right">
+                <textarea id="contents"></textarea>
+                <div id="buttons">
+                    <a href="javascript:refresh()">Refresh</a>
+                    <a href="javascript:updateOp()">Server op update</a>
+                    <a href="javascript:updateMtn()">Server maintenance update</a>
+                    <a href="javascript:createPath()">Create path</a>
+                    <a href="javascript:deletePath()">Delete path</a> 
+                    <a href="javascript:editFile()">Save</a>
+                    <a href="javascript:uploadFile()">Upload and replace</a>
+                    <a href="javascript:downloadFile()">Download</a>
+                </div>
+            </div>
 
-        <div id="popup">
+            <div id="loginscreen">
+                <h1></h1>
+                <p></p>
+            </div>
+
+            <div id="popup">
+            </div>
         </div>
     </body>
 </html>

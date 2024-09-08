@@ -30,7 +30,10 @@ const app = express();
 const http = require("http");
 const fs = require("fs");
 const server = http.createServer(app);
-const helmet = require('helmet');
+const helmet = require("helmet");
+const bcrypt = require("bcrypt");
+
+const salt = bcrypt.genSaltSync(10);
 
 const { Server } = require("socket.io");
 const io = new Server(server);
@@ -205,6 +208,7 @@ io.on("connection", socket => {
     }
 
     socket.emit("connection"); // for admin page
+    let login, password;
 
     socket.on("error", err => console.error("Error in socket: "+err));
 
@@ -282,8 +286,15 @@ io.on("connection", socket => {
     });
 
     // op options
-    socket.on("updateOp", password => {
-        const ok = authorized(ip, password);
+    socket.on("login", ([_login, _password]) => {
+        const result = authorized(_login, _password);
+        login = _login;
+        password = _password;
+        socket.emit("loginFeedback", result);
+    });
+
+    socket.on("updateOp", () => {
+        const ok = authorized(login, password);
 
         if (ok) {
             updateOp();
@@ -292,8 +303,8 @@ io.on("connection", socket => {
         else socket.emit("deniedOperation");
     });
 
-    socket.on("updateMaintenance", password => {
-        const ok = authorized(ip, password);
+    socket.on("updateMaintenance", () => {
+        const ok = authorized(login, password);
 
         if (ok) {
             checkMaintenance();
@@ -302,8 +313,8 @@ io.on("connection", socket => {
         else socket.emit("deniedOperation");
     });
 
-    socket.on("listFiles", password => {
-        if (!authorized(ip, password)) {
+    socket.on("listFiles", () => {
+        if (!authorized(login, password)) {
             socket.emit("deniedOperation");
             return;
         }
@@ -334,8 +345,8 @@ io.on("connection", socket => {
         socket.emit("sendFileList", parsed);
     });
 
-    socket.on("readFile", ([password, path]) => {
-        if (!authorized(ip, password)) return;
+    socket.on("readFile", path => {
+        if (!authorized(login, password)) return;
 
         try {
             socket.emit("acceptedFileRead", fs.readFileSync(__dirname+path, { encoding: "binary" }));
@@ -348,17 +359,17 @@ io.on("connection", socket => {
     });
 
     // /!\ SENSITIVE FUNCTION
-    socket.on("editFile", ([password, path, content]) => {
-        executeOperation(socket, ip, password, path, () => {
+    socket.on("editFile", ([path, content]) => {
+        executeOperation(socket, login, password, path, () => {
             fs.writeFileSync(__dirname+path, content, { encoding: "binary" });
         });
     });
 
     // /!\ SENSITIVE FUNCTION
-    socket.on("createPath", ([password, path]) => {
+    socket.on("createPath", path => {
         path = path.trim();
         if (path != null && path[0] != "/") path = "/"+path;
-        executeOperation(socket, ip, password, path, () => {
+        executeOperation(socket, login, password, path, () => {
             path = __dirname+path;
 
             const isDir = path[path.length-1] == "/";
@@ -370,14 +381,14 @@ io.on("connection", socket => {
     });
 
     // /!\ SENSITIVE FUNCTION
-    socket.on("deletePath", ([password, path]) => {
+    socket.on("deletePath", path => {
         path = path.trim();
         if (path != null && path[0] != "/") path = "/"+path;
 
         // don't allow to delete specific files
         if (path == "/") socket.emit("deniedOperation", "Can't delete root directory");
         else
-            executeOperation(socket, ip, password, path, () => {
+            executeOperation(socket, login, password, path, () => {
                 path = __dirname+path;
 
                 const isDir = fs.lstatSync(path).isDirectory();
@@ -389,8 +400,8 @@ io.on("connection", socket => {
     });
 });
 
-function executeOperation(socket, ip, password, path, operation) {
-    if (!authorized(ip, password)) return;
+function executeOperation(socket, login, password, path, operation) {
+    if (!authorized(login, password)) return;
 
     let err;
     try {
@@ -408,10 +419,24 @@ function executeOperation(socket, ip, password, path, operation) {
     if (err) socket.emit("deniedOperation", err.stack);
 }
 
-function authorized(ip, password) {
-    let ok = false;
-    op.forEach(([_ip, hash]) => {
-        if (_ip == ip) ok = hash == null || passwordHash(password) == hash;
+function authorized(login, password) {
+    // returns 0 if not authorized, 1 if op but no password set, 2 if correct password
+    // if 1, sets the password permanently
+
+    let ok = 0;
+    let i = 0;
+    op.forEach(([_login, _hash]) => {
+        if (_login == login) {
+            if (_hash == null) {
+                ok = 1;
+                const hash = bcrypt.hashSync(password, salt);
+                op[i] = [login, hash];
+
+                updateOpFile();
+            }
+            else ok = bcrypt.compareSync(password, _hash) ? 2 : 0;
+        }
+        i++;
     });
     return ok;
 }
@@ -455,26 +480,9 @@ function checkMaintenance() {
     return false;
 }
 
-function passwordHash(pwd) {
-    const mask = 0xffffff;
-    let salt = 394587;
-    for (let i = 0, len = pwd.length; i < len; i++)
-        salt = (salt + pwd.charCodeAt(i)) & mask;
-
-    for (let n = 0; n < 10000; n++) {
-        salt = (salt*13973 + 134237) & mask;
-        let newPwd = salt;
-        for (let i = 0, len = pwd.length; i < len; i++) {
-            newPwd *= (newPwd << 3)+salt ^ pwd.charCodeAt(i) ^ (newPwd >> 5);
-            newPwd &= mask;
-        }
-        pwd = ""+(newPwd & mask);
-    }
-
-    return pwd;
-}
-
 function updateOp(forceLog=false) {
+    // parses data from the op and blacklist files
+
     const _blacklist = blacklist.length;
     const _op = op.length;
 
@@ -490,6 +498,14 @@ function updateOp(forceLog=false) {
     if (_op != op.length && op.length || forceLog) console.log("Op:\n"+op);
 }
 updateOp(true);
+
+function updateOpFile() {
+    // only updates the op file
+
+    let list = [];
+    op.forEach(([login, hash]) => list.push(login+" "+hash));
+    fs.writeFileSync(files.op, list.join("\n"));
+}
 
 // error handling
 function logErrorToFile(err) {

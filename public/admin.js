@@ -1,5 +1,4 @@
 let socket = io();
-let password;
 
 let filesList;
 let currentFile;
@@ -10,6 +9,12 @@ let uneditedData;
 let isBinary;
 
 let dom = {
+    login: null,
+    username: null,
+    password: null,
+    loginComment: null,
+
+    main: null,
     path: null,
     tree: null,
     contents: null,
@@ -18,6 +23,30 @@ let dom = {
 
 let popupTimeout;
 let disconnected = false;
+
+function login() {
+    socket.emit("login", [dom.username.value, dom.password.value]);
+}
+
+socket.on("loginFeedback", result => {
+    console.log(result);
+    if (result == 0) dom.loginComment.innerHTML = "Incorrect login details";
+    else {
+        if (result == 1) dom.loginComment.innerHTML = "First connection sucessful";
+        else dom.loginComment.innerHTML = "Login successful";
+
+        dom.username.value = "";
+        dom.password.value = "";
+
+        window.setTimeout(() => {
+            socket.emit("listFiles");
+            dom.login.style = "display: none";
+            dom.main.style = "";
+        }, 500);
+    }
+});
+
+////////////////////
 
 function popup(text, badness, err=null) {
     dom.popup.style.display = null;
@@ -75,7 +104,7 @@ function treeClick(path) {
 
     dom.path.value = path;
     loadingFile = path;
-    socket.emit("readFile", [password, path]);
+    socket.emit("readFile", path);
 }
 
 function treeExpand(elt, path) {
@@ -87,26 +116,26 @@ function refresh() {
     dom.path.value = "";
     dom.tree.innerHTML = "";
     dom.contents.value = "";
-    socket.emit("listFiles", password);
+    socket.emit("listFiles");
 }
 
-let updateOp = () => socket.emit("updateOp", password);
-let updateMtn = () => socket.emit("updateMaintenance", password);
+let updateOp = () => socket.emit("updateOp");
+let updateMtn = () => socket.emit("updateMaintenance");
 
 function createPath() {
     wantTreeEdit = true;
-    socket.emit("createPath", [password, dom.path.value]);
+    socket.emit("createPath", dom.path.value);
 }
 
 function deletePath() {
     wantTreeEdit = true;
-    socket.emit("deletePath", [password, dom.path.value]);
+    socket.emit("deletePath", dom.path.value);
 }
 
 function editFile() {
     const ok = currentFile != null && loadingFile == null;
     if (ok) {
-        socket.emit("editFile", [password, currentFile, dom.contents.value]);
+        socket.emit("editFile", [currentFile, dom.contents.value]);
         if (isBinary) popup("Edited file with textarea-corrupted characters, might cause issues.", 1);
     }
     else popup("Cannot edit the file right now", 2);
@@ -132,7 +161,7 @@ function uploadFile() {
         fr.onload = evt => {
             const data = bufferToString(evt.target.result);
             onFileLoad(data);
-            socket.emit("editFile", [password, currentFile, data]);
+            socket.emit("editFile", [currentFile, data]);
         }
         fr.readAsArrayBuffer(event.target.files[0]);
     });
@@ -235,6 +264,4 @@ socket.on("deniedOperation", (err) => {
 
 window.onload = () => {
     Object.keys(dom).forEach(id => dom[id] = document.getElementById(id));
-
-    socket.emit("listFiles", password);
 };

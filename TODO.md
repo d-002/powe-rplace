@@ -70,7 +70,8 @@ updated every 60s, remove old lines, 48 lines:
 - file with "timestamp error", replace in error: \t, \n=>" "
 
 TODO:
-- require admin password on first connection, store hashed
+- wrong time in status page
+- async functions for users files
 - powerups
 - make backup option: download zip of users, grid, options, op, blacklist
 - sfx

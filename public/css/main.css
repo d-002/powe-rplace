@@ -96,7 +96,7 @@ body {
 
     font-size: 16px;
     font-family: consolas, courier new, monospace;
-    color: #f00;
+    color: var(--red1);
 }
 
 #logo {
@@ -511,7 +511,7 @@ h2 {
 
 #popup strong.red {
     font-weight: 1000;
-    color: #f00;
+    color: var(--red1);
 }
 
 a.button, a.toggle, a.toggle::after {
@@ -530,7 +530,7 @@ a.button, a.toggle, a.toggle::after {
     box-sizing: border-box;
     border: 3px solid rgba(var(--r), var(--g), var(--b), 1);
     background-color: rgba(var(--r), var(--g), var(--b), 0.5);
-    color: #fff;
+    color: var(--fg4);
 }
 
 a.button {

@@ -1,14 +1,19 @@
 :root {
     --bg1: #f7f7f7;
     --bg2: #eee;
+    --bg3: #ddd;
+    --bg4: #ccc;
+    --bg5: #bbb;
 
     --fg1: #171717;
     --fg2: #444;
     --fg3: #999;
-
-    --link1: #186bd8;
+    --fg4: #fff;
 
     --bgp1: #224;
+
+    --link1: #186bd8;
+    --red1: #f00;
 }
 
 @font-face {
