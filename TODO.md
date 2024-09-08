@@ -70,7 +70,7 @@ updated every 60s, remove old lines, 48 lines:
 - file with "timestamp error", replace in error: \t, \n=>" "
 
 TODO:
-- async functions for users files
+- optimize map storage (chunks)
 - powerups
 - make backup option: download zip of users, grid, options, op, blacklist
 - sfx

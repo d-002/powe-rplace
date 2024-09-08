@@ -1,9 +1,10 @@
 // using fs2 instead of fs because multiple fs get defined on the client
-let fs2, files2, dirs2;
-function initAccounts(_fs, _files, _dirs) {
+let fs2, files2, dirs2, handleErr;
+function initAccounts(_fs, _files, _dirs, _handleErr) {
     fs2 = _fs;
     files2 = _files;
     dirs2 = _dirs;
+    handleErr = _handleErr;
 }
 
 // users and powerups settings
@@ -73,7 +74,7 @@ class User {
     }
 
     encodeToFile() {
-        fs2.writeFileSync(dirs2.accounts+this.ip, this.encode());
+        fs2.writeFile(dirs2.accounts+this.ip, this.encode(), handleErr);
     }
 }
 

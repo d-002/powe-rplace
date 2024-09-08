@@ -52,8 +52,10 @@ const broadcastDelay = 60000;
 
 let maintenance;
 
+let handleErr = err => { if (err) onError(err) };
+
 // init modules
-initAccounts(fs, files, dirs);
+initAccounts(fs, files, dirs, handleErr);
 initMap(fs, files, dirs);
 
 app.use(express.static(__dirname+"/public"));
@@ -126,9 +128,6 @@ Array.from(Object.keys(files)).forEach(name => {
     }
 });
 
-// create dummy file to make the glitch.com editor display the logs folder
-fs.writeFileSync(dirs.logs+"foo.txt", "bar");
-
 checkMaintenance();
 
 function addDataToStatusFile(file, add) {
@@ -138,7 +137,7 @@ function addDataToStatusFile(file, add) {
         if (Date.now()-timestamp <= 127800000) data.push(line);
     });
     data.push(add);
-    fs.writeFileSync(file, data.join("\n"));
+    fs.writeFile(file, data.join("\n"), handleErr);
 }
 
 // check for server stops
@@ -165,7 +164,7 @@ catch(e) {
 console.log("Server version: "+logsVersion);
 
 function updateOptions() {
-    fs.writeFileSync(files.options, ""+logsVersion);
+    fs.writeFile(files.options, ""+logsVersion, handleErr);
 }
 updateOptions();
 
@@ -346,7 +345,10 @@ io.on("connection", socket => {
     });
 
     socket.on("readFile", path => {
-        if (!authorized(login, password)) return;
+        if (!authorized(login, password)) {
+            socket.emit("deniedOperation");
+            return;
+        }
 
         try {
             socket.emit("acceptedFileRead", fs.readFileSync(__dirname+path, { encoding: "binary" }));
@@ -361,7 +363,7 @@ io.on("connection", socket => {
     // /!\ SENSITIVE FUNCTION
     socket.on("editFile", ([path, content]) => {
         executeOperation(socket, login, password, path, () => {
-            fs.writeFileSync(__dirname+path, content, { encoding: "binary" });
+            fs.writeFile(__dirname+path, content, { encoding: "binary" }, handleErr);
         });
     });
 
@@ -375,7 +377,7 @@ io.on("connection", socket => {
             const isDir = path[path.length-1] == "/";
             if (isDir) fs.mkdirSync(path);
             else fs.writeFileSync(path, "");
-            
+
             console.log("Created "+(isDir ? "dir" : "file")+": '"+path+"'");
         });
     });
@@ -401,7 +403,10 @@ io.on("connection", socket => {
 });
 
 function executeOperation(socket, login, password, path, operation) {
-    if (!authorized(login, password)) return;
+    if (!authorized(login, password)) {
+        socket.emit("deniedOperation");
+        return;
+    }
 
     let err;
     try {
@@ -504,7 +509,7 @@ function updateOpFile() {
 
     let list = [];
     op.forEach(([login, hash]) => list.push(login+" "+hash));
-    fs.writeFileSync(files.op, list.join("\n"));
+    fs.writeFile(files.op, list.join("\n"), handleErr);
 }
 
 // error handling
@@ -513,7 +518,9 @@ function logErrorToFile(err) {
     addDataToStatusFile(files.errors, Date.now()+" "+err.stack.replace(/\t/g, "    ").replace(/\n/g, "\t"));
 }
 
-process.on("uncaughtException", err => {
+process.on("uncaughtException", onError);
+
+function onError(err) {
     console.error("PREVENTED SERVER CRASH, logging...");
     console.error(err.stack);
 
@@ -524,7 +531,7 @@ process.on("uncaughtException", err => {
     catch {
         // make sure to not trigger errors here as this would loop
     }
-});
+}
 
 app.use((err, req, res, next) => {
     try {
@@ -554,7 +561,7 @@ const slowInterval = setInterval(() => {
     checkMaintenance();
 
     // ping
-    fs.writeFileSync(files.ping, Date.now()+" "+maintenance);
+    fs.writeFile(files.ping, Date.now()+" "+maintenance, handleErr);
 
     // update players file
     let toHour = time => Math.floor(time/3600000)*3600000;
@@ -577,7 +584,7 @@ const slowInterval = setInterval(() => {
 
     // ...or add a new data point on new hours
     if (add) data.push(hour+" "+count);
-    fs.writeFileSync(files.nPlayers, data.join("\n"));
+    fs.writeFile(files.nPlayers, data.join("\n"), handleErr);
 }, broadcastDelay);
 
 server.listen(port, () => console.log("Listening on port "+port));
