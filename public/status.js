@@ -30,7 +30,7 @@ class CanvasHandler {
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
 
-        this.stringFunc = i => new Date(toHour(Date.now()+i-47)*hour).toGMTString()+" - "+stringFunc(this.data[i]);
+        this.stringFunc = i => new Date((toHour(Date.now())+i-47)*hour).toGMTString()+" - "+stringFunc(this.data[i]);
 
         // resize canvas
         canvas.setAttribute("width", w);
