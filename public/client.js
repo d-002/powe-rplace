@@ -54,7 +54,8 @@ let options = {
     color: 1,
     borders: 1,
     debug: 0,
-    aa: 0
+    aa: 0,
+    startup: 1
 };
 
 function click(evt) {
@@ -170,7 +171,7 @@ function updateLocalStorage() {;
 
     localStorage.setItem("terms", acceptedTerms ? 1 : 0);
 
-    localStorage.setItem("options", options.x+" "+options.y+" "+options.zoom+" "+options.color+" "+options.borders+" "+options.debug+" "+options.aa);
+    localStorage.setItem("options", options.x+" "+options.y+" "+options.zoom+" "+options.color+" "+options.borders+" "+options.debug+" "+options.aa+" "+options.startup);
 }
 
 function loadLocalStorage() {
@@ -216,6 +217,7 @@ function loadLocalStorage() {
         options.borders = parseInt(data[4]) || 0;
         options.debug = parseInt(data[5]) || 0;
         options.aa = parseInt(data[6]) || 0;
+        options.startup = parseInt(data[7]) || 0;
     }
     catch(err) {
         info.show("Failed to parse options, settings may be reset: "+err);

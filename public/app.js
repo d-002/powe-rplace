@@ -26,6 +26,7 @@ let dom = {
     tBorders: null,
     tDebug: null,
     tAa: null,
+    tStartup: null,
 
     // powerups
     powerups: null
@@ -252,11 +253,13 @@ class Info {
 }
 
 function startup() {
-    showPopup(dom.startup, dom.settings, acceptedTerms);
+    if (options.startup) showPopup(dom.startup, dom.settings, acceptedTerms);
 
     dom.debug.style.display = options.debug ? null : "none";
-    if (options.borders) toggleElt(dom.tBorders);
-    if (options.debug) toggleElt(dom.tDebug);
+    if (options.borders) toggleOption(dom.tBorders);
+    if (options.debug) toggleOption(dom.tDebug);
+    if (options.aa) toggleOption(dom.tAa);
+    if (options.startup) toggleOption(dom.tStartup);
 
     if (acceptedTerms) dom.noterms.style.display = "none";
     else dom.termsok.style.display = "none";
@@ -471,11 +474,6 @@ function updateColorsLayout() {
     dom.colors.style = "--size: "+(user ? user.nColors>>3 : 4)+"; --colw: "+Math.ceil(user ? 8/heights.length : 1)+"; --colh: "+heights.length;
 }
 
-function toggleElt(elt) {
-    if (elt.className.includes("active")) elt.classList.remove("active");
-    else elt.classList.add("active");
-}
-
 function updateNClients(n) {
     dom.nClients.innerHTML = n+" online right now";
 }
@@ -509,19 +507,16 @@ function tResetPos() {
     }, 500);
 }
 
-function tBorders() {
-    toggleElt(dom.tBorders);
-    options.borders = 1-options.borders;
-    updateLocalStorage();
-    chunkSystem.reset();
-}
+function toggleOption(elt, name=null) {
+    // toggle element
+    if (elt.className.includes("active")) elt.classList.remove("active");
+    else elt.classList.add("active");
 
-function tAa() {
-    toggleElt(dom.tAa);
-    options.aa = 1-options.aa;
-    updateLocalStorage();
-    setPixelated();
-    chunkSystem.reset();
+    // toggle option
+    if (name != null) {
+        options[name] = 1-options[name];
+        updateLocalStorage();
+    }
 }
 
 function tRefreshMap() {
@@ -529,12 +524,24 @@ function tRefreshMap() {
     chunkSystem.reset();
 }
 
-function tDebug() {
-    toggleElt(dom.tDebug);
-    options.debug = 1-options.debug;
-    updateLocalStorage();
+function tBorders() {
+    toggleOption(dom.tBorders, "borders");
+    chunkSystem.reset();
+}
 
+function tAa() {
+    toggleOption(dom.tAa, "aa");
+    setPixelated();
+    chunkSystem.reset();
+}
+
+function tDebug() {
+    toggleOption(dom.tDebug, "debug");
     dom.debug.style.display = options.debug ? null : "none";
+}
+
+function tStartup() {
+    toggleOption(dom.tStartup, "startup");
 }
 
 window.onload = () => {
