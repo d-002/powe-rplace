@@ -78,13 +78,16 @@ TODO:
 - mobile version (when width < height, updated on screen resize (with timeout))
 - changelog popup
 - click on minimap
-- login support to sync data from ip, implement passkey system in local storage
 - ddos protection / ip ban in admin
 - gpu acceleration
 - possible to stop server in admin panel
-- user data system: create account, or checksum in localstorage for connection by ip
+- user data system: create account, remember me with checksum in localstorage
+- use email, send confirmation email, email about connection from new ip addresses, clean html email, reminder if has not played in a long time
+- leaderboards for placed pixels, weekly etc
+- browse for accounts (set as public?), achievements etc
+- display position of other players on the map
 - better zoom and pos management (perfectly linear movement)
-- dark theme (night sky)
+- dark theme (night sky), automatic depending on the time?
 - send email / admin logs on error
 - fix icon wrong pixel on squares
 - actually use correct html tags (footer, nav, section)

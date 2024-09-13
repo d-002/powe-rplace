@@ -90,11 +90,16 @@ canvas:not(#clouds), a.big {
     background-color: white;
 }
 
+canvas[loading] {
+    filter: opacity(0.5);
+}
+
 code {
     display: flex;
     justify-content: center;
 
     width: 810px;
+    min-height: 30px;
     padding: 5px;
     box-sizing: border-box;
 

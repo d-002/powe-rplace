@@ -35,8 +35,10 @@ class CanvasHandler {
         // resize canvas
         canvas.setAttribute("width", w);
         canvas.setAttribute("height", h);
+        // the width and height are preset in the html file, just making sure they are right
         canvas.width = w;
         canvas.height = h;
+        canvas.removeAttribute("loading"); // show the canvas now that is has loaded
 
         canvas.addEventListener("mousemove", evt => this.onmove(evt));
         canvas.addEventListener("mouseout", evt => this.redraw());
