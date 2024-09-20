@@ -251,7 +251,8 @@ socket.on("maintenance", data => {
     console.log("Maintenance planned, starting in "+Math.ceil((maintenanceTime-Date.now())/1000)+"s");
 });
 
-socket.on("disconnect", () => {
+// on disconnect, wait a bit before redirecting in case this gets thrown on page change
+socket.on("disconnect", () => window.setTimeout(() => {
     try {
         socket.disconnect();
         socket.removeAllListeners();
@@ -260,6 +261,6 @@ socket.on("disconnect", () => {
     catch { }
 
     window.location.href = "/down?reason=disconnect";
-});
+}, 2000));
 
 socket.on("blacklist", () => {window.location.href = "/down?reason=blacklist";});
