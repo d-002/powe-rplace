@@ -22,7 +22,6 @@ const dirs = {
     "status": "/public/status"
 }
 
-
 console.log("Importing express...");
 const express = require("express");
 console.log("Setting up server...");

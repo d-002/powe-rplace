@@ -317,7 +317,8 @@ function init() {
     handlers.errors = new SquareGrid(dom.errors, parseErrors(), x => x >= 1 ? Math.min((x-0.999)/10, 1) : x, [[[-1, 0], "No data"], [[0, 0], "No errors"], [[[1, 0], [10, 0]], "Errors"]], data => data[0] ? data[0]+" error"+(data[0] == 1 ? "" : "s") : "no errors");
 
     // fill info p
-    dom.peak.innerHTML = "Peak: "+Math.max(...handlers.players.data)+" online";
+    let peak = Math.max(...handlers.players.data);
+    dom.peak.innerHTML = "Peak: "+(peak < 0 ? 0 : peak)+" online";
 
     let sum = 0;
     handlers.down.data.forEach(point => sum += 1-point[0]);

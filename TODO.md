@@ -34,7 +34,7 @@ powerups:
 - place pixels faster
 - pre-place (must have window open)
 - colors pickup
-- place multiple pixels at once
+- place multiple pixels at once (slower cooldown)
 - community decisions: vote to fill area of increasing size
 - undo
 - import schematics, of increasing sizes
@@ -70,6 +70,7 @@ updated every 60s, remove old lines, 48 lines:
 - file with "timestamp error", replace in error: \t, \n=>" "
 
 TODO:
+- IMPORTANT FIX BUG DELETE USER STORAGE
 - optimize map storage (chunks)
 - powerups
 - make backup option: download zip of users, grid, options, op, blacklist
@@ -91,6 +92,8 @@ TODO:
 - send email / admin logs on error
 - fix icon wrong pixel on squares
 - actually use correct html tags (footer, nav, section)
+- ads
+- show stats only if no adblocker
 
 - better error handling for malicious clients: e.g. editFile(null) crashes
 - realtime clouds background
